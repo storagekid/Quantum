@@ -1,3 +1,2 @@
-# Quasar App
-
-> WIP
+# Quantum
+Quasar Front for MiDentix Laravel
