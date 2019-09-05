@@ -1,0 +1,151 @@
+export const searchMethods = {
+  data () {
+    return {
+      filterIds: []
+    }
+  },
+  methods: {
+    filterMethod (rows, terms, cols = this.computedCols, cellValue = this.getCellValue) {
+      let app = this
+      if (terms.indexOf('&&') > -1 && terms.length > 4) {
+        let words = terms.toLowerCase().split('&&')
+        words.forEach((i) => {
+          rows = rows.filter(
+            row => cols.some(function (col) {
+              let value = app.getItem(row, col.name) + ''
+              // console.log(value)
+              if (Array.isArray(value)) {
+                value = JSON.stringify(value)
+                value = JSON.stringify(value)
+                // console.log('Array')
+              }
+              if (i.indexOf('==') > -1) {
+                let columnName = i.split('==')
+                if (col.label.toLowerCase() === columnName[0]) {
+                  if (!columnName[1]) return (value === null || value === '' || value === 'false')
+                  return value.toLowerCase().indexOf(columnName[1]) !== -1
+                }
+              } else if (i.indexOf('=in=') > -1) {
+                let columnName = i.split('=in=')
+                if (col.label.toLowerCase() === columnName[0]) {
+                  let finds = columnName[1].split('|')
+                  for (let find of finds) {
+                    if (value.toLowerCase().indexOf(find) > -1) return true
+                  }
+                  return false
+                }
+              } else if (i.indexOf('!=') > -1) {
+                let columnName = i.split('!=')
+                if (col.label.toLowerCase() === columnName[0]) {
+                  // console.log(columnName[0])
+                  // console.log(value)
+                  if (!columnName[1]) return (value !== '' && value !== 'false')
+                  return value.toLowerCase().indexOf(columnName[1]) === -1
+                }
+              }
+              if (i[0] === '"') {
+                if (value.toLowerCase() === i.substring(1)) {
+                  return true
+                }
+              } else return value.toLowerCase().indexOf(i) !== -1
+            }, app)
+          )
+        })
+        let ids = []
+        for (let i = rows.length - 1; i >= 0; i--) {
+          ids.push(rows[i].id)
+        }
+        this.filterIds = ids
+        return rows
+      }
+      // Simple Search
+      const lowerTerms = terms ? terms.toLowerCase() : ''
+      rows = rows.filter(
+        row => cols.some(function (col) {
+          let value = app.getItem(row, col.name) + ''
+          return value.toLowerCase().indexOf(lowerTerms) !== -1
+        }, app)
+      )
+      let ids = []
+      for (let i = rows.length - 1; i >= 0; i--) {
+        ids.push(rows[i].id)
+      }
+      this.filterIds = ids
+      return rows
+    },
+    getItem (row, name) {
+      if (name.indexOf('.') > -1) {
+        let names = name.split('.')
+        let item = row[names[0]]
+        if (typeof item === 'boolean') {
+          return item
+        }
+        if (!item) return ''
+        for (let i = 1; i < names.length; i++) {
+          item = item[names[i]]
+          if (typeof item === 'boolean') {
+            return item
+          }
+          if (!item) return ''
+        }
+        if (typeof item !== 'string') {
+          return item.label
+        } else if (typeof item === 'boolean') {
+          return item
+        }
+        return item
+      } else if (Array.isArray(row[name])) {
+        let value = JSON.stringify(row[name])
+        return value === '[]' ? '' : value
+      }
+      return row[name] ? row[name] : ''
+    },
+    getObject (row, name) {
+      if (name.indexOf('.') > -1) {
+        let names = name.split('.')
+        let item = row[names[0]]
+        for (let i = 1; i < names.length - 1; i++) {
+          item = item[names[i]]
+        }
+        return item
+      }
+      return row[name]
+    },
+    customSort (rows, sortBy, descending) {
+      let data = [...rows]
+
+      if (sortBy) {
+        data.sort((a, b) => {
+          let x = descending ? b : a
+          let y = descending ? a : b
+          if (sortBy) {
+            // string sort
+            if (sortBy.indexOf('.') > -1) {
+              // console.log(sortBy)
+              let words = sortBy.split('.')
+              x = x[words[0]] || ''
+              y = y[words[0]] || ''
+              let round = 1
+              while (round < words.length && (x !== '' && y !== '')) {
+                x = x[words[round]]
+                y = y[words[round]]
+                round++
+              }
+              // console.log(x)
+              // console.log(y)
+            } else {
+              x = x[sortBy]
+              y = y[sortBy]
+            }
+            return x > y ? 1 : x < y ? -1 : 0
+          } else {
+            // numeric sort
+            return parseFloat(x[sortBy]) - parseFloat(y[sortBy])
+          }
+        })
+      }
+
+      return data
+    }
+  }
+}

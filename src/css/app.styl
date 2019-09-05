@@ -1,0 +1,76 @@
+// app global css
+// @import '~quasar.variables'
+.main-background {
+    background-image: url('../statics/main-bg.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.entrance-bg {
+    background-image: url('../statics/login-bg-xs.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.bg-white-a50 {
+    background-color: rgba(255,255,255,.5)
+}
+.q-item.router-link-active {
+    background-color: $tertiary;
+    color: white;
+    .q-item-section {
+        color: white;
+    }
+    .q-item-sublabel {
+        color: $grey-5;
+    }
+}
+.no-shadow {
+    box-shadow: none !important;
+}
+.no-shadow-cascade {
+    * {
+        box-shadow: none !important;
+    }
+}
+.q-stepper {
+    box-shadow: none !important;
+    * {
+        box-shadow: none !important;
+    }
+}
+.custom-table {
+    &.filter {
+        .q-radio__label {
+            font-size: .6em;
+        }
+        .q-field__control {
+            height: 30px;
+        }
+    }
+    .q-table {
+        background: rgba(255,255,255,1);
+        tr td { 
+            font-size: .9em;
+            // color: red;
+            .q-btn__content {
+                flex-wrap: nowrap;
+            }
+        }
+        .filtered {
+            opacity: 1;
+            color: $primary;
+            font-weight: 900;
+            .q-table__filter-icon {
+                // transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.5, 1);
+                opacity: 1;
+                font-size: 130%;
+                font-weight: 900;
+                color: $primary
+            }
+        }
+    }
+}
+.dashboard-table {
+    .q-table__top {
+        padding: 0 5px;
+    }
+}

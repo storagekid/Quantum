@@ -1,0 +1,280 @@
+<template>
+  <q-list
+    dense
+    class="q-mt-md bg-white text-accent"
+    >
+    <q-item dark dense :to="{name: 'admin-dashboard'}" :exact="true" clickable v-ripple class="bg-warning" v-if="$store.getters['User/isRoot']">
+      <q-item-section avatar>
+      <q-avatar text-color="white" icon="vpn_key" font-size=".5em" rounded></q-avatar>
+      </q-item-section>
+      <q-item-section>
+        <q-item-label style="font-weight: bold">
+          {{$t('menus.main.adminArea.title')}}
+        </q-item-label>
+      </q-item-section>
+    </q-item>
+    <q-expansion-item icon="how_to_vote" label="Stationary" expand-separator group="marketing">
+      <q-item dense :to="{name: 'orders'}" :exact="true">
+        <q-item-section avatar>
+          <q-avatar text-color="accent" icon="compare_arrows" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.orders.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.orders.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item dense @click.stop>
+        <q-item-section avatar>
+          <q-avatar text-color="accent" icon="file_copy" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.stationary.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.stationary.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item dense :to="{name: 'personalTags'}">
+        <q-item-section avatar>
+          <q-avatar text-color="accent" icon="more" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.personalTags.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.personalTags.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item dense @click.stop>
+        <q-item-section avatar>
+          <q-avatar text-color="accent" icon="credit_card" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.bussinesCards.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.bussinesCards.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item dense @click.stop>
+        <q-item-section avatar>
+          <q-avatar text-color="accent" icon="receipt" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.medicalChart.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.medicalChart.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+    </q-expansion-item>
+    <q-expansion-item icon="developer_board" label="Marketing" expand-separator group="marketing" :value="['clinics','campaigns','poster-distribution-dashboard', 'poster-distribution', 'clinic-posters', 'clinic-poster-priorities', 'poster-models'].includes($router.currentRoute.name)">
+      <q-item dense :to="{name: 'clinics'}" :exact="true">
+        <q-item-section avatar>
+          <q-avatar text-color="accent" icon="store_mall_directory" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.clinics.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.clinics.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item dense :to="{name: 'campaigns'}" :exact="true" clickable v-ripple>
+        <q-item-section avatar>
+        <q-avatar text-color="accent" icon="format_list_bulleted" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.campaigns.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.campaigns.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-expansion-item icon="photo_album" label="Cartelería" group="marketing-1" :value="['poster-distribution-dashboard', 'poster-distribution', 'clinic-posters', 'clinic-poster-priorities', 'poster-models'].includes($router.currentRoute.name)">
+        <q-item dense :to="{name: 'poster-distribution-dashboard'}" :exact="true">
+          <q-item-section avatar>
+          <q-avatar text-color="accent" icon="dashboard" font-size=".5em" rounded></q-avatar>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label style="font-weight: bold">
+              {{$t('menus.main.poster-distribution-dashboard.title')}}
+            </q-item-label>
+            <q-item-label caption>
+              {{$t('menus.main.poster-distribution-dashboard.subtitle')}}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item dense :to="{name: 'poster-distribution'}" :exact="true">
+          <q-item-section avatar>
+          <q-avatar text-color="accent" icon="picture_in_picture" font-size=".5em" rounded></q-avatar>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label style="font-weight: bold">
+              {{$t('menus.main.poster-distribution.title')}}
+            </q-item-label>
+            <q-item-label caption>
+              {{$t('menus.main.poster-distribution.subtitle')}}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item dense :to="{name: 'clinic-posters'}" :exact="true">
+          <q-item-section avatar>
+          <q-avatar text-color="accent" icon="list_alt" font-size=".5em" rounded></q-avatar>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label style="font-weight: bold">
+              {{$t('menus.main.clinicPoster.title')}}
+            </q-item-label>
+            <q-item-label caption>
+              {{$t('menus.main.clinicPoster.subtitle')}}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item dense :to="{name: 'clinic-poster-priorities'}" :exact="true">
+          <q-item-section avatar>
+          <q-avatar text-color="accent" icon="list_alt" font-size=".5em" rounded></q-avatar>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label style="font-weight: bold">
+              {{$t('menus.main.clinicPosterPriority.title')}}
+            </q-item-label>
+            <q-item-label caption>
+              {{$t('menus.main.clinicPosterPriority.subtitle')}}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-item dense :to="{name: 'poster-models'}" :exact="true">
+          <q-item-section avatar>
+          <q-avatar text-color="accent" icon="insert_photo" font-size=".5em" rounded></q-avatar>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label style="font-weight: bold">
+              {{$t('menus.main.posterModels.title')}}
+            </q-item-label>
+            <q-item-label caption>
+              {{$t('menus.main.posterModels.subtitle')}}
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-expansion-item>
+      <q-item dense :to="{name: 'sanitary-codes'}" :exact="true" clickable v-ripple>
+        <q-item-section avatar>
+        <q-avatar text-color="accent" icon="format_list_bulleted" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.sanitaryCodes.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.sanitaryCodes.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+    </q-expansion-item>
+    <q-expansion-item icon="people" label="RRHH" expand-separator group="marketing" :value="['profiles','users'].includes($router.currentRoute.name)">
+      <q-item dense :to="{name: 'profiles'}" :exact="true">
+        <q-item-section avatar>
+          <q-avatar text-color="accent" icon="contact_mail" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.profiles.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.profiles.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+      <!-- <q-item dense :to="{name: 'orgcharts'}" :exact="true">
+        <q-item-section avatar>
+          <q-avatar text-color="accent" icon="layers" font-size=".5em" rounded></q-avatar>
+        </q-item-section>
+        <q-item-section>
+          <q-item-label style="font-weight: bold">
+            {{$t('menus.main.orgchart.title')}}
+          </q-item-label>
+          <q-item-label caption>
+            {{$t('menus.main.orgchart.subtitle')}}
+          </q-item-label>
+        </q-item-section>
+      </q-item> -->
+    </q-expansion-item>
+  </q-list>
+</template>
+
+<script>
+export default {
+  name: 'MainMenu',
+  data () {
+    return {}
+  },
+  mounted () {
+    console.log(this.$router.currentRoute.name)
+    console.log(this.$router.currentRoute)
+  }
+}
+</script>
+
+<style lang="stylus">
+// @import '~quasar-variables'
+  .q-item.q-router-link--active, .q-item--active {
+    background-color: $primary;
+    color: white;
+    .q-icon {
+      color: white;
+    }
+    .q-item__label {
+      color: white;
+    }
+  }
+  .q-expansion-item {
+    .q-expansion-item {
+      .q-item__section--avatar {
+        align-items: center;
+      }
+      .q-expansion-item__content {
+        * {
+          color: $primary;
+          // justify-content: flex-end;
+        }
+        .q-item__section--main {
+          font-size: .85em;
+          font-style: italic;
+        }
+        .q-item {
+          max-height: 20px;
+        }
+        .q-avatar__content {
+          justify-content: flex-end;
+        }
+        .q-item.q-router-link--active, .q-item--active {
+          background-color: $primary;
+          color: white;
+          .q-icon {
+            color: white;
+          }
+          .q-item__label {
+            color: white;
+          }
+        }
+      }
+    }
+  }
+</style>

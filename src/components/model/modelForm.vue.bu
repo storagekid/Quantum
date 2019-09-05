@@ -1,0 +1,1010 @@
+<template>
+  <form v-if="quasarData">
+    <div class="row q-col-gutter-md q-mt-md" v-for="(row, index) in step.fields" :key="'R'+index">
+      <div
+        v-for="(field, index) in row"
+        :key="'F'+index"
+        class="col-xs-12 col-sm-4"
+        >
+        <q-input
+          v-if="field.type.name === 'inputText'"
+          icon="subject"
+          :label-width="12"
+          bottom-slots
+          :error="$v.model[field.name].$error"
+          :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
+          :name="field.name"
+          :label="field.label"
+          stack-label
+          suffix=""
+          v-model="model[field.name]"
+          type="text"
+          @blur="checkAndSend"
+          />
+        <q-input
+          v-if="field.type.name === 'password'"
+          icon="subject"
+          bottom-slots
+          :error="$v.model[field.name].$error"
+          :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
+          :name="field.name"
+          :label="field.label"
+          stack-label
+          suffix=""
+          v-model="model[field.name]"
+          type="password"
+          @blur="checkAndSend"
+          />
+        <q-select
+          v-if="field.type.name === 'select'"
+          icon="subject"
+          bottom-slots
+          :error="$v.model[field.name].$error"
+          :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
+          :name="field.name"
+          use-input
+          :label="field.type.default.text"
+          stack-label
+          v-model="model[field.name]"
+          :options="getOptions(field.type.model)"
+          @input="checkAndSend($event, field.name)"
+        >
+        <template slot="prepend">
+        <q-icon name="subject"></q-icon>
+        </template>
+        </q-select>
+        <q-select
+          v-if="field.type.name === 'enum'"
+          icon="subject"
+          bottom-slots
+          :error="$v.model[field.name].$error"
+          :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
+          :name="field.name"
+          :label="field.type.default.text"
+          stack-label
+          v-model="model[field.name]"
+          :options="field.type.array"
+          @input="checkAndSend($event, field.name)"
+        />
+        <q-select
+          v-if="field.type.name === 'array'"
+          icon="subject"
+          bottom-slots
+          :error="$v.model[field.name].$error"
+          :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
+          :name="field.name"
+          :label="field.type.default.text"
+          stack-label
+          v-model="model[field.name]"
+          :options="field.type.array"
+          @input="checkAndSend($event, field.name)"
+        />
+      </div>
+    </div>
+    <q-card flat v-for="(relation, index) in step.relations" :key="'Rel'+index" style="overflow: visible">
+      <template v-if="quasarData.relations[relation].type === 'MorphMany'">
+        <q-card-section class="text-primary text-weight-bolder bg-secondary q-mt-lg">
+          {{relation}}
+          <q-btn dense rounded class="q-ml-md" color="primary" icon="add" @click="openRelation = relation" v-if="openRelation !== relation"/>
+          <q-btn-group rounded class="q-ml-md" v-if="openRelation === relation">
+            <q-btn rounded color="primary" icon="check" @click="saveRelation(relation)" :disable="$v.relations[relation].$anyError"/>
+            <q-btn rounded color="negative" icon="cancel" @click="closeRelationForm(relation)"/>
+          </q-btn-group>
+        </q-card-section>
+        <q-card-section v-if="openRelation === relation || model[relation].length">
+          <form class="q-mb-lg" v-if="openRelation === relation">
+            <div class="row" v-for="(row, index) in quasarData.relations[relation].quasarData.newLayout[0].fields" :key="relation+'RelForm'+index">
+              <template
+                v-for="(field, index) in row"
+                >
+                <q-input
+                  v-if="field.type.name === 'inputText'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="$v.relations[relation][field.name].$error"
+                  :name="field.name"
+                  :float-label="field.label"
+                  suffix=""
+                  type="text"
+                  v-model="relations[relation][field.name]"
+                  @blur="$v.relations[relation][field.name].$touch"
+                  />
+               <q-select
+                  v-if="field.type.name === 'enum'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  radio
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="field.type.array"
+                  @input="$v.relations[relation][field.name].$touch"
+                />
+                <q-select
+                  v-if="field.type.name === 'array'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  radio
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="field.type.array"
+                  @input="$v.relations[relation][field.name].$touch"
+                />
+                <q-toggle
+                  v-if="field.type.name === 'boolean'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  v-model="relations[relation][field.name]"
+                  :label="field.type.default.text"
+                  left-label
+                  @input="$v.relations[relation][field.name].$touch"
+                />
+              </template>
+            </div>
+          </form>
+          <q-list separator no-border dense v-if="model[relation].length">
+            <q-item v-for="(item, index) in model[relation]" :key="relation+'Item'+index">
+              <q-item-section>
+                <q-btn class="q-mr-sm" size="md" dense rounded color="negative" icon="remove" @click="removeRelation(relation, index, item.id)"/>
+                <q-btn size="md" dense rounded color="warning" icon="edit" @click="editRelation(relation, index)"/>
+              </q-item-section>
+              <q-item-section class="gt-sm" v-for="(left, index) in quasarData.relations[relation].quasarData.listFields.left" :key="relation+'List-L'+index">
+                <q-chip small dense v-if="left.includes('chips')">{{item[index]}}</q-chip>
+              </q-item-section>
+              <q-item-label v-for="(main, index) in quasarData.relations[relation].quasarData.listFields.main" :key="relation+'List-M'+index">
+                <q-icon class="float-right" name="star" color="positive" v-if="main.includes('boolean') && item[index]"/>
+                <span v-if="main.includes('text')">{{ item[index] }}</span>
+              </q-item-label>
+              <q-item-section class="gt-sm" v-for="(left, index) in quasarData.relations[relation].quasarData.listFields.right" :key="relation+'List-R'+index">{{ item[index] }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </template>
+      <template v-if="quasarData.relations[relation].type === 'BelongsToMany'">
+        <q-card-section class="text-primary text-weight-bolder bg-secondary q-mt-lg">
+          {{relation}}
+          <q-btn dense rounded class="q-ml-md" color="primary" icon="add" @click="openRelation = relation" v-if="openRelation !== relation"/>
+          <q-btn-group rounded class="q-ml-md" v-if="openRelation === relation">
+            <q-btn rounded color="primary" icon="check" @click="saveRelation(relation)" :disable="$v.relations[relation].$anyError"/>
+            <q-btn rounded color="negative" icon="cancel" @click="closeRelationForm(relation)"/>
+          </q-btn-group>
+        </q-card-section>
+        <q-card-section v-if="openRelation === relation || model[relation].length">
+          <form class="q-mb-lg" v-if="openRelation === relation">
+            <q-select
+              :key="relation+'RelField'+index"
+              class="col-xs-12 col-sm-3"
+              icon="email"
+              :name="relation"
+              :label="relation"
+              stack-label
+              v-model="relations[relation]"
+              :options="getOptions(relation, relation)"
+            >
+            </q-select>
+          </form>
+          <q-list separator no-border dense v-if="model[relation].length" class="q-mt-sm">
+            <q-item v-for="(item, index) in model[relation]" :key="relation+'Item'+index">
+              <q-item-section avatar>
+                <q-btn-group class="q-gutter-sm">
+                  <q-btn size="md" dense color="negative" icon="remove" @click="removeRelation(relation, index, item.id)"/>
+                  <q-btn size="md" dense color="warning" icon="edit" @click="editRelation(relation, index)"/>
+                </q-btn-group>
+              </q-item-section>
+              <q-item-section avatar class="gt-sm" v-for="(left, index) in quasarData.relations[relation].quasarData.listFields.left" :key="relation+'List-L'+index">
+                <q-chip small dense v-if="left.includes('chips')">{{item[index]}}</q-chip>
+              </q-item-section>
+              <q-item-section v-for="(main, index) in quasarData.relations[relation].quasarData.listFields.main" :key="relation+'List-M'+index">
+                <q-item-label>
+                  <q-icon class="float-right" name="star" color="positive" v-if="main.includes('boolean') && item[index]"/>
+                  <span v-if="main.includes('text')">{{ item[index] }}</span>
+                </q-item-label>
+              </q-item-section>
+              <q-item-section class="gt-sm" v-for="(left, index) in quasarData.relations[relation].quasarData.listFields.right" :key="relation+'List-R'+index">{{ item[index] }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </template>
+      <template v-if="quasarData.relations[relation].type === 'HasMany'">
+        <q-card-section class="text-primary text-weight-bolder bg-secondary q-py-sm">
+          {{relation}}
+          <q-btn size="md" dense rounded class="q-ml-md" color="primary" icon="add" @click="openRelation = relation" v-if="openRelation !== relation"/>
+          <q-btn-group rounded class="q-ml-md" v-if="openRelation === relation">
+            <q-btn dense rounded class="q-px-sm" color="primary" icon="check" @click="saveRelation(relation)" :disable="$v.relations[relation].$anyError"/>
+            <q-btn dense rounded class="q-px-sm" color="negative" icon="cancel" @click="closeRelationForm(relation)"/>
+          </q-btn-group>
+        </q-card-section>
+        <q-card-section v-if="openRelation === relation || model[relation].length">
+          <form class="q-mb-lg" v-if="openRelation === relation">
+            <div class="row" v-for="(row, index) in quasarData.relations[relation].quasarData.newLayout[0].fields" :key="relation+'RelForm'+index">
+              <!-- <q-input :name="quasarData.relations[relation]['getForeignKeyName']" type="hidden" v-model="relations[relation]['getForeignKeyName']" :value="model.id"/> -->
+              <template
+                v-for="(field, index) in row"
+                >
+                <q-input
+                  v-if="field.type.name === 'inputText'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="quasarData.relations[relation].quasarData.fields.includes(field.name) ? $v.relations[relation][field.name].$error : false"
+                  :name="field.name"
+                  :float-label="field.label"
+                  suffix=""
+                  type="text"
+                  v-model="relations[relation][field.name]"
+                  @blur="$v.relations[relation][field.name].$touch"
+                  />
+                <q-uploader
+                  v-if="field.type.name === 'file'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="quasarData.relations[relation].quasarData.fields.includes(field.name) ? $v.relations[relation][field.name].$error : false"
+                  url=""
+                  :upload-factory="uploadFile"
+                  :hide-upload-button="true"
+                  :hide-upload-progress="true"
+                  @add="uploadFilesAdded($event, relation, field.name)"
+                />
+                <q-select
+                  v-if="field.type.name === 'enum'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="quasarData.relations[relation].quasarData.fields.includes(field.name) ? $v.relations[relation][field.name].$error : false"
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  radio
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="field.type.array"
+                  @input="$v.relations[relation][field.name].$touch"
+                />
+                <q-select
+                  v-if="field.type.name === 'array'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="quasarData.relations[relation].quasarData.fields.includes(field.name) ? $v.relations[relation][field.name].$error : false"
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  radio
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="field.type.array"
+                  @input="$v.relations[relation][field.name].$touch"
+                />
+                <q-select
+                  v-if="field.type.name === 'select'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="quasarData.relations[relation].quasarData.fields.includes(field.name) ? $v.relations[relation][field.name].$error : false"
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="getOptions(field.type.model, false, filterRelation = {'key': field.type.filterKey, 'relation': relation})"
+                />
+                <q-select
+                  v-if="field.type.name === 'selectFromModel'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="quasarData.relations[relation].quasarData.fields.includes(field.name) ? $v.relations[relation][field.name].$error : false"
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="model[field.type.model]"
+                />
+                <q-toggle
+                  v-if="field.type.name === 'boolean'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="quasarData.relations[relation].quasarData.fields.includes(field.name) ? $v.relations[relation][field.name].$error : false"
+                  v-model="relations[relation][field.name]"
+                  :label="field.type.default.text"
+                  left-label
+                  @input="$v.relations[relation][field.name].$touch"
+                />
+              </template>
+              <div
+                v-for="(field, index) in row"
+                :key="relation+'MultiUploader'+index"
+                class="col-xs-12"
+                :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                >
+                  <q-uploader
+                    v-if="field.type.name === 'multiFile'"
+                    float-label="Multi Upload"
+                    url=""
+                    multiple
+                    :upload-factory="uploadFiles"
+                    @add="uploadMultiFilesAdded($event, relation, field.name)"
+                    @finish="sendMultiFiles"
+                  />
+              </div>
+            </div>
+          </form>
+          <div
+            v-else-if="model[relation].length && quasarData.relations[relation].quasarData.listFields.mode === 'table-grid'"
+            class="text-center"
+            >
+            <q-table
+              grid
+              dense
+              :data="model[relation]"
+              :columns="[
+                  { name: 'poster', label: 'Size', field: obj => obj.poster.name, sortable: true },
+                  { name: 'material', label: 'Material', field: obj => obj.poster.material, sortable: true },
+                  { name: 'poster_model', label: 'Model', field: obj => obj.poster_model.name, sortable: true },
+                  { name: 'language', label: 'Language', field: obj => obj.language.native_name, sortable: true },
+                  { name: 'country', label: 'Country', field: obj => obj.country.name ? obj.country.name : '-', sortable: true },
+                  { name: 'state', label: 'State', field: obj => obj.state ? obj.state.name : '-', sortable: true },
+                  { name: 'type', label: 'Type', field: 'type'},
+                  { name: 'thumbnail64', label: 'Thumbnail64', field: 'thumbnail64'},
+                ]"
+              :filter="filter"
+              :selection="'multiple'"
+              :selected.sync="selectedItems"
+              :visible-columns="['poster', 'material', 'poster_model', 'language', 'country', 'state', 'type', 'thumbnail64']"
+              :pagination.sync="pagination"
+              row-key="id"
+              >
+              <template slot="top-right">
+                <q-btn-group rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
+                  <q-btn rounded color="primary" icon="delete" @click="showRemoveRelation(relation)" :disabled="!selectedItems.length"/>
+                </q-btn-group>
+              </template>
+              <template slot="top-left">
+                <q-input
+                clearable
+                debounce="500"
+                class="col-6"
+                v-model="filter"
+                />
+              </template>
+              <q-tr slot="header" slot-scope="props" :props="props" style="height: 20px">
+                <q-th auto-width>
+                  <q-checkbox
+                    v-if="props.multipleSelect"
+                    v-model="props.selected"
+                    indeterminate-value="all"
+                  />
+                </q-th>
+                <q-th v-for="col in props.cols" :key="col.name" :props="props" style="text-align: center; padding-bottom: 10px">
+                  <span class="text-primary">{{ col.label }}</span>
+                </q-th>
+              </q-tr>
+              <div
+                slot="item"
+                class="q-pa-xs col-xs-12 col-sm-6 col-md-4 col-lg-3 col-xl-2 transition-generic"
+                :style="props.selected ? 'transform: scale(0.95);' : ''"
+              >
+                <q-card class="transition-generic" :class="props.selected ? 'bg-secondary text-primary' : ''" style="">
+                  <q-card-section class="relative-position q-pa-none">
+                    <q-checkbox v-model="props.selected" :label="props.row.name" class="q-ma-none q-caption ellipsis" style="width:150px"/>
+                  </q-card-section>
+                  <q-separator />
+                  <q-card-section class="q-pa-none">
+                    <q-list no-border>
+                      <q-item v-for="col in props.cols.filter(col => col.name !== 'desc')" :key="col.name" style="min-height:10px" class="q-py-xs q-px-sm">
+                        <template v-if="col.name === 'thumbnail64'">
+                          <q-card-section  style="width: 100%; max-height: 150px" class="text-center">
+                            <q-card-section slot="overlay" class="q-pa-xs">
+                              <q-card-actions class="justify-between q-pa-none">
+                                <q-btn dense size="md" color="warning" @click="editRelation(relation, props.row.__index)" icon="edit"></q-btn>
+                                <q-btn dense size="md" color="positive"  @click="downloadFile(relation, props.row.__index, props.row.id)" icon="cloud_download"></q-btn>
+                                <q-btn dense size="md" color="negative"  @click="removeRelation(relation, props.row.__index, props.row.id)" icon="remove"></q-btn>
+                              </q-card-actions>
+                            </q-card-section>
+                            <img :src="col.value" style="max-height: 130px; width: auto; display: inline-block">
+                          </q-card-section>
+                        </template>
+                        <template v-else>
+                          <q-item-label>
+                            <q-item-tile class="q-caption">{{ col.label }}</q-item-tile>
+                          </q-item-label>
+                          <q-item-section right>
+                            <q-item-tile label class="q-ma-none q-caption ellipsis" style="width:150px">{{ col.value }}</q-item-tile>
+                          </q-item-section>
+                        </template>
+                      </q-item>
+                    </q-list>
+                  </q-card-section>
+                </q-card>
+              </div>
+            </q-table>
+          </div>
+          <div
+            v-else-if="model[relation].length && quasarData.relations[relation].quasarData.listFields.mode === 'gallery'"
+            class="q-py-lg text-center"
+            >
+            <q-card
+              v-for="(item, index) in model[relation]" :key="relation+'GalleryItem'+index"
+              inline
+              style="width: 120px"
+              class="q-ma-xs"
+              >
+              <q-card-section v-for="(main, index) in quasarData.relations[relation].quasarData.listFields.main" :key="relation+'GalleryImage-M'+index">
+                <img :src="item[index]">
+                <q-card-section slot="overlay" v-for="(main, index) in quasarData.relations[relation].quasarData.listFields.right" :key="relation+'GalleryTitle-M'+index">
+                  <p slot="subtitle" class="q-ma-none q-caption ellipsis" style="width:100px">
+                    <q-tooltip class="bg-secondary text-primary">
+                      {{item[index]}}
+                    </q-tooltip>
+                    {{item[index]}}
+                  </p>
+                </q-card-section>
+                <q-btn
+                  size="md"
+                  dense
+                  color="white"
+                  text-color="primary"
+                  class="absolute"
+                  icon="cloud_download"
+                  style="right: 5px; top: 5px; z-index:10"
+                  @click="downloadFile(relation, index, item.id)"
+                />
+              </q-card-section>
+              <q-card-actions class="justify-between q-pa-none">
+                <q-btn flat dense size="lg" color="warning" @click="editRelation(relation, index)" icon="edit"></q-btn>
+                <q-btn flat dense size="lg" color="negative"  @click="removeRelation(relation, index, item.id)" icon="remove"></q-btn>
+              </q-card-actions>
+            </q-card>
+          </div>
+          <q-list separator no-border dense v-else>
+            <q-item v-for="(item, index) in model[relation]" :key="relation+'Item'+index">
+              <q-item-section>
+                <q-btn class="q-mr-sm" size="md" dense rounded color="negative" icon="remove" @click="removeRelation(relation, index, item.id)"/>
+                <q-btn size="md" dense rounded color="warning" icon="edit" @click="editRelation(relation, index)"/>
+              </q-item-section>
+              <q-item-section class="gt-sm" v-for="(left, index) in quasarData.relations[relation].quasarData.listFields.left" :key="relation+'List-L'+index">
+                <q-chip small dense v-if="left.includes('chips')">{{item[index]}}</q-chip>
+              </q-item-section>
+              <q-item-label v-for="(main, index) in quasarData.relations[relation].quasarData.listFields.main" :key="relation+'List-M'+index">
+                <q-icon class="float-right" name="star" color="positive" v-if="main.includes('boolean') && item[index]"/>
+                <span v-if="main.includes('text')">{{ item[index] }}</span>
+              </q-item-label>
+              <template v-for="(left, index) in quasarData.relations[relation].quasarData.listFields.right">
+                <q-item-section class="gt-sm" :key="relation+'List-R'+index" v-if="left.includes('image')" :image="item[index]">
+                </q-item-section>
+                <q-item-section v-else :key="relation+'List-R'+index">{{ item[index] }}</q-item-section>
+              </template>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </template>
+      <template v-if="quasarData.relations[relation].type === 'HasManyThrough'">
+        <q-card-section class="text-primary text-weight-bolder bg-secondary q-mt-lg">
+          {{relation}}
+          <q-btn dense rounded class="q-ml-md" color="primary" icon="add" @click="openRelation = relation" v-if="openRelation !== relation"/>
+          <q-btn-group rounded class="q-ml-md" v-if="openRelation === relation">
+            <q-btn rounded color="primary" icon="check" @click="saveRelation(relation)" :disable="$v.relations[relation].$anyError"/>
+            <q-btn rounded color="negative" icon="cancel" @click="closeRelationForm(relation)"/>
+          </q-btn-group>
+        </q-card-section>
+        <q-card-section v-if="openRelation === relation || model[relation].length">
+          <form class="q-mb-lg" v-if="openRelation === relation">
+            <div class="row" v-for="(row, index) in quasarData.relations[relation].quasarData.newLayout[0].fields" :key="relation+'RelForm'+index">
+              <template
+                v-for="(field, index) in row"
+                >
+                <q-input
+                  v-if="field.type.name === 'inputText'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="$v.relations[relation][field.name].$error"
+                  :name="field.name"
+                  :float-label="field.label"
+                  suffix=""
+                  type="text"
+                  v-model="relations[relation][field.name]"
+                  @blur="$v.relations[relation][field.name].$touch"
+                  />
+                <q-select
+                  v-if="field.type.name === 'enum'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="$v.relations[relation][field.name].$error"
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  radio
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="field.type.array"
+                  @input="$v.relations[relation][field.name].$touch"
+                />
+                <q-select
+                  v-if="field.type.name === 'array'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="$v.relations[relation][field.name].$error"
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  radio
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="field.type.array"
+                  @input="$v.relations[relation][field.name].$touch"
+                />
+                <q-select
+                  v-if="field.type.name === 'select'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="$v.relations[relation][field.name].$error"
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="getOptions(field.type.model)"
+                />
+                <q-select
+                  v-if="field.type.name === 'selectFromModel'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="$v.relations[relation][field.name].$error"
+                  :name="field.name"
+                  :float-label="field.type.default.text"
+                  filter
+                  v-model="relations[relation][field.name]"
+                  :options="model[field.type.model]"
+                />
+                <q-toggle
+                  v-if="field.type.name === 'boolean'"
+                  :key="relation+'RelField'+index"
+                  class="col-xs-12 col-sm-3"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  icon="email"
+                  :label-width="12"
+                  bottom-slots
+                  :error="$v.relations[relation][field.name].$error"
+                  v-model="relations[relation][field.name]"
+                  :label="field.type.default.text"
+                  left-label
+                  @input="$v.relations[relation][field.name].$touch"
+                />
+              </template>
+            </div>
+          </form>
+          <q-list separator no-border dense v-if="model[relation].length">
+            <q-item v-for="(item, index) in model[relation]" :key="relation+'Item'+index">
+              <q-item-section>
+                <q-btn class="q-mr-sm" size="md" dense rounded color="negative" icon="remove" @click="removeRelation(relation, index, item.id)"/>
+                <q-btn size="md" dense rounded color="warning" icon="edit" @click="editRelation(relation, index)"/>
+              </q-item-section>
+              <q-item-section class="gt-sm" v-for="(left, index) in quasarData.relations[relation].quasarData.listFields.left" :key="relation+'List-L'+index">
+                <q-chip small dense v-if="left.includes('chips')">{{item[index]}}</q-chip>
+              </q-item-section>
+              <q-item-label v-for="(main, index) in quasarData.relations[relation].quasarData.listFields.main" :key="relation+'List-M'+index">
+                <q-icon class="float-right" name="star" color="positive" v-if="main.includes('boolean') && item[index]"/>
+                <span v-if="main.includes('text')">{{ item[index] }}</span>
+              </q-item-label>
+              <q-item-section class="gt-sm" v-for="(left, index) in quasarData.relations[relation].quasarData.listFields.right" :key="relation+'List-R'+index">{{ item[index] }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-card-section>
+      </template>
+    </q-card>
+    <q-dialog v-model="removeModel">
+      <remove-model-confirm
+        :modelQty="selectedItems.length"
+        :name="relationName"
+        :models="selectedItems"
+        :relatedTo="modelName"
+        :parentIndex="model.__index"
+        v-on:confirmed="hideRemoveRelation"
+        v-on:finished="finishRemoveRelation"
+        >
+      </remove-model-confirm>
+    </q-dialog>
+  </form>
+</template>
+
+<script>
+import { ModelRelations } from '../../mixins/modelMixin'
+import RemoveModelConfirm from './removeModelConfirm'
+
+export default {
+  name: 'ModelForm',
+  props: ['mode', 'modelName', 'model', 'quasarData', 'step'],
+  mixins: [ModelRelations],
+  components: { RemoveModelConfirm },
+  data () {
+    return {
+      removeModel: false,
+      relationName: null,
+      visible: false,
+      relations: {},
+      editing: false,
+      openRelation: false,
+      multiUpload: {
+        items: []
+      },
+      selectedItems: [],
+      pagination: {
+        sortBy: null, // String, column "name" property value
+        descending: false,
+        page: 1,
+        rowsPerPage: 18 // current rows per page being displayed
+      },
+      filter: ''
+    }
+  },
+  watch: {
+    '$v.model.$anyError' () {
+      this.$emit('dirtiness', { step: this.step.title, dirty: this.$v.model.$anyError })
+    }
+  },
+  methods: {
+    getModelById (name, id) {
+      if (this.$store.state.Model.models[name]) return this.$store.state.Model.models[name].items.filter(item => item.id === id)[0]
+      return this.$store.state.Scope[this.$store.state.Scope.mode][name].items.filter(item => item.id === id)[0]
+    },
+    getErrors (field) {
+      for (let param in field.$params) {
+        if (!field[param]) {
+          let error = 'forms.errors.' + param
+          if (param === 'minLength') {
+            return this.$t(error, { min: field.$params[param].min })
+          } else if (param === 'maxLength') {
+            return this.$t(error, { max: field.$params[param].max })
+          }
+          return this.$t(error)
+        }
+      }
+    },
+    showRemoveRelation (relation) {
+      this.removeModel = true
+      this.relationName = relation
+    },
+    hideRemoveRelation () {
+      this.removeModel = false
+    },
+    finishRemoveRelation () {
+      this.selectedItems = []
+      this.relationName = null
+    },
+    renderBase64 (base64) {
+      return `data:image/jpeg;base64, ${base64}`
+    },
+    uploadMultiFilesAdded (files, relation, field) {
+      // console.log(files)
+      let models = {}
+      this.$store.state.Model.models.poster_models.items.map(model => {
+        models[model.name] = model.id
+      })
+      let posters = {}
+      this.$store.state.Model.models.posters.items.map(model => {
+        posters[model.name] = model.id
+      })
+      let langs = {}
+      this.$store.state.Model.models.languages.items.map(model => {
+        langs[model['639-1']] = model.id
+      })
+      let states = {}
+      this.$store.state.Scope[this.$store.state.Scope.mode].states.items.map(model => {
+        states[model.name] = model.id
+      })
+      for (let file of files) {
+        let object = {}
+        for (let index in this.relations[relation]) {
+          object[index] = null
+        }
+        // Defaults
+        object.file = file
+        object.type = 'Ext'
+        object.language_id = langs['es']
+        object.country_id = 1
+        // End Defaults
+        let cleanName = file.name.substring(0, file.name.indexOf('.pdf'))
+        let words = cleanName.split(' ')
+        let units = ['cm', 'mm', 'm']
+        let multistate = []
+        // let langs = ['eu', 'ca', 'en', 'fr', 'it', 'es']
+        for (let word of words) {
+          if (word.includes('x')) {
+            if (word.indexOf('(') > 0) {
+              word = word.substring(0, word.indexOf('('))
+              object.poster_id = posters[word]
+              continue
+            } else if (word.indexOf('(') === 0) {
+              object.type = 'Office'
+              continue
+            } else if (word.indexOf('(') === -1) {
+              for (let unit of units) {
+                if (word.indexOf(unit) !== -1) {
+                  word = word.substring(0, word.indexOf(unit))
+                  object.poster_id = posters[word]
+                  console.log(word)
+                  continue
+                }
+              }
+              object.poster_id = posters[word]
+              continue
+            }
+          } else if (word === 'Interior') {
+            object.type = 'Office Int'
+            continue
+          } else if (word === 'Generic') {
+            object.poster_model_id = models['Recalls']
+            continue
+          } else if (models[word]) {
+            object.poster_model_id = models[word]
+            continue
+          } else if (word === 'CAT') {
+            object.language_id = langs['ca']
+            continue
+          } else if (word === 'AS') {
+            object.state_id = states['Asturias, Principado de']
+            continue
+          } else if (word === 'AR') {
+            object.state_id = states['Aragón']
+            continue
+          } else if (word === 'MU') {
+            object.state_id = states['Murcia, Región de']
+            continue
+          } else if (word === 'NA') {
+            object.state_id = states['Navarra, Comunidad Foral de']
+            continue
+          } else if (word === 'PV') {
+            object.state_id = states['País Vasco']
+            continue
+          } else if (word.indexOf('-')) {
+            multistate = word.split('-')
+            continue
+          }
+        }
+        if (multistate.length) {
+          console.log(multistate)
+          for (let state of multistate) {
+            let newObject = {}
+            for (let i in object) {
+              newObject[i] = object[i]
+            }
+            if (state === 'AS') newObject.state_id = states['Asturias, Principado de']
+            else if (state === 'AR') newObject.state_id = states['Aragón']
+            else if (state === 'MU') newObject.state_id = states['Murcia, Región de']
+            else if (state === 'NA') newObject.state_id = states['Navarra, Comunidad Foral de']
+            else if (state === 'PV') newObject.state_id = states['País Vasco']
+            console.log(newObject)
+            this.multiUpload.items.push(newObject)
+          }
+        } else this.multiUpload.items.push(object)
+      }
+    },
+    uploadFiles (files, updateProgress) {
+      return new Promise((resolve, reject) => {
+        resolve(files)
+      })
+    },
+    sendMultiFiles () {
+      this.$emit('multiUploadFiles', {
+        relation: this.openRelation,
+        items: this.multiUpload.items,
+        parentIndex: this.model.__index
+      })
+      this.closeRelationForm(this.openRelation)
+    },
+    uploadFilesAdded (files, relation, field) {
+      this.relations[relation][field] = files[0]
+      this.$v.relations[relation][field].$touch()
+    },
+    uploadFile (file, updateProgress) {
+      return new Promise((resolve, reject) => {
+        resolve(file)
+      })
+    },
+    editRelation (relation, sourceIndex) {
+      this.editing = sourceIndex
+      let source = this.model[relation][sourceIndex]
+      this.buildRelationData(relation, source)
+      this.openRelation = relation
+    },
+    // editGalleryRelation (relation, props) {
+    //   console.log(props)
+    // },
+    closeRelationForm (relation) {
+      this.openRelation = false
+      this.editing = false
+      this.multiUpload.items = []
+      this.buildRelationData(relation)
+    },
+    getOptions (name, filter = false, filterRelation = false) {
+      let models = []
+      if (this.$store.state.Model.models[name]) models = this.$store.state.Model.models[name].items
+      else if (name === 'clinics') models = this.$store.state.Scope.clinic[name].items
+      else if (name === 'stores') models = this.$store.state.Scope.store[name].items
+      else if (this.$store.state.Scope[this.$store.state.Scope.mode][name]) models = this.$store.state.Scope[this.$store.state.Scope.mode][name].items
+      if (filter) models = models.filter(model => !this.model[filter].includes(model.id))
+      if (filterRelation) {
+        let owned = []
+        this.model[filterRelation.relation].map(model => owned.push(model[filterRelation.key]))
+        models = models.filter(model => !owned.includes(model.id))
+      }
+      return models
+    },
+    getRelationListOptions (name) {
+      if (this.$store.state.Model.models[name]) return this.$store.state.Model.models[name].items.filter(item => this.model[name].includes(item.id))
+      else if (name === 'clinics') return this.$store.state.Scope.clinic[name].items.filter(item => this.model[name].includes(item.id))
+      else if (name === 'stores') return this.$store.state.Scope.store[name].items.filter(item => this.model[name].includes(item.id))
+    },
+    downloadFile (relation, index, id) {
+      this.$emit('downloadFile', { relation: relation, index: index, id: id })
+    },
+    saveRelation (relation) {
+      let id = false
+      if (this.editing !== false) id = this.model[relation][this.editing].id
+      this.$emit('saveRelation',
+        {
+          relation: relation,
+          data: this.relationObjectsValueExtrator(relation, this.relations[relation]),
+          index: this.editing,
+          parentIndex: this.model.__index,
+          id: id
+        })
+      this.closeRelationForm(relation)
+    },
+    relationObjectsValueExtrator (relation, data) {
+      let fieldsToExtract = ['select', 'array', 'selectFromModel']
+      for (let field in data) {
+        if (fieldsToExtract.includes(this.quasarData.relations[relation].quasarData.formFields[field].type.name)) {
+          data[field] = data[field].value
+        }
+        // if (field.indexOf('_id' > -1)) {
+        //   relation[field] = relation[field].id
+        // }
+      }
+      return data
+    },
+    removeRelation (relation, index, id) {
+      this.$emit('removeRelation', { relation: relation, index: index, id: id })
+    },
+    checkAndSend (e, name = null) {
+      let val
+      if (!name) {
+        name = e.target.name
+        val = e.target.value
+      } else {
+        val = e
+      }
+      this.$v.model[name].$touch()
+      this.$emit('fieldChanged', { field: name, value: val })
+    },
+    validateFromLaravel (rules) {
+      let validations = {}
+      for (let rule of rules) {
+        if (typeof rule !== 'string') continue
+        if (rule === 'required') {
+          const { required } = require('vuelidate/lib/validators')
+          validations = { ...validations, required }
+        } else if (rule.includes('min:')) {
+          const { minLength } = require('vuelidate/lib/validators')
+          let minValue = parseInt(rule.substring((rule.indexOf(':') + 1)))
+          validations = { ...validations, minLength: minLength(minValue) }
+        } else if (rule.includes('max:')) {
+          const { maxLength } = require('vuelidate/lib/validators')
+          let maxValue = parseInt(rule.substring((rule.indexOf(':') + 1)))
+          validations = { ...validations, maxLength: maxLength(maxValue) }
+        } else if (rule.includes('same:')) {
+          const { sameAs } = require('vuelidate/lib/validators')
+          let sameField = rule.substring((rule.indexOf(':') + 1))
+          validations = { ...validations, sameAs: sameAs(sameField) }
+        }
+      }
+      // console.log(validations)
+      return validations
+    }
+  },
+  validations () {
+    let model = {}
+    let relations = {}
+    if (!this.step) return { model }
+    for (let row of this.step.fields) {
+      for (let field in row) {
+        if (this.quasarData.rules[field]) {
+          model[field] = this.validateFromLaravel(this.quasarData.rules[field])
+        }
+      }
+    }
+    if (this.step.relations) {
+      let sameContructor = ['MorphMany', 'HasManyThrough', 'HasMany']
+      let avoid = false
+      for (let relation of this.step.relations) {
+        if (this.quasarData.relations[relation].type === 'HasMany') {
+          avoid = this.quasarData.relations[relation]['getForeignKeyName']
+        }
+        if (sameContructor.includes(this.quasarData.relations[relation].type)) {
+          relations[relation] = {}
+          for (let field in this.quasarData.relations[relation].quasarData.rules) {
+            if (field !== avoid) relations[relation][field] = this.validateFromLaravel(this.quasarData.relations[relation].quasarData.rules[field])
+          }
+        }
+        if (this.quasarData.relations[relation].type === 'BelongsToMany') {
+          relations[relation] = this.validateFromLaravel(['required'])
+        }
+        if (this.quasarData.relations[relation].type === 'BelongsTo') {
+          relations[relation] = this.validateFromLaravel(['required'])
+        }
+      }
+    }
+    return { model, relations }
+  },
+  created () {
+    if (this.step.relations) {
+      for (let relation of this.step.relations) {
+        this.buildRelationData(relation)
+      }
+    }
+    this.$emit('dirtiness', { step: this.step.title, dirty: this.$v.model.$anyError })
+  },
+  mounted () {
+    this.$v.$touch()
+  }
+}
+</script>
+
+<style>
+</style>

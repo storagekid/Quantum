@@ -1,0 +1,104 @@
+<template>
+  <div>
+    <q-tabs animated align="justify" v-model="tabName" class="text-accent" active-color="primary">
+      <!-- Tabs - notice slot="title" -->
+      <q-tab
+        v-for="(step, index) in quasarData.updateLayout"
+        :key="'Tab'+index"
+        :name="index"
+        :icon="step.icon ? step.icon : 'subject'"
+        />
+      <!-- Targets -->
+    </q-tabs>
+    <q-tab-panels v-model="tabName" class="display-inner-selects">
+      <q-tab-panel
+        v-for="(step, index) in quasarData.updateLayout"
+        :key="'TabPane'+index"
+        :name="index"
+        class="q-pa-none"
+        keep-alive
+        style="display: contents"
+        >
+        <model-form
+            :mode="mode"
+            :batchMode="batchMode"
+            :batchSource="source"
+            :modelName="modelName"
+            :model="model"
+            :quasarData="quasarData"
+            :step="step"
+            v-on:dirtiness="checkDirtyness"
+            v-on:loading="$emit('loading')"
+            v-on:loaded="$emit('loaded')"
+          >
+        </model-form>
+        <div class="row">
+          <q-btn color="primary" label="Save Changes" class="q-mt-md full-width" @click="sendUpdateForm" v-if="step.fields.length" :disable="steps[step.title].errors"/>
+        </div>
+      </q-tab-panel>
+    </q-tab-panels>
+  </div>
+</template>
+
+<script>
+import ModelForm from './modelForm'
+import { ModelUpdaterBuilder, ModelController } from '../../mixins/modelMixin'
+
+export default {
+  name: 'UpdateModelTabs',
+  props: ['source', 'modelName', 'quasarData', 'mode', 'batchMode'],
+  components: { ModelForm },
+  mixins: [ModelUpdaterBuilder, ModelController],
+  data () {
+    return {
+      tabName: 0,
+      steps: {},
+      model: {}
+    }
+  },
+  computed: {
+    cleanForm () {
+      for (let step in this.steps) {
+        if (this.steps[step].errors) return false
+      }
+      return true
+    },
+    batchIDs () {
+      let ids = []
+      this.source.forEach((i) => { ids.push(i.id) })
+      return ids
+    }
+  },
+  methods: {
+    checkDirtyness (payload) {
+      this.steps[payload.step].errors = payload.dirty
+    },
+    // closeModal () {
+    //   this.visible = false
+    //   this.$emit('profileUpdated')
+    // },
+    buildStepper (source = null) {
+      for (let step of this.quasarData.updateLayout) {
+        this.$set(this.steps, step.title, {})
+        this.$set(this.steps[step.title], 'errors', false)
+      }
+    }
+  },
+  updated () {
+    // this.buildUpdaterModel(this.source)
+  },
+  created () {
+    this.buildUpdaterModel(this.source)
+    this.buildStepper()
+  }
+}
+</script>
+
+<style>
+.display-inner-selects {
+   overflow: visible;
+ }
+ .display-inner-selects > div {
+   display: contents;
+ }
+</style>
