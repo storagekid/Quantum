@@ -111,6 +111,7 @@
                   :name="field.name"
                   :label="field.type.default.text"
                   stack-label
+                  :options="model[field.type.model]"
                   v-model="relation[field.name]"
                 />
                 <q-input
