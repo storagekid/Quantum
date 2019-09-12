@@ -1,5 +1,5 @@
 <template>
-  <div padding v-if="model && can.show" class="bg-white">
+  <div padding v-if="model" class="bg-white">
     <template v-if="!updateModel">
       <q-table
         :class="wrapperClass ? wrapperClass : 'custom-table-wrapper'"
@@ -68,7 +68,7 @@
           </q-tr>
         </template> -->
         <template v-slot:top="props" class="dense">
-          <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit)">
+          <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete)">
             <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="newModel = !newModel" v-if="can.create"/>
             <q-btn-group flat rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
               <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
@@ -358,19 +358,20 @@
       <restore-model-confirm :modelQty="selectedItems.length" :name="modelName" :models="selectedItems" :quasarData="quasarData" v-on:confirmed="restoreConfirmed"></restore-model-confirm>
     </q-dialog>
     <q-dialog v-model="confirm.state" persistent>
-      <q-card>
+      <q-card v-if="confirm.state">
         <q-card-section class="row items-center">
           <q-avatar icon="info" color="blue" text-color="white" />
-          <span class="q-ml-sm">Selecciona una campaña</span>
+          <span class="q-ml-sm">Selecciona una plantilla</span>
         </q-card-section>
         <q-card-section class="row items-center">
           <custom-select
             :dense="true"
             :hide-bottom-space="true"
-            :field="{name: 'campaigns', type: { model: 'campaigns', default: { text: 'Selecciona una campaña'} }}"
+            :field="{name: 'campaigns', type: { default: { text: 'Selecciona una plantilla'} }}"
+            :sourceOptions="options.exports.excel"
             :clearable='true'
-            :initValue="campaignSelected"
-            @updated="updateCustomSelect($event,'campaignSelected')"
+            :initValue="options.exports.excel[0]"
+            @updated="updateCustomSelect($event,'confirm.blueprint')"
             >
           </custom-select>
         </q-card-section>
@@ -464,7 +465,8 @@ export default {
       confirm: {
         state: false,
         id: null,
-        index: null
+        index: null,
+        blueprint: null
       },
       campaignSelected: '',
       newModel: false,
@@ -475,7 +477,7 @@ export default {
       restoreModel: false,
       loading: false,
       columns: [],
-      options: [],
+      options: {},
       visibleColumns: [],
       separator: 'horizontal',
       // filter: '',
@@ -575,22 +577,29 @@ export default {
       return true
     },
     can () {
-      if (this.$store.state.User.permissions.clinics) {
-        return {
-          show: this.$store.state.User.permissions.clinics.includes('show'),
-          create: this.$store.state.User.permissions.clinics.includes('create'),
-          edit: this.$store.state.User.permissions.clinics.includes('edit'),
-          delete: this.$store.state.User.permissions.clinics.includes('delete')
-        }
-      } else if (this.permissions === undefined) {
-        let object = {
-          show: true,
-          create: false,
-          edit: false,
-          delete: false
-        }
-        return object
-      } else return this.permissions
+      let object = {
+        show: Object.keys(this.options).length ? this.options.actions.view : false,
+        create: Object.keys(this.options).length ? this.options.actions.create : false,
+        edit: Object.keys(this.options).length ? this.options.actions.update : false,
+        delete: Object.keys(this.options).length ? this.options.actions.destroy : false
+      }
+      return object
+      // if (this.$store.state.User.permissions.clinics) {
+      //   return {
+      //     show: this.$store.state.User.permissions.clinics.includes('show'),
+      //     create: this.$store.state.User.permissions.clinics.includes('create'),
+      //     edit: this.$store.state.User.permissions.clinics.includes('edit'),
+      //     delete: this.$store.state.User.permissions.clinics.includes('delete')
+      //   }
+      // } else if (this.permissions === undefined) {
+      //   let object = {
+      //     show: true,
+      //     create: false,
+      //     edit: false,
+      //     delete: false
+      //   }
+      //   return object
+      // } else return this.permissions
     },
     model () {
       if (this.relatedTo) {
@@ -706,7 +715,16 @@ export default {
       // }
     },
     updateCustomSelect (payload, object) {
-      this[object] = payload
+      if (object.indexOf('.') > -1) {
+        let words = object.split('.')
+        let mainObject = this[words[0]]
+        for (let i = 1; i < words.length - 1; i++) {
+          mainObject = mainObject[words[i]]
+        }
+        mainObject[words[words.length - 1]] = payload !== null ? payload : null
+      } else {
+        this[object] = payload !== null ? payload : null
+      }
     },
     updateCustomSelectFilter (payload, object) {
       if (!this.filters[object]) this.$set(this.filters, object, [])
@@ -720,10 +738,14 @@ export default {
     exports () {
       this.downloadingExcel = true
       this.$axios({
-        // url: this.$store.state.App.dataWarehouse + 'exports/?model=' + this.modelName + '&campaign=' + this.campaignSelected,
-        url: this.$store.state.App.dataWarehouse + 'exports',
+        url: this.$store.state.App.dataWarehouse + 'exportExcel',
         method: 'POST',
-        data: { model: this.modelName, 'campaign': this.campaignSelected, ids: this.filterIds },
+        data: {
+          model: this.modelName,
+          ids: this.filterIds,
+          blueprint: this.confirm.blueprint,
+          modelOptions: this.$store.state.Model.models[this.modelName].options
+        },
         responseType: 'blob'
       }).then((response) => {
         // console.log(response.data)

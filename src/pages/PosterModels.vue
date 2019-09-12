@@ -30,14 +30,14 @@ export default {
           cache: false,
           where: false,
           full: true
-        },
-        campaigns: {
-          scoped: false,
-          refresh: false,
-          cache: false,
-          where: false,
-          full: true
         }
+        // campaigns: {
+        //   scoped: false,
+        //   refresh: false,
+        //   cache: false,
+        //   where: false,
+        //   full: true
+        // }
       },
       modelSelected: null
     }

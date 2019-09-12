@@ -707,7 +707,14 @@ export default {
       return index
     },
     campaignSelectedId () {
-      return this.campaignSelected ? this.campaignSelected.id : ''
+      let id = ''
+      if (this.designsInRange.length) {
+        id = this.designsInRange[0].campaign_id
+        for (let design of this.designsInRange) {
+          if (design.campaign_id !== id) return ''
+        }
+      }
+      return id === null ? '' : id
     },
     clinicHasPosters () {
       if (this.model) {
@@ -721,10 +728,11 @@ export default {
       if (this.model && this.dateSelected) {
         let posters = []
         for (let poster of this.model.posters[this.campaignSelectedId]) {
-          if (poster.ends_at <= this.dateSelected.value || poster.starts_at > this.dateSelected.value) continue
-          if (this.campaignSelectedId === '') {
+          if (this.campaignSelectedId !== '') {
             posters.push(poster)
-          }
+            continue
+          } else if (poster.ends_at <= this.dateSelected.value || poster.starts_at > this.dateSelected.value) continue
+          posters.push(poster)
         }
         return posters
       }
@@ -790,11 +798,13 @@ export default {
         this.$store.dispatch('Model/getModelView', { model: 'clinics', id: this.clinicSelected.value, params: { view: 'distributions' } })
           .then((data) => {
             this.model = data.model
+            console.log('HERE')
             // console.log(data.model)
             if (this.model.poster_distributions.length) this.buildModelDesigns(this.model.poster_distributions)
             this.model['originalPosterPriorities'] = JSON.parse(JSON.stringify(this.model.posters))
             this.visible = false
           }).catch((response) => {
+            console.log('THERE')
             this.$store.dispatch('Response/responseErrorManager', response)
             this.visible = false
           })
@@ -1038,7 +1048,7 @@ export default {
       this.startUploader()
     },
     buildModelDesigns (designs) {
-      // console.log('Building Designs')
+      console.log('Building Designs')
       this.designs = []
       for (let design of designs) {
         let baseDesign = this.createDesign()
@@ -1065,7 +1075,7 @@ export default {
         baseDesign.distributions['height'] = data['height']
         baseDesign.distributions['holders'] = []
         baseDesign.distributions['posterIds'] = data['posterIds'] ? data['posterIds'] : []
-        // console.log('There')
+        console.log('There')
         if (data['holders'].length) {
           for (let holder of data['holders']) {
             if (!holder.lastX) holder['lastX'] = 0
@@ -1079,11 +1089,14 @@ export default {
         }
         if (baseDesign.distributions.holders.length) {
           let campaignId = baseDesign.campaign_id ? baseDesign.campaign_id : ''
+          console.log('Beyond')
+          console.log('Campaign: ' + campaignId)
           for (let holder of baseDesign.distributions.holders) {
             holder.ext = this.model.posters[campaignId].filter(i => { return i.id === holder.ext })[0]
             holder.int = this.model.posters[campaignId].filter(i => { return i.id === holder.int })[0]
           }
         }
+        console.log('Finish ' + design.id)
         this.designs.push(baseDesign)
       }
     },

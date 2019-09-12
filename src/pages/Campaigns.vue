@@ -104,7 +104,7 @@ export default {
       modelName: 'campaigns',
       modelsNeeded: {
         campaigns: {
-          scoped: false,
+          with: ['parent', 'children'],
           refresh: true,
           withCount: ['campaign_posters', 'campaign_poster_priorities', 'sanitary_codes', 'campaign_facades'],
           orderBy: 'starts_at',
