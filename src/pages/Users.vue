@@ -31,10 +31,7 @@ export default {
       modelName: 'users',
       modelsNeeded: {
         users: {
-          scoped: false,
-          refresh: false,
-          cache: false,
-          where: false
+          with: ['groups']
         }
       }
     }
