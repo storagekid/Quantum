@@ -5,6 +5,7 @@
       :modelsNeeded="modelsNeeded"
       :permissions="permissions"
       :dense="true"
+      :getModelView="true"
       v-if="Object.keys(modelsNeeded).length === modelsFetched"
       >
       <template slot="body-cell-emails" slot-scope="item" :item="item">
