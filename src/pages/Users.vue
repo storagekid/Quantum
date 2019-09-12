@@ -31,7 +31,7 @@ export default {
       modelName: 'users',
       modelsNeeded: {
         users: {
-          with: ['groups']
+          with: ['groups', 'group_users']
         }
       }
     }
