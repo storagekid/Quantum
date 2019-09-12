@@ -10,9 +10,9 @@
       <template slot="body-cell-name" slot-scope="item" :item="item">
         <q-btn size="md" dense flat color="primary">{{ item.item }}</q-btn>
       </template>
-      <template slot="body-cell-groups" slot-scope="item" :item="item">
+      <template slot="body-cell-group_users" slot-scope="item" :item="item">
         <div v-for="(group, index) in item.item" :key="index">
-          <span class="text-bold text-italic text-caption">{{ group.name }} -</span> {{ group.role.role }}
+          <span class="text-bold text-italic text-caption">{{ group.groupName }} -</span> {{ group.role }}
           <!-- <q-chip size="sm" class="text-caption text-uppercase" dense square color="tertiary-light" text-color="black" :label="group.name"></q-chip><span class="text-caption text-uppercase">{{ group.role.role }}</span> -->
         </div>
       </template>
@@ -31,7 +31,7 @@ export default {
       modelName: 'users',
       modelsNeeded: {
         users: {
-          with: ['groups', 'group_users']
+          with: ['group_users']
         }
       }
     }
