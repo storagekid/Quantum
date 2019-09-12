@@ -7,7 +7,7 @@
         :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona una clínica'} }}"
         :clearable='true'
         :initValue="clinicSelected"
-        @updated="updateCustomSelect($event,'clinicSelected')"
+        @updated="updateCustomSelect('clinicSelected', $event)"
         >
       </custom-select>
       <custom-select
@@ -18,7 +18,7 @@
         :clearable="dates.length > 1"
         :sourceOptions="dates"
         :initValue="dateSelected"
-        @updated="updateCustomSelect($event,'dateSelected')"
+        @updated="updateCustomSelect('dateSelected', $event)"
         >
       </custom-select>
       <q-btn
@@ -40,7 +40,7 @@
         :clearable='true'
         :sourceOptions="campaignOptions"
         :initValue="campaignSelected"
-        @updated="updateCustomSelect($event,'campaignSelected')"
+        @updated="updateCustomSelect('campaignSelected', $event)"
         >
       </custom-select> -->
       <!-- <q-btn v-if="campaignSelected" size="sm" icon="save" color="primary" class="full-width q-mb-sm" label="Clonar Distribución Base" @click="cloneBaseDistribution"></q-btn> -->
@@ -188,7 +188,7 @@
                           :clearable='true'
                           :sourceOptions="campaignOptions"
                           :initValue="campaignSelected"
-                          @updated="updateCustomSelect($event,'campaignSelected')"
+                          @updated="updateCustomSelect('campaignSelected', $event)"
                           >
                         </custom-select>
                       </div>
@@ -552,7 +552,7 @@
             :field="{name: 'campaigns', type: { model: 'campaigns', default: { text: '¿Esta relaccionado con una campaña?'} }}"
             :clearable='true'
             :initValue="cloneDialog.campaign"
-            @updated="updateCustomSelect($event,'cloneDialog.campaign')"
+            @updated="updateCustomSelect('cloneDialog.campaign', $event)"
             >
           </custom-select>
           <q-input
@@ -602,13 +602,14 @@
 </template>
 
 <script>
+import { Helpers } from '../mixins/helpers'
 import { ModelsFetcher, ModelController } from '../mixins/modelMixin'
 import { FileDownloadMethods } from '../mixins/fileMixin'
 import CustomSelect from '../components/form/customSelect'
 
 export default {
   name: 'PosterDistribution',
-  mixins: [ModelsFetcher, ModelController, FileDownloadMethods],
+  mixins: [ModelsFetcher, ModelController, FileDownloadMethods, Helpers],
   components: { CustomSelect },
   data () {
     return {
@@ -1309,22 +1310,6 @@ export default {
     getPriority (poster) {
       let priority = poster.priority === 1 ? 1 : poster.priority === 2 ? 0.9 : poster.priority === 3 ? 0.8 : poster.priority === 4 ? 0.7 : poster.priority === 5 ? 0.6 : 0.5
       return priority
-    },
-    updateCustomSelect (payload, object) {
-      // console.log(object)
-      if (object.indexOf('.') > -1) {
-        let words = object.split('.')
-        let mainObject = this[words[0]]
-        // console.log(mainObject)
-        // console.log(words)
-        // console.log(words.length)
-        for (let i = 1; i < words.length - 1; i++) {
-          mainObject = mainObject[words[i]]
-        }
-        mainObject[words[words.length - 1]] = payload !== null ? payload : null
-      } else {
-        this[object] = payload !== null ? payload : null
-      }
     },
     removeDesign (index = false) {
       let design = this.designs[this.confirm.index]

@@ -63,7 +63,7 @@
             :initValue="model[field.name]"
             :error="$v.model[field.name].$error"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
-            @updated="updateCustomSelect(field.name, ...arguments)"
+            @updated="updateCustomSelect('model.' + field.name, ...arguments)"
             >
           </custom-select>
           <q-select
@@ -132,6 +132,7 @@
 </template>
 
 <script>
+import { Helpers } from '../../mixins/helpers'
 import MultiUploadBars from '../loaders/multiUploadBars'
 import RemoveModelConfirm from './removeModelConfirm'
 import CustomSelect from '../form/customSelect'
@@ -139,6 +140,7 @@ import RelationCard from '../relation/relationCard'
 
 export default {
   name: 'ModelForm',
+  mixins: [Helpers],
   props: ['mode', 'modelName', 'model', 'quasarData', 'step', 'batchMode', 'batchSource'],
   components: { RemoveModelConfirm, RelationCard, MultiUploadBars, CustomSelect },
   data () {
@@ -235,10 +237,6 @@ export default {
       if (this.$store.state.Model.models[name]) return this.$store.state.Model.models[name].items.filter(item => this.model[name].includes(item.id))
       else if (name === 'clinics') return this.$store.state.Scope.clinic[name].items.filter(item => this.model[name].includes(item.id))
       else if (name === 'stores') return this.$store.state.Scope.store[name].items.filter(item => this.model[name].includes(item.id))
-    },
-    updateCustomSelect (field, payload) {
-      this.model[field] = payload
-      this.$v.model[field].$touch()
     },
     validateFromLaravel (rules) {
       let validations = {}

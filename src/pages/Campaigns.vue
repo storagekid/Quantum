@@ -58,7 +58,7 @@
             :sourceOptions="clinicOptions"
             :clearable='true'
             :initValue="clinicsSelected"
-            @updated="updateCustomSelect($event,'clinicsSelected')"
+            @updated="updateCustomSelect('clinicsSelected', $event)"
             >
           </custom-select>
         </q-card-section>
@@ -91,13 +91,14 @@
 </template>
 
 <script>
+import { Helpers } from '../mixins/helpers'
 import { ModelsFetcher } from '../mixins/modelMixin'
 import CustomSelect from '../components/form/customSelect'
 import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'CampaignsPage',
-  mixins: [ModelsFetcher],
+  mixins: [ ModelsFetcher, Helpers ],
   components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {
@@ -388,10 +389,6 @@ export default {
         fake: true
       }
       this.clinicsSelected = []
-    },
-    // END Multi Async Actions Methods
-    updateCustomSelect (payload, object) {
-      this[object] = payload !== null ? payload : []
     },
     showLauncher (campaign) {
       // console.log(campaign)

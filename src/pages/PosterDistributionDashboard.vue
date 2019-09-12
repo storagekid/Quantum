@@ -97,7 +97,7 @@
             :sourceOptions="campaignOptions"
             :clearable='true'
             :initValue="confirm.campaignSelected"
-            @updated="updateCustomSelect($event,'confirm.campaignSelected')"
+            @updated="updateCustomSelect('confirm.campaignSelected', $event)"
             >
           </custom-select>
         </q-card-section>
@@ -111,13 +111,14 @@
 </template>
 
 <script>
+import { Helpers } from '../mixins/helpers'
 import { ModelsFetcher } from '../mixins/modelMixin'
-import CustomSelect from '../components/form/customSelect'
 import { FileDownloadMethods } from '../mixins/fileMixin'
+import CustomSelect from '../components/form/customSelect'
 
 export default {
   name: 'PosterDistributionDashboard',
-  mixins: [ ModelsFetcher, FileDownloadMethods ],
+  mixins: [ ModelsFetcher, FileDownloadMethods, Helpers ],
   components: { CustomSelect },
   data () {
     return {
@@ -201,31 +202,6 @@ export default {
           this.resetDialog()
         })
     },
-    updateCustomSelect (payload, object) {
-      // console.log(object)
-      if (object.indexOf('.') > -1) {
-        let words = object.split('.')
-        let mainObject = this[words[0]]
-        // console.log(mainObject)
-        // console.log(words)
-        // console.log(words.length)
-        for (let i = 1; i < words.length - 1; i++) {
-          mainObject = mainObject[words[i]]
-        }
-        mainObject[words[words.length - 1]] = payload !== null ? payload : null
-      } else {
-        this[object] = payload !== null ? payload : null
-      }
-    },
-    // findCompleteDists (dists) {
-    //   let posters = 0
-    //   for (let dist of dists) {
-    //     // console.log(dist)
-    //     // console.log(JSON.parse(dist.distributions))
-    //     // posters += JSON.parse(dist.distributions).posterIds.length
-    //   }
-    //   return posters > 0
-    // },
     groupedBy (array, key) {
       return array.reduce(function (rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(x)
@@ -234,7 +210,6 @@ export default {
     },
     showPDFGenerator (clinic) {
       this.confirm.state = true
-      // this.confirm.item = this.computedClinics[clinic.__index]
     },
     generateClinicDistributionPDF () {
       this.confirm.loading = this.confirm.item.id

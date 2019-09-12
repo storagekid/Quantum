@@ -371,7 +371,7 @@
             :sourceOptions="options.exports.excel"
             :clearable='true'
             :initValue="options.exports.excel[0]"
-            @updated="updateCustomSelect($event,'confirm.blueprint')"
+            @updated="updateCustomSelect('confirm.blueprint', $event)"
             >
           </custom-select>
         </q-card-section>
@@ -449,14 +449,14 @@ import RestoreModelConfirm from './restoreModelConfirm'
 import CloneModelConfirm from './cloneModelConfirm'
 import CustomSelect from '../form/customSelect'
 import { FileDownloadMethods } from '../../mixins/fileMixin'
-
+import { Helpers } from '../../mixins/helpers'
 import { ModelsFetcher } from '../../mixins/modelMixin'
 import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
   props: ['modelName', 'relatedTo', 'modelsNeeded', 'getModelView', 'permissions', 'dense', 'grid', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass'],
-  mixins: [ModelsFetcher, searchMethods, FileDownloadMethods],
+  mixins: [ModelsFetcher, searchMethods, FileDownloadMethods, Helpers],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {
     return {
@@ -713,18 +713,6 @@ export default {
       //   if (this.$refs['table-' + this.modelName].columnToSort.label === column.label && this.$refs['table-' + this.modelName].columnToSort.__thClass.indexOf('desc') > -1) this.sortIcon = 'arrow_downward'
       //   else this.sortIcon = 'arrow_upward'
       // }
-    },
-    updateCustomSelect (payload, object) {
-      if (object.indexOf('.') > -1) {
-        let words = object.split('.')
-        let mainObject = this[words[0]]
-        for (let i = 1; i < words.length - 1; i++) {
-          mainObject = mainObject[words[i]]
-        }
-        mainObject[words[words.length - 1]] = payload !== null ? payload : null
-      } else {
-        this[object] = payload !== null ? payload : null
-      }
     },
     updateCustomSelectFilter (payload, object) {
       if (!this.filters[object]) this.$set(this.filters, object, [])

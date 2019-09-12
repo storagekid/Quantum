@@ -19,7 +19,7 @@
         'q-pa-none': relationData.quasarData.listFields.mode === 'table',
         'no-shadow': relationData.quasarData.listFields.mode === 'table'
       }"
-      v-if="openRelation || model[relationData.name].length"
+      v-if="openRelation || (typeof model[relationData.name] !== 'undefined')"
       >
       <form class="q-mb-lg" v-if="openRelation">
         <template v-if="['HasMany', 'MorphMany', 'HasManyThrough'].includes(relationData.type)">
@@ -100,7 +100,7 @@
                   :relation="relationData.name"
                   :initValue="relation[field.name]"
                   :error="relationData.quasarData.fields.includes(field.name) ? $v.relation[field.name].$error : false"
-                  @updated="updateCustomSelect(field.name, ...arguments)"
+                  @updated="updateCustomSelect(field.name, ...arguments, true)"
                   >
                 </custom-select>
                 <q-select
@@ -151,7 +151,7 @@
                   :relationType="relationData.type"
                   :initValue="null"
                   :error="$v.relation.$error"
-                  @updated="updateCustomSelect(relationData.name, ...arguments)"
+                  @updated="updateCustomSelect(relationData.name, ...arguments, true)"
                   >
                 </custom-select>
         </template>
@@ -310,6 +310,7 @@
 <script>
 import { ModelRelations, RelationController, SortingRelation } from '../../mixins/modelMixin'
 import { searchMethods } from '../../mixins/tableMixin'
+import { Helpers } from '../../mixins/helpers'
 import { FileDownloadMethods } from '../../mixins/fileMixin'
 import RemoveModelConfirm from '../model/removeModelConfirm'
 import CustomSelect from '../form/customSelect'
@@ -317,7 +318,7 @@ import CustomSelect from '../form/customSelect'
 export default {
   name: 'RelationCard',
   props: ['relationData', 'relatedTo', 'model', 'modelData', 'mode', 'batchMode', 'batchSource'],
-  mixins: [ModelRelations, RelationController, SortingRelation, searchMethods, FileDownloadMethods],
+  mixins: [ModelRelations, RelationController, SortingRelation, searchMethods, FileDownloadMethods, Helpers],
   components: { RemoveModelConfirm, CustomSelect },
   data () {
     return {
@@ -420,15 +421,6 @@ export default {
       this.elDragged.index = null
     },
     // END DRAG METHODS !!!! NOT WORKING !!!
-    updateCustomSelect (field, payload) {
-      if (this.relationData.type === 'BelongsToMany') {
-        this.relation = payload
-        this.$v.relation.$touch()
-      } else {
-        this.relation[field] = payload
-        this.$v.relation[field].$touch()
-      }
-    },
     // IMAGES METHODS
     fetchThumbnail (file, index) {
       let params = {}
