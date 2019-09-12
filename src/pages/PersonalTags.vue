@@ -50,7 +50,7 @@ import { ModelsFetcher } from '../mixins/modelMixin'
 import { FileDownloadMethods } from '../mixins/fileMixin'
 
 export default {
-  name: 'PersonalTags',
+  name: 'personal-tags',
   mixins: [ModelsFetcher, FileDownloadMethods],
   data () {
     return {

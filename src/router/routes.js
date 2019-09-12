@@ -20,7 +20,7 @@ const routes = [
       },
       {
         path: '/personal-tags',
-        name: 'personalTags',
+        name: 'personal-tags',
         component: () => import('pages/PersonalTags.vue'),
         meta: { requiresAuth: true }
       },
