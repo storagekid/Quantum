@@ -189,7 +189,6 @@ export function sendUpdateForm (context, { source }) { // CLEANED
   })
 }
 export function removeModels (context, { name, items, softDeleting = false }) {
-  // console.log(context.getters)
   return new Promise((resolve, reject) => {
     let deleted = 0
     let round = 0
