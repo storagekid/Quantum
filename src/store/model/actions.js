@@ -189,7 +189,7 @@ export function sendUpdateForm (context, { source }) { // CLEANED
   })
 }
 export function removeModels (context, { name, items, softDeleting = false }) {
-  // console.log(items)
+  // console.log(context.getters)
   return new Promise((resolve, reject) => {
     let deleted = 0
     let round = 0
@@ -198,13 +198,13 @@ export function removeModels (context, { name, items, softDeleting = false }) {
       round = round + 1
       axios({
         url: context.rootState.App.dataWarehouse + name + '/' + id,
-        method: 'DELETE'
+        method: 'DELETE',
+        params: context.getters.availableOptions[name]
       }).then(({ data }) => {
         deleted = deleted + 1
         // console.log(deleted)
         // console.log('Soft Deleting: ' + softDeleting)
         softDeleting ? context.commit('updateModelItems', { name: name, item: data.model }) : context.commit('removeModelItem', { name: name, id: id })
-        // context.dispatch('Notify/displayMessage', { message: data.message, position: 'top', type: 'positive' }, { root: true })
         if (deleted === items.length && items.length === round) {
           resolve(data)
         }
