@@ -735,7 +735,7 @@ export const RelationController = {
           parentIndex: this.model.__index
         }
         this.$store.commit('Model/removeRelationById', options)
-        this.$store.dispatch('Notify/displayMessage', { message: response.message, position: 'top', type: 'positive' }, { root: true })
+        this.$store.dispatch('Notify/displayMessage', { message: response.message || payload.relation + ' successfully removed', position: 'top', type: 'positive' }, { root: true })
         this.relationLoader = false
       }).catch((response) => {
         this.relationLoader = false
