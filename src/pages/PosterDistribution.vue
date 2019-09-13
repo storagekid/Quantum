@@ -863,60 +863,7 @@ export default {
       })
       return true
     },
-    // clonePosterPriorities () {
-    //   return new Promise((resolve, reject) => {
-    //     let startDate = new Date(this.cloneDialog.starts_at)
-    //     let endsDate = new Date(startDate.setDate(startDate.getDate() - 1))
-    //     // console.log(startDate)
-    //     // console.log(endsDate)
-    //     let endsAt = endsDate.getFullYear() + '-' + (endsDate.getMonth() < 10 ? '0' : '') + (Number(endsDate.getMonth()) + 1) + '-' + (endsDate.getDate() < 10 ? '0' : '') + endsDate.getDate()
-    //     console.log(this.cloneDialog.starts_at)
-    //     console.log(endsAt)
-    //     // if (this.cloneDialog.state) resolve()
-    //     let count = 0
-    //     let total = this.clinicPosters.length
-    //     let payload = { name: 'clinic_poster_priorities', model: null }
-    //     for (let poster of this.clinicPosters) {
-    //       count++
-    //       payload.model = JSON.parse(JSON.stringify(poster))
-    //       delete payload.model.id
-    //       delete payload.model.created_at
-    //       delete payload.model.updated_at
-    //       payload.model.starts_at = this.cloneDialog.starts_at
-    //       payload.model.ends_at = this.cloneDialog.campaign ? this.this.cloneDialog.campaign.ends_at : null
-    //       payload.url = this.$store.state.App.dataWarehouse + payload.name
-    //       this.$store.dispatch('Model/sendNewForm', {
-    //         'source': payload
-    //       }).then((response) => {
-    //         // this.$store.commit('Model/addModelItems', { name: payload.name, items: response.model })
-    //         this.$store.dispatch('Notify/displayMessage', { message: 'Model: ' + payload.name + ' Created', position: 'top', type: 'positive' })
-    //         if (!this.cloneDialog.campaign) {
-    //           count--
-    //           payload.model = null
-    //           payload.model = JSON.parse(JSON.stringify(poster))
-    //           delete payload.model.clinic_poster
-    //           payload.model.ends_at = endsAt
-    //           payload.url = this.$store.state.App.dataWarehouse + payload.name + '/' + payload.model.id
-    //           this.$store.dispatch('Model/sendUpdateForm', {
-    //             'source': payload
-    //           }).then((response) => {
-    //             count++
-    //             this.$store.dispatch('Notify/displayMessage', { message: 'Model: ' + payload.name + ' Updated', position: 'top', type: 'positive' })
-    //             if (count === total) resolve()
-    //           }).catch((response) => {
-    //             this.$store.dispatch('Response/responseErrorManager', response)
-    //           })
-    //         }
-    //         if (count === total) resolve()
-    //         // this.$emit('formRespondedOK')
-    //       }).catch((response) => {
-    //         // this.$emit('formRespondedWithErrors')
-    //         this.$store.dispatch('Response/responseErrorManager', response)
-    //         if (count === total) reject()
-    //       })
-    //     }
-    //   })
-    // },
+
     downloadPDF (fileId) {
       this.btnLoaders.facadePdf = true
       this.downloadFile(fileId)
