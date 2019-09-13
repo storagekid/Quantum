@@ -12,7 +12,7 @@
           radio
           :options="profiles"
         />
-        <q-btn color="primary" label="Aceptar" class="q-mt-md full-width" @click="$emit('profile-selected', profileSelected)" :disabled="profileSelected === null"/>
+        <q-btn color="primary" label="Aceptar" class="q-mt-md full-width" @click="$emit('profile-selected', profileSelected.id)" :disabled="profileSelected === null"/>
       </form>
     </q-card-section>
     <q-inner-loading :showing="visible">

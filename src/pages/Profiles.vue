@@ -47,6 +47,7 @@ export default {
         profiles: {
           scoped: true,
           refresh: true,
+          orderBy: 'name',
           with: ['phones', 'emails', 'country', 'company', 'stores', 'clinic_profiles', 'store_profiles', 'user']
         }
       }

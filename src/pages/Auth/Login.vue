@@ -74,11 +74,18 @@ export default {
     getScope (id) {
       this.visible = true
       this.setProfile(id)
-      this.$axios.get(this.$store.state.App.dataWarehouse + 'scope/' + id, {
+      this.$axios.get(this.$store.state.App.dataWarehouse + 'profiles', {
+        params: {
+          ids: [id],
+          with: ['clinics', 'stores'],
+          appends: [
+            'storeScope',
+            'clinicScope'
+          ]
+        }
       }).then((response) => {
         this.setUser()
-        this.setStartModels(response.data.profile)
-        // this.$store.commit('Scope/initScope', response.data.profile)
+        this.setStartModels(response.data.model[0])
         this.profileCard = false
         this.checkRealm()
       })
@@ -108,11 +115,11 @@ export default {
         }
         this.setUser()
         this.setStartModels(this.user.profile)
-        // this.$store.commit('Scope/initScope', this.user.profile)
         this.checkRealm()
       }
     },
     setStartModels (profile) {
+      console.log(profile)
       let counties = []
       let countyIds = []
       let states = []
@@ -143,14 +150,6 @@ export default {
       if (profile.storeScope.length) {
         Object.keys(profile.storeScope).map((k) => {
           storeIds.push(profile.storeScope[k].id)
-          // if (!countyIds.includes(profile.storeScope[k].county.id)) {
-          //   counties.push(profile.storeScope[k].county)
-          //   countyIds.push(profile.storeScope[k].county.id)
-          // }
-          // if (!stateIds.includes(profile.storeScope[k].county.state_id)) {
-          //   states.push(profile.storeScope[k].county.state)
-          //   stateIds.push(profile.storeScope[k].county.state_id)
-          // }
           if (!countryIds.includes(profile.storeScope[k].country_id)) {
             countries.push(profile.storeScope[k].country)
             countryIds.push(profile.storeScope[k].country_id)
