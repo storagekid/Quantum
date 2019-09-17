@@ -77,11 +77,10 @@ export default {
       show: null,
       modelsNeeded: {
         clinics: {
-          scoped: false,
           full: true,
           refresh: true,
           withTrashed: true,
-          cache: false,
+          orderBy: 'city',
           appends: ['open']
         }
       }
