@@ -25,10 +25,6 @@ export default {
       modelName: 'poster_models',
       modelsNeeded: {
         poster_models: {
-          scoped: false,
-          refresh: false,
-          cache: false,
-          where: false,
           full: true
         }
         // campaigns: {
