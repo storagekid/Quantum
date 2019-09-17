@@ -426,7 +426,14 @@ export const ModelController = {
         'source': payload
       }).then((response) => {
         this.$store.commit('Model/addModelItems', { name: payload.name, items: response.model })
-        this.$store.dispatch('Notify/displayMessage', { message: 'Model: ' + payload.name + ' Created', position: 'top', type: 'positive' })
+        // this.$store.dispatch('Notify/displayMessage', { message: 'Model: ' + payload.name + ' Created', position: 'top', type: 'positive' })
+        this.$store.dispatch('Notify/displayMessage', {
+          message: this.$t('forms.messages.successCreate', {
+            model: this.$tc('models.' + payload.name + '.name', 1),
+            action: this.$tc('forms.actions.saved', 1)
+          }),
+          position: 'top',
+          type: 'positive' })
         this.$emit('formRespondedOK')
       }).catch((response) => {
         this.$emit('formRespondedWithErrors')

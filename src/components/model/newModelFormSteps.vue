@@ -36,7 +36,7 @@
         </model-review>
         <q-stepper-navigation default>
           <q-btn color="primary" flat @click="$refs.stepper.previous()" label="Volver" />
-          <q-btn color="primary" label="Crear Perfil" class="q-mt-md full-width" @click="sendNewForm"/>
+          <q-btn color="primary" :label="'Crear ' + $tc('models.' + modelName +'.name', 1) " class="q-mt-md full-width" @click="sendNewForm"/>
         </q-stepper-navigation>
       </q-step>
   </q-stepper>

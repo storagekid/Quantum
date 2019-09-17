@@ -104,12 +104,29 @@ export default {
     user: 'Correo',
     password: 'Contraseña'
   },
+  models: {
+    campaigns: {
+      name: 'Campaña | Campañas'
+    }
+  },
   forms: {
     errors: {
       required: 'El campo es obligatorio',
       email: 'Debes escribir un email válido',
       minLength: 'Debe tener una longitud mínima de {min} caracteres',
       maxLength: 'Debe tener una longitud mínima de {max} caracteres'
+    },
+    actions: {
+      create: 'Crear',
+      save: 'Guardar',
+      saved: 'Guardad@ | Guardad@s',
+      update: 'Actualizar',
+      updated: 'Actualizado | Acutalizados',
+      delete: 'Eliminar',
+      deleted: 'Eliminado | Eliminados'
+    },
+    messages: {
+      successCreate: '{model} {action} con éxito.'
     }
   }
 }
