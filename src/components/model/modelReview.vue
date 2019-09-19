@@ -11,15 +11,14 @@
               <q-item-section avatar>
                 {{field.label}}
               </q-item-section>
-              <!-- <q-item-section>Active, Active class</q-item-section> -->
               <q-item-section side>
-                <span v-if="field.type.name === 'select'">
+                <span v-if="field.type.name === 'select' && model[field.name]">
                   {{ model[field.name].label }}
                 </span>
-                <span v-else-if="field.type.name === 'array'">
+                <span v-else-if="field.type.name === 'array' && model[field.name]">
                   {{ model[field.name].label }}
                 </span>
-                <span v-else-if="field.type.name === 'password'">
+                <span v-else-if="field.type.name === 'password' && model[field.name]">
                   {{ hidePassword(model[field.name]) }}
                 </span>
                 <div v-else>
