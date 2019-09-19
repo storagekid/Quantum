@@ -422,6 +422,7 @@ export const ModelController = {
     },
     saveModelOnNewController (payload) { // CLEANED
       payload.url = this.$store.state.App.dataWarehouse + payload.name
+      payload.options = this.$store.getters['Model/availableOptions'][payload.name]
       this.$store.dispatch('Model/sendNewForm', {
         'source': payload
       }).then((response) => {
