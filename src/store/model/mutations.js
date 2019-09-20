@@ -148,12 +148,10 @@ export function updateRelationItems ({ models }, { name, relation, item, parentI
   // console.log(relation)
   // console.log(item)
   // console.log(parentIndex)
-  for (const [model] of models[name].items[parentIndex][relation].entries()) {
+  for (let model of models[name].items[parentIndex][relation]) {
     if (model.id === item.id) {
       for (let prop in item) {
         model[prop] = item[prop]
-        // console.log(index)
-        // models[name].items[parentIndex][relation][index][prop] = item[prop]
       }
     }
   }
