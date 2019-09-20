@@ -155,7 +155,8 @@ export function getQuasarData (context, { model }) {
   })
 }
 export function sendNewForm (context, { source }) { // CLEANED
-  let payload = formConstructor(source)
+  let payload = formConstructor(source.model)
+  if (source.quasarInfo) payload.append('quasarData', JSON.stringify(source.quasarInfo))
   let headers = {}
   headers['Content-Type'] = 'multipart/form-data'
   return new Promise((resolve, reject) => {
@@ -173,8 +174,8 @@ export function sendNewForm (context, { source }) { // CLEANED
   })
 }
 export function sendUpdateForm (context, { source }) { // CLEANED
-  // console.log(source)
   let payload = formConstructor(source.model)
+  if (source.quasarInfo) payload.append('quasarData', JSON.stringify(source.quasarInfo))
   payload.append('_method', 'PATCH')
   return new Promise((resolve, reject) => {
     axios({
