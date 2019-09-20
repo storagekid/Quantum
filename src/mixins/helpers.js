@@ -40,6 +40,6 @@ export const Helpers = {
   },
 
   created () {
-    console.log('Helpers here')
+    // console.log('Helpers here')
   }
 }
