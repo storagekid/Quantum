@@ -31,7 +31,7 @@ export default {
       modelName: 'clinic_posters',
       modelsNeeded: {
         clinic_posters: {
-          scoped: false,
+          scoped: true,
           refresh: true,
           orderBy: 'clinic_id',
           withCount: ['clinic_poster_priorities'],
