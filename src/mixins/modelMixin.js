@@ -814,7 +814,7 @@ export const RelationController = {
     removeBelongsToMany (payload) { // CLEANED
       console.log('removeBelongsToMany')
       return new Promise((resolve, reject) => {
-        payload.url = this.$store.state.App.dataWarehouse + 'belongstomany'
+        payload.url = this.$store.state.App.dataWarehouse + 'belongstomany/' + payload.id
         this.sendDestroyRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
       })
     }
