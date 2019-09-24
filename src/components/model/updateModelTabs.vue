@@ -1,14 +1,12 @@
 <template>
   <div>
     <q-tabs animated align="justify" v-model="tabName" class="text-accent" active-color="primary">
-      <!-- Tabs - notice slot="title" -->
       <q-tab
         v-for="(step, index) in quasarData.updateLayout"
         :key="'Tab'+index"
         :name="index"
         :icon="step.icon ? step.icon : 'subject'"
         />
-      <!-- Targets -->
     </q-tabs>
     <q-tab-panels v-model="tabName" class="display-inner-selects">
       <q-tab-panel
@@ -78,26 +76,19 @@ export default {
         if (this.batchMode) {
           this.batchModel(payload, this.source).then(() => { this.$emit('formResponded') }).catch(() => { this.$emit('formRespondedWithErrors') })
         } else {
-          this.saveModel(payload).then(() => { this.$emit('formResponded') }).catch(() => { this.$emit('formRespondedWithErrors') })
+          this.saveModel(payload, 'update').then(() => { this.$emit('formResponded') }).catch(() => { this.$emit('formRespondedWithErrors') })
         }
       }
     },
     checkDirtyness (payload) {
       this.steps[payload.step].errors = payload.dirty
     },
-    // closeModal () {
-    //   this.visible = false
-    //   this.$emit('profileUpdated')
-    // },
     buildStepper (source = null) {
       for (let step of this.quasarData.updateLayout) {
         this.$set(this.steps, step.title, {})
         this.$set(this.steps[step.title], 'errors', false)
       }
     }
-  },
-  updated () {
-    // this.buildUpdaterModel(this.source)
   },
   created () {
     this.buildUpdaterModel(this.source)
