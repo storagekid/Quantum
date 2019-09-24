@@ -4,6 +4,7 @@
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
       :dense="true"
+      :editAferCreate="true"
       :getModelView="true"
       v-if="Object.keys(modelsNeeded).length === modelsFetched"
       >
