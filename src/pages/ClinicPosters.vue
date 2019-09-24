@@ -4,7 +4,6 @@
       ref="clinicPostersTable"
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
-      :permissions="permissions"
       :rows="modelsNeeded.clinic_posters.paginate"
       :dense="true"
       :editAferCreate="true"

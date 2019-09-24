@@ -3,7 +3,6 @@
     <model-table
       :modelName="modelName"
       :modelsNeeded="tableModels"
-      :permissions="permissions"
       :dense="true"
       :getModelView="true"
       :rows="20"

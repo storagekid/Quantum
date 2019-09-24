@@ -13,7 +13,6 @@
       ref="clinicPostersTable"
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
-      :permissions="permissions"
       :rows="modelsNeeded.clinic_poster_priorities.paginate"
       :dense="true"
       startFilter="&&Activa!=&&Fecha de Baja=="

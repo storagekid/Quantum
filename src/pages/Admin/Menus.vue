@@ -3,7 +3,6 @@
     <model-table
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
-      :permissions="permissions"
       :dense="true"
       v-if="Object.keys(modelsNeeded).length === modelsFetched"
       >
