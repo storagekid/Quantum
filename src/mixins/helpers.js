@@ -37,9 +37,5 @@ export const Helpers = {
       // console.log(object)
       return (object === null) ? null : Array.isArray(object) ? [] : (typeof object === 'object') ? {} : (typeof object === 'string') ? '' : false
     }
-  },
-
-  created () {
-    // console.log('Helpers here')
   }
 }
