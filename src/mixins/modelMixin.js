@@ -16,9 +16,6 @@ export const ModelsFetcher = {
           let size = Object.keys(this.modelsNeeded).length
           for (let name in this.modelsNeeded) {
             let model = this.modelsNeeded[name]
-            // if (this.modelName) {
-            //   if (this.modelName === 'clinics' && this.model) model['clinics'] = [this.model.id]
-            // }
             if (!this.$store.state.Model.models[name] || model.refresh) {
               // console.log('Getting Models')
               this.$store.dispatch('Model/getModel', {
@@ -55,15 +52,6 @@ export const ModelsFetcher = {
       })
     }
   },
-  // created () {
-  //   console.log('Created')
-  //   this.getModelsNeeded().then((size) => {
-  //     this.modelsFetched = size
-  //     this.$q.loading.hide()
-  //   }).catch((response) => {
-  //     this.$q.loading.hide()
-  //   })
-  // },
   mounted () {
     // console.log('Model Fetcher Mounted Hook')
     this.getModelsNeeded().then((size) => {
@@ -72,9 +60,6 @@ export const ModelsFetcher = {
     }).catch((response) => {
       this.$q.loading.hide()
     })
-  },
-  updated () {
-    // console.log('Model Fetcher Updated Hook')
   }
 }
 export const ModelBuilder = {
@@ -336,8 +321,8 @@ export const ModelController = {
   methods: {
     async batchModel (data, batchSource) {
       console.log('batchModel')
-      console.log(data)
-      console.log(batchSource)
+      // console.log(data)
+      // console.log(batchSource)
       // let tempModel = JSON.parse(JSON.stringify(data.model))
       let batchRound = 0
       let failed = []
@@ -357,30 +342,6 @@ export const ModelController = {
       }
       return true
     },
-    // sendUpdateForm () {
-    //   if (!this.cleanForm) {
-    //     return false
-    //   } else {
-    //     this.$emit('formSent')
-    //     if (this.batchMode) {
-    //       for (let item of this.source) {
-    //         let tempModel = JSON.parse(JSON.stringify(this.model))
-    //         // for (let field in item) {
-    //         //   if (!tempModel[field]) tempModel[field] = item[field]
-    //         // }
-    //         tempModel['id'] = item.id
-    //         tempModel['__index'] = item.__index
-    //         // console.log(model)
-    //         let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(tempModel) }
-    //         // console.log(payload)
-    //         this.saveModel(payload)
-    //       }
-    //     } else {
-    //       let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
-    //       this.saveModel(payload)
-    //     }
-    //   }
-    // },
     fieldsObjectValueExtrator (data) {
       let fieldsToExtract = ['select', 'array', 'enum', 'selectFromModel']
       let copy = {}
@@ -460,34 +421,6 @@ export const RelationController = {
     }
   },
   methods: {
-    relationFileDownload (payload) {
-      this.gridItemLoading = payload.id
-      payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id + '/download'
-      this.$store.dispatch('Model/sendFileDownloadForm', {
-        'source': payload
-      }).then((response) => {
-        // console.log(response.headers)
-        let headers = response.headers['content-disposition'].split(';')
-        let badname = headers[1].split('=')
-        let name = badname[1].slice(1, -1)
-        if (headers[2]) {
-          let badname2 = headers[2].split('\'\'')
-          // console.log(decodeURIComponent(badname2[1]))
-          name = decodeURIComponent(badname2[1])
-        }
-        const url = window.URL.createObjectURL(new Blob([response.data]))
-        const link = document.createElement('a')
-        link.href = url
-        link.setAttribute('download', name) // or any other extension
-        document.body.appendChild(link)
-        link.click()
-        this.$store.dispatch('Notify/displayMessage', { message: 'File Downloaded', position: 'top', type: 'positive' }, { root: true })
-        this.gridItemLoading = false
-      }).catch((response) => {
-        this.gridItemLoading = false
-        this.$store.dispatch('Response/responseErrorManager', response)
-      })
-    },
     async multiUploadFiles (payload) {
       // console.log('multiUploadFiles')
       // console.log(payload)
@@ -612,19 +545,6 @@ export const RelationController = {
         }
       })
     },
-    updateRelationBatch (relation) {
-      for (let item of this.model[relation]) {
-        let payload =
-        {
-          relation: relation,
-          model: item,
-          index: this.editing,
-          parentIndex: this.model.__index,
-          id: item.id
-        }
-        this.updateRelationOnUpdateController(payload)
-      }
-    },
     saveRelationOnNewController (payload) { // CLEANED
       return new Promise((resolve, reject) => {
         if (typeof payload.model === 'number') this.model[payload.relation].push(this.getModelById(payload.relation, payload.model))
@@ -724,7 +644,7 @@ export const RelationController = {
       })
     },
     sendUpdateRelationForm (payload) {
-      // console.log('sendUpdateRelationForm')
+      console.log('sendUpdateRelationForm')
       // console.log(payload)
       return new Promise((resolve, reject) => {
         this.$store.dispatch('Model/sendUpdateForm', {
@@ -736,7 +656,9 @@ export const RelationController = {
             item: response.model,
             parentIndex: payload.parentIndex
           }
+          // console.log('responded 1')
           this.$store.commit('Model/updateRelationItems', options)
+          // console.log('responded && Commited')
           this.$store.dispatch('Notify/displayMessage', { message: 'Relation Saved', position: 'top', type: 'positive' })
           resolve(response)
         }).catch((response) => {
@@ -858,6 +780,7 @@ export const SortingRelation = {
   },
   methods: {
     updateRelationOrder (relation, ids = [], force = false) {
+      this.$q.loading.show()
       for (let item of this.model[relation]) {
         if (this.itemsOrderChanged.includes(item.id) || ids.includes(item.id)) {
           let payload =
@@ -866,9 +789,16 @@ export const SortingRelation = {
             model: item,
             index: this.editing,
             parentIndex: this.model.__index,
-            id: item.id
+            parentName: this.relatedTo,
+            parentId: this.model.id,
+            id: item.id,
+            quasarData: this.relationData
           }
-          this.updateRelationOnUpdateController(payload)
+          this.updateRelationOnUpdateController(payload).then((response) => {
+            this.$q.loading.hide()
+          }).catch((response) => {
+            this.$q.loading.hide()
+          })
         }
       }
       this.buildLastItemOrder()
