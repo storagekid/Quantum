@@ -87,12 +87,17 @@ export function addRelationItems ({ models }, { name, relation, items, parentInd
   // console.log(models[name].items[parentIndex][relation])
 }
 export function removeRelationItemsById (state, { name, relation, items, parentIndex }) {
+  // console.log(name)
+  // console.log(relation)
+  // console.log(items)
+  // console.log(parentIndex)
   let index
   for (let item of items) {
     for (let i = 0; i < state.models[name].items[parentIndex][relation].length; i++) {
       if (state.models[name].items[parentIndex][relation][i].id === item.id) {
         index = i
         state.models[name].items[parentIndex][relation].splice(index, 1)
+        // console.log('DONE')
         break
       }
     }
