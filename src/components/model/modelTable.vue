@@ -230,7 +230,7 @@
                                   dense
                                   size="md"
                                   color="warning"
-                                  @click="editRelation(relationData.name, props.row.__index, props.row)"
+                                  @click="$emit('editRelation', {name: modelName, index: props.row.__index, row: props.row})"
                                   icon="edit"
                                   >
                                 </q-btn>
