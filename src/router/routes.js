@@ -24,12 +24,6 @@ const routes = [
         component: () => import('pages/PersonalTags.vue'),
         meta: { requiresAuth: true }
       },
-      // {
-      //   path: '/orcharts',
-      //   name: 'orgcharts',
-      //   component: () => import('pages/OrgCharts.vue'),
-      //   meta: { requiresAuth: true }
-      // },
       {
         path: '/campaigns',
         name: 'campaigns',
@@ -123,7 +117,7 @@ const routes = [
       {
         path: '/users',
         name: 'users',
-        component: () => import('pages/Users.vue'),
+        component: () => import('pages/Admin/Users.vue'),
         meta: { requiresAuth: true }
       },
       {
