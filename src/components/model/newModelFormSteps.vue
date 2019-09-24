@@ -36,7 +36,7 @@
         </model-review>
         <q-stepper-navigation default>
           <q-btn color="primary" flat @click="$refs.stepper.previous()" label="Volver" />
-          <q-btn color="primary" :label="'Crear ' + $tc('models.' + modelName +'.name', 1) " class="q-mt-md full-width" @click="sendNewForm"/>
+          <q-btn color="primary" :label="'Crear ' + $tc('models.' + modelName +'.name', 1) " class="q-mt-md full-width" @click="startSaving"/>
         </q-stepper-navigation>
       </q-step>
   </q-stepper>
@@ -45,13 +45,13 @@
 <script>
 import ModelForm from './modelForm'
 import ModelReview from './modelReview'
-import { ModelBuilder, ModelController } from '../../mixins/modelMixin'
+import { ModelBuilder, ModelController, ModelRelations, RelationController } from '../../mixins/modelMixin'
 
 export default {
   name: 'NewModelFormSteps',
-  props: ['mode', 'modelName', 'quasarData'],
+  props: ['mode', 'modelName', 'quasarData', 'relation'],
   components: { ModelForm, ModelReview },
-  mixins: [ModelBuilder, ModelController],
+  mixins: [ModelBuilder, ModelController, ModelRelations, RelationController],
   data () {
     return {
       stepName: 0,
@@ -71,6 +71,30 @@ export default {
     }
   },
   methods: {
+    startSaving () {
+      if (!this.cleanForm) return false
+      this.$emit('formSent')
+      if (!this.relation) {
+        let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
+        this.saveModel(payload).then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
+      } else {
+        let payload = this.buildRelationPayload({
+          relatedTo: this.quasarData.nameSpace,
+          relation: this.modelName,
+          model: this.model,
+          index: false,
+          parentName: this.relation.name,
+          parentNameSpace: this.$store.state.Model.models[this.relation.name].quasarData.nameSpace,
+          parentIndex: this.relation.index,
+          parentId: this.relation.id,
+          id: this.model['id'],
+          quasarData: this.$store.state.Model.models[this.relation.name].quasarData.relations[this.modelName]
+        })
+        this.mode === 'update'
+          ? this.updateRelation(payload).then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
+          : this.saveRelation(payload).then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
+      }
+    },
     checkDirtyness (payload) {
       // console.log(payload.step)
       // console.log(this.steps[payload.step].errors)
@@ -106,12 +130,3 @@ export default {
   }
 }
 </script>
-
-<style>
-  /* .display-contents > * {
-     display: contents;
-  }
-  .display-contents > * > *{
-     display: contents;
-  } */
-</style>
