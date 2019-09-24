@@ -3,7 +3,6 @@
     <model-table
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
-      :permissions="permissions"
       :dense="true"
       wrapperClass="dashboard-table"
       hideHeaderButtons
@@ -177,16 +176,6 @@ export default {
         }
       }
       return ids
-    },
-    permissions () {
-      let role = this.$store.state.User.groupsInfo['Clinics']
-      let object = {
-        show: (role !== 'guest'),
-        create: ['user', 'editor', 'administrator', 'overseeker', 'root'].includes(role),
-        edit: ['administrator', 'editor', 'overseeker', 'root'].includes(role),
-        delete: ['overseeker', 'root'].includes(role)
-      }
-      return object
     }
   },
   methods: {

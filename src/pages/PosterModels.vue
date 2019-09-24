@@ -3,7 +3,6 @@
     <model-table
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
-      :permissions="permissions"
       :dense="true"
       v-if="Object.keys(modelsNeeded).length === modelsFetched"
       >
@@ -27,30 +26,9 @@ export default {
         poster_models: {
           full: true
         }
-        // campaigns: {
-        //   scoped: false,
-        //   refresh: false,
-        //   cache: false,
-        //   where: false,
-        //   full: true
-        // }
       },
       modelSelected: null
     }
-  },
-  computed: {
-    permissions () {
-      let role = this.$store.state.User.groupsInfo['Clinics']
-      let object = {
-        show: (role !== 'guest'),
-        create: ['user', 'editor', 'administrator', 'overseeker', 'root'].includes(role),
-        edit: ['administrator', 'editor', 'overseeker', 'root'].includes(role),
-        delete: ['overseeker', 'root'].includes(role)
-      }
-      return object
-    }
-  },
-  methods: {
   }
 }
 </script>

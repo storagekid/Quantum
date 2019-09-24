@@ -162,16 +162,6 @@ export default {
     }
   },
   computed: {
-    permissions () {
-      let role = this.$store.state.User.groupsInfo['Clinics']
-      let object = {
-        show: (role !== 'guest'),
-        create: ['user', 'editor', 'administrator', 'overseeker', 'root'].includes(role),
-        edit: ['administrator', 'editor', 'overseeker', 'root'].includes(role),
-        delete: ['overseeker', 'root'].includes(role)
-      }
-      return object
-    },
     postersNeeded () {
       let seed = this.$store.state.Model.models.clinic_posters.items
       let grouped = {}
@@ -416,44 +406,6 @@ export default {
       })
       this.clinicOptions = items
       this.confirm.state = true
-      // for (let clinic of items) {
-      //   if (clinic.poster_distributions.length) {
-      //     console.log(clinic)
-      //     if (!clinic.poster_distributions) continue
-      //     for (let dist of clinic.poster_distributions) {
-      //       let actionPayload = {}
-      //       actionPayload.url = this.$store.state.App.dataWarehouse + 'poster_distributions/' + dist.id + '/compose'
-      //       actionPayload.method = 'GET'
-      //       actionPayload.params = {
-      //         'campaign': campaign.id,
-      //         'force': true
-      //       }
-      //       dist.actionPayload = actionPayload
-      //       distributions.push(dist)
-      //     }
-      //   }
-      // }
-      // this.confirm.state = true
-      // this.multiAsyncAction.items = distributions
-      // this.multiUploadFiles({
-      //   items: this.multiAsyncAction.items
-      // })
-      // this.confirm.item = campaign
-      // this.modelsNeeded['poster_distributions'] = {
-      //   scoped: false,
-      //   refresh: false,
-      //   cache: false,
-      //   where: false,
-      //   noQuasar: true
-      // }
-      // this.getModelsNeeded().then(() => {
-      //   this.clinicOptions = []
-      //   for (let id in this.$store.state.Model.models['poster_distributions'].items) {
-      //     this.clinicOptions.push(this.$store.state.Model.models['poster_distributions'].items[id][0].clinic)
-      //   }
-      //   this.$q.loading.hide()
-      //   this.confirm.state = true
-      // })
     },
     launchDistribution () {
       for (let clinic of this.clinicsSelected) {
@@ -471,19 +423,6 @@ export default {
         items: this.multiAsyncAction.items
       })
       this.clearConfirm()
-      // console.log(campaign)
-      // this.$axios({
-      //   url: this.$store.state.App.dataWarehouse + 'poster_distributions/launch',
-      //   method: 'POST',
-      //   data: {
-      //     campaign: campaign !== false ? campaign : this.confirm.item,
-      //     clinics: this.clinicsSelected
-      //   }
-      // }).then((response) => {
-      //   this.$store.dispatch('Notify/displayMessage', { message: 'Distribution Launched', position: 'top', type: 'positive' })
-      // }).catch(({ response }) => {
-      //   this.$store.dispatch('Response/responseErrorManager', response)
-      // })
     }
   }
 }

@@ -32,18 +32,6 @@
         >
         Añade un plano
       </q-btn>
-      <!-- <custom-select
-        v-if="dateSelected"
-        :dense="true"
-        :hide-bottom-space="true"
-        :field="{name: 'campaigns', type: { model: 'campaigns', default: { text: 'Selecciona una campaña'} }}"
-        :clearable='true'
-        :sourceOptions="campaignOptions"
-        :initValue="campaignSelected"
-        @updated="updateCustomSelect('campaignSelected', $event)"
-        >
-      </custom-select> -->
-      <!-- <q-btn v-if="campaignSelected" size="sm" icon="save" color="primary" class="full-width q-mb-sm" label="Clonar Distribución Base" @click="cloneBaseDistribution"></q-btn> -->
       <q-btn size="sm" icon="save" color="info" class="full-width q-my-md" label="Guardar" :disable="!modelReady" @click="save"></q-btn>
       <q-btn size="sm" icon="file_copy" color="info" class="full-width q-mb-md" label="Clonar" :disable="!designsInRange.length" @click="cloneDialog.state = true"></q-btn>
       <q-uploader
@@ -519,7 +507,6 @@
                   <q-btn rounded outline size="sm" color="info" label="Exteriores" @click="flipPosters(design.__index, 'ext')"></q-btn>
                   <q-btn rounded outline size="sm" color="info" label="Interiores" @click="flipPosters(design.__index, 'int')"></q-btn>
                 </q-btn-group>
-                <!-- <q-btn size="sm" flat color="negative" icon="delete" label="Eliminar" @click="removeDesign(design.__index)"></q-btn> -->
                 <q-btn size="sm" flat color="negative" icon="delete" label="Eliminar" @click="showConfirm(design.__index)"></q-btn>
               </q-card-actions>
             </q-card>
@@ -571,23 +558,6 @@
               </q-icon>
             </template>
           </q-input>
-          <!-- <q-input
-            dense
-            mask="####-##-##"
-            :rules="[]"
-            bottom-slots
-            label="Empieza el"
-            stack-label
-            v-model="cloneDialog.ends_at"
-            >
-            <template v-slot:append>
-              <q-icon name="event" class="cursor-pointer" color="primary">
-                <q-popup-proxy ref="qDateProxy-CEA" transition-show="scale" transition-hide="scale">
-                  <q-date color="primary" v-model="cloneDialog.ends_at" @input="hideDatePicker('CEA')" mask="YYYY-MM-DD"/>
-                </q-popup-proxy>
-              </q-icon>
-            </template>
-          </q-input> -->
         </q-card-section>
         <q-card-actions align="right">
           <q-btn label="Cancel" color="primary" v-close-popup />
@@ -625,7 +595,6 @@ export default {
           scoped: false,
           refresh: false,
           withCount: ['campaign_posters'],
-          // with: ['campaign_posters', 'campaign_poster_priorities', 'sanitary_codes'],
           orderBy: 'starts_at',
           orderDesc: true
         }

@@ -15,17 +15,10 @@ export default {
       this.$store.dispatch('User/getUser')
         .then((response) => {
           // console.log(response)
-          // this.$emit('logged', response)
-          // this.visible = false
         })
         .catch((response) => {
           // console.log(response)
           this.visible = false
-          // if (response) {
-          //   this.$store.dispatch('Response/responseErrorManager', response)
-          // } else {
-          //   this.$store.dispatch('Response/responseNoResponse')
-          // }
         })
     }
   }

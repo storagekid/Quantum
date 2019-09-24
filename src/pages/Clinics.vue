@@ -4,7 +4,6 @@
       :modelName="modelName"
       :getModelView="true"
       :modelsNeeded="modelsNeeded"
-      :permissions="permissions"
       :editAferCreate="true"
       :dense="true"
       rows="10"
@@ -33,19 +32,6 @@
             <span class="text-bold text-italic text-caption">{{ phone.type }} -</span> {{ phone.number }}
         </div>
       </template>
-      <!-- <template slot="body-cell-actions" slot-scope="item" :item="item">
-        <q-btn-dropdown
-          icon="insert_photo"
-          color="info"
-          label="Distribución"
-          unelevated
-          size="sm"
-          >
-          <div class="column q-gutter-sm q-py-sm">
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="generateCLinicsDistributionPDF(item.item)"></q-btn>
-          </div>
-        </q-btn-dropdown>
-      </template> -->
     </model-table>
     <clinic-view v-if="show" :id="show"></clinic-view>
     <q-page-sticky position="top-left" :offset="[5, 5]" v-if="show">
@@ -84,18 +70,6 @@ export default {
           appends: ['open']
         }
       }
-    }
-  },
-  computed: {
-    permissions () {
-      let role = this.$store.state.User.groupsInfo['Clinics']
-      let object = {
-        show: (role !== 'guest'),
-        create: ['editor', 'administrator', 'overseeker', 'root'].includes(role),
-        edit: ['editor', 'administrator', 'overseeker', 'root'].includes(role),
-        delete: ['overseeker', 'root'].includes(role)
-      }
-      return object
     }
   },
   methods: {

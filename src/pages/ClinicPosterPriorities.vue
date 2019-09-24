@@ -18,7 +18,7 @@
       :dense="true"
       startFilter="&&Activa!=&&Fecha de Baja=="
       v-if="Object.keys(modelsNeeded).length === modelsFetched"
-      v-on:tableReady="ready = true"
+      v-on:tableReady="tableReady = true"
       >
       <template slot="body-cell-clinic_poster.clinic.active" slot-scope="item" :item="item">
         <q-icon name="check_circle" v-if="item.item" color="positive"></q-icon>
@@ -28,7 +28,7 @@
         {{ item.item ? $store.state.Model.models.campaigns.items.filter(i => { return i.id === item.item })[0].name : '-' }}
       </template>
     </model-table>
-    <template v-if="ready && adminOptions.showTables">
+    <template v-if="tableReady && adminOptions.showTables">
       <template v-for="priority in groupedForTable.priorities">
         <q-card :key="'P-' + priority">
           <q-card-section class="text-center text-primary text-weight-bolder bg-secondary q-mt-lg q-mb-sm">
@@ -109,7 +109,8 @@ export default {
       modelName: 'clinic_poster_priorities',
       modelsNeeded: {
         clinic_poster_priorities: {
-          scoped: false,
+          scoped: true,
+          scopedThrough: 'clinic_poster',
           refresh: true,
           full: true
         },
@@ -122,7 +123,8 @@ export default {
         }
       },
       modelSelected: null,
-      ready: false,
+      // ready: false,
+      tableReady: false,
       clicked: {},
       adminOptions: {
         showTables: false
@@ -130,22 +132,12 @@ export default {
     }
   },
   computed: {
-    permissions () {
-      let role = this.$store.state.User.groupsInfo['Clinics']
-      let object = {
-        show: (role !== 'guest'),
-        create: ['user', 'editor', 'administrator', 'overseeker', 'root'].includes(role),
-        edit: ['administrator', 'editor', 'overseeker', 'root'].includes(role),
-        delete: ['overseeker', 'root'].includes(role)
-      }
-      return object
-    },
     filteredPosters () {
-      if (this.ready) return this.$store.state.Model.models.clinic_poster_priorities.items.filter((i) => { return this.$refs.clinicPostersTable.filterIds.includes(i.id) })
+      if (this.tableReady) return this.$store.state.Model.models.clinic_poster_priorities.items.filter((i) => { return this.$refs.clinicPostersTable.filterIds.includes(i.id) })
       return []
     },
     groupedForTable () {
-      if (!this.ready) return
+      if (!this.tableReady) return
       // console.log('Computing Grouped')
       let grouped = {}
       let languages = []

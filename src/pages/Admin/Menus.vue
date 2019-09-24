@@ -27,20 +27,6 @@ export default {
         }
       }
     }
-  },
-  computed: {
-    permissions () {
-      let role = this.$store.state.User.groupsInfo['Clinics']
-      let object = {
-        show: (role !== 'guest'),
-        create: ['user', 'editor', 'administrator', 'overseeker', 'root'].includes(role),
-        edit: ['administrator', 'editor', 'overseeker', 'root'].includes(role),
-        delete: ['overseeker', 'root'].includes(role)
-      }
-      return object
-    }
-  },
-  methods: {
   }
 }
 </script>
