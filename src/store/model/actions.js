@@ -229,6 +229,7 @@ export function restoreModels (context, { name, items, nameSpace }) {
 }
 export function removeRelations (context, { name, items, relatedTo, parentIndex }) {
   // console.log(items)
+  // console.log(removeRelations)
   return new Promise((resolve, reject) => {
     let deleted = []
     let round = 0
@@ -244,11 +245,10 @@ export function removeRelations (context, { name, items, relatedTo, parentIndex 
         // context.commit('removeRelationItems', {name: relatedTo, relation: name, index: item.index, parentIndex: parentIndex})
         if (items.length < 6) context.dispatch('Notify/displayMessage', { message: data.message, position: 'top', type: 'positive' }, { root: true })
         if (items.length === round) {
-          // console.log('deleting')
           context.commit('removeRelationItemsById', { name: relatedTo, relation: name, items: deleted, parentIndex: parentIndex })
         }
         if (deleted.length === items.length && items.length === round) {
-          resolve()
+          resolve(data)
         }
       }).catch((error) => {
         round = round + 1
