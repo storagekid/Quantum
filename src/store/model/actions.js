@@ -78,38 +78,7 @@ export function getModel (context, { model, options }) {
       params = context.rootState.Scope.mode === 'clinic' ? { clinic_id: context.rootState.Scope.clinic.clinics.selected } : { store_id: context.rootState.Scope.store.stores.selected.join() }
     }
   }
-  if (options.full) {
-    params['full'] = options.full
-  }
-  if (options.with) {
-    params['with'] = options.with
-  }
-  if (options.appends) {
-    params['appends'] = options.appends
-  }
-  if (options.withCount) {
-    params['withCount'] = options.withCount
-  }
-  if (options.withTrashed) {
-    params['withTrashed'] = options.withTrashed
-  }
-  if (options.where) {
-    for (let modelName in options.where) {
-      params[modelName] = options.where[modelName]
-    }
-  }
-  if (options.paginate) {
-    params['paginate'] = options.paginate
-  }
-  if (options.orderBy) {
-    params['orderBy'] = options.orderBy
-  }
-  if (options.orderDesc) {
-    params['orderDesc'] = options.orderDesc
-  }
-  if (options.fake) {
-    params['fake'] = options.fake
-  }
+  params.options = context.getters.availableOptions[model]
   return new Promise((resolve, reject) => {
     axios({
       url: context.rootState.App.dataWarehouse + model,
@@ -157,6 +126,7 @@ export function getQuasarData (context, { model }) {
 export function sendNewForm (context, { source }) { // CLEANED
   let payload = formConstructor(source.model)
   if (source.quasarInfo) payload.append('quasarData', JSON.stringify(source.quasarInfo))
+  if (source.options) payload.append('options', JSON.stringify(source.options))
   let headers = {}
   headers['Content-Type'] = 'multipart/form-data'
   return new Promise((resolve, reject) => {
