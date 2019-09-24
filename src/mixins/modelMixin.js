@@ -429,6 +429,7 @@ export const ModelController = {
       })
     },
     saveModelOnNewController (payload) { // CLEANED
+      // console.log('saveModelOnNewController')
       return new Promise((resolve, reject) => {
         payload.url = this.$store.state.App.dataWarehouse + payload.name
         payload.options = this.$store.getters['Model/availableOptions'][payload.name]
