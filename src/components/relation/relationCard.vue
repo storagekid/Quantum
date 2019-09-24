@@ -8,7 +8,7 @@
       />
       <q-btn-group rounded class="q-ml-md" v-if="openRelation === relationData.name">
         <q-btn rounded color="primary" icon="check"
-          @click="batchMode ? saveBatchRelation(relationData.name) : saveRelation(relationData.name)"
+          @click="startSaveRelation"
           :disable="$v.relation.$anyError"
         />
         <q-btn rounded color="negative" icon="cancel" @click="closeRelationForm(relationData.name)"/>
@@ -157,7 +157,7 @@
                 </custom-select>
         </template>
       </form>
-      <template v-if="model[relationData.name].length">
+      <template v-if="model[relationData.name]">
         <q-list
           separator no-border dense
           v-if="relationData.quasarData.listFields.mode === 'list'"
@@ -178,7 +178,7 @@
             <q-item-section avatar>
               <div class="row">
                 <q-btn-group flat class="q-gutter-sm">
-                  <q-btn size="md" flat dense color="negative" icon="delete" @click="removeRelation(relationData.name, index, item.id)"/>
+                  <q-btn size="md" flat dense color="negative" icon="delete" @click="startRemoveRelation(relationData.name, index, item.id)"/>
                   <q-btn
                     v-if="!relationData.quasarData.listFields.draggable"
                     size="md"
@@ -271,7 +271,7 @@
             :grid="true"
             dense
             :modelName="relationData.name"
-            :relatedTo="{name: relatedTo, index: model.__index}"
+            :relatedTo="{name: relatedTo, index: model.__index, id: model.id}"
             >
           </model-table>
         </div>
@@ -284,7 +284,7 @@
             tableClass="no-shadow custom-table"
             dense
             :modelName="relationData.name"
-            :relatedTo="{name: relatedTo, index: model.__index}"
+            :relatedTo="{name: relatedTo, index: model.__index, id: model.id}"
             >
           </model-table>
         </div>
@@ -354,6 +354,59 @@ export default {
     }
   },
   methods: {
+    startRemoveRelation (relation, index, id) {
+      console.log('startRemoveRelation')
+      this.relationLoader = true
+      let payload = {
+        'relation': relation,
+        'parentName': this.relatedTo,
+        'parentIndex': this.model.__index,
+        'index': index,
+        'id': id,
+        'sourceModel': this.modelData.nameSpace,
+        'sourceModelId': this.model.id,
+        'relatedTo': this.relationData.nameSpace,
+        'relatedToID': this.relation.id,
+        'quasarData': this.relationData
+      }
+      if (this.mode === 'update') this.removeRelation(payload, 'update').then(() => { this.relationLoader = false }).catch((response) => { this.relationLoader = false })
+      else {
+        this.model[relation].splice(index, 1)
+        this.relationLoader = false
+      }
+    },
+    startSaveRelation () {
+      this.relationLoader = true
+      let payload = this.buildRelationPayload({
+        relatedTo: this.relationData.nameSpace,
+        relatedToID: this.relation.id,
+        relation: this.relationData.name,
+        model: this.relation,
+        index: this.editing,
+        parentName: this.relatedTo,
+        parentNameSpace: this.modelData.nameSpace,
+        parentIndex: this.model.__index,
+        parentId: this.model.id,
+        id: this.relation['id'],
+        quasarData: this.relationData
+      })
+      if (this.batchMode) {
+        this.batchRelation(payload, this.batchSource, this.mode).then(() => {
+          this.relationLoader = false
+          this.closeRelationForm()
+        })
+      } else {
+        this.mode === 'update'
+          ? this.updateRelation(payload).then(() => {
+            this.relationLoader = false
+            this.closeRelationForm()
+          }).catch(() => { this.relationLoader = false })
+          : this.saveRelation(payload).then(() => {
+            this.relationLoader = false
+            this.closeRelationForm()
+          }).catch(() => { this.relationLoader = false })
+      }
+    },
     hideDatePicker (index) {
       let picker = 'qDateProxy-' + index
       // console.log(picker)
