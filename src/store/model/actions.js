@@ -189,7 +189,7 @@ export function sendUpdateForm (context, { source }) { // CLEANED
     })
   })
 }
-export function removeModels (context, { name, items, softDeleting = false }) {
+export function removeModels (context, { name, items, softDeleting = false, forceDeleting = false }) {
   return new Promise((resolve, reject) => {
     let deleted = 0
     let round = 0
@@ -197,14 +197,14 @@ export function removeModels (context, { name, items, softDeleting = false }) {
     for (let id of items) {
       round = round + 1
       axios({
-        url: context.rootState.App.dataWarehouse + name + '/' + id,
+        url: forceDeleting ? context.rootState.App.dataWarehouse + 'model/' + id + '/forceDelete' : context.rootState.App.dataWarehouse + name + '/' + id,
         method: 'DELETE',
-        params: context.getters.availableOptions[name]
+        params: forceDeleting ? { ...context.getters.availableOptions[name], ...{ nameSpace: context.state.models[name].quasarData.nameSpace } } : context.getters.availableOptions[name]
       }).then(({ data }) => {
         deleted = deleted + 1
         // console.log(deleted)
         // console.log('Soft Deleting: ' + softDeleting)
-        softDeleting ? context.commit('updateModelItems', { name: name, item: data.model }) : context.commit('removeModelItem', { name: name, id: id })
+        softDeleting && !forceDeleting ? context.commit('updateModelItems', { name: name, item: data.model }) : context.commit('removeModelItem', { name: name, id: id })
         if (deleted === items.length && items.length === round) {
           resolve(data)
         }
