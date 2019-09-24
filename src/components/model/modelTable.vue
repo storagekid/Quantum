@@ -24,60 +24,17 @@
         row-key="id"
         @request="onRequest"
         >
-        <!-- <template v-slot:top="props" class="dense">
-          <q-tr v-if="$refs['table-' + modelName]" class="row justify-between full-width">
-            <template v-for="column in $refs['table-' + modelName].computedCols">
-              <template v-if="column.onGrid !== 'hide'">
-                <th :class="[column.__thClass, filter.indexOf(column.label) > -1 ? 'filtered' : '']" :key="column.name" auto-width v-if="visibleColumns.includes(column.name)">
-                  <div>
-                    {{ column.label }}
-                    <q-icon class="" @click="sortColumn(column)" :name="column.__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-icon>
-                    <q-icon class="" name="filter_list">
-                      <q-popup-proxy transition-show="flip-up" transition-hide="flip-down">
-                        <div class="q-pa-md custom-table filter">
-                          <q-option-group
-                            class="text-h6"
-                            v-model="filters[column.name].options"
-                            :options="[
-                              {label: 'Buscar', value: 'has'},
-                              {label: 'Exacto', value: 'is'},
-                              {label: 'Excluir', value: 'not'},
-                              {label: 'Incluir', value: 'in'},
-                              {label: 'Sí', value: 'some'},
-                              {label: 'No', value: 'empty'}
-                            ]"
-                            color="primary"
-                            inline
-                            dense
-                          />
-                          <q-input
-                            v-model="filters[column.name].text"
-                            debounce="800"
-                            v-if="!['empty', 'some'].includes(filters[column.name].options)"
-                            :disable="['empty', 'some'].includes(filters[column.name].options)"
-                            dense
-                            >
-                          </q-input>
-                        </div>
-                      </q-popup-proxy>
-                    </q-icon>
-                  </div>
-                </th>
-              </template>
-            </template>
-          </q-tr>
-        </template> -->
         <template v-slot:top="props" class="dense">
           <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete)">
             <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="newModel = !newModel" v-if="can.create"/>
             <q-btn-group flat rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
               <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
-              <!-- <q-btn dense flat size="sm" rounded color="primary" icon="visibility" :to="'/' + modelName + '/' + selectedId" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/> -->
               <q-btn dense flat size="sm" rounded color="primary" icon="edit" @click="showUpdate" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="file_copy" @click="cloneModel = true" :disabled="!selectedItems.length || selectedItems.length  > 1 || true" v-if="can.create"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="find_replace" :label="!$q.screen.lt.md ? 'Multi Edit' : ''" @click="showUpdateBatch" :disabled="selectedItems.length < 2 || !batchForm" v-if="can.edit"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="delete" @click="removeModel = true" :disabled="!shouldRemove" v-if="can.delete"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="restore_from_trash" @click="restoreModel = true" :disabled="!shouldRestore" v-if="showRestore"/>
+              <q-btn dense flat size="sm" rounded color="primary" icon="delete_forever" @click="removeModel = true" :disabled="!shouldRemoveForever" v-if="can.delete"/>
             </q-btn-group>
             <q-space />
           </template>
@@ -185,7 +142,6 @@
             <th :class="[props.colsMap[column.name].__thClass, filter.indexOf(column.label) > -1 ? 'filtered' : '']" :key="column.name" auto-width v-if="visibleColumns.includes(column.name)">
               <slot :name="'head-cell-' + column.name" v-bind:item="props">
                 {{ column.label }}
-                <!-- {{ log(visibleColumns.includes(column.name) ? props.colsMap[column.name] : column.name + ' is Hidden') }} -->
                 <q-icon :class="props.colsMap[column.name].__iconClass" @click="sortColumn(column)" :name="props.colsMap[column.name].__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-icon>
                 <q-icon :class="props.colsMap[column.name].__filterClass" name="filter_list">
                   <q-popup-proxy transition-show="flip-up" transition-hide="flip-down">
@@ -254,7 +210,6 @@
                     >
                       <template v-if="col.onGrid !== 'hide'">
                         <template v-if="col.onGrid === 'footer'">
-                          <!-- <q-img contain :src="col.value" basic style="max-height:150px; min-height: 60px" class="q-mt-sm"> -->
                           <q-img
                             spinner-color="primary"
                             spinner-size="82px"
@@ -263,9 +218,6 @@
                             basic
                             style="max-height:150px; min-height: 100px"
                             class="q-mt-sm bg-color-primary">
-                            <!-- <template v-slot:loading>
-                              <q-spinner-gears color="white" />
-                            </template> -->
                             <template v-if="col.value === ''">
                               <div class="absolute-full flex flex-center bg-primary text-white">
                                 <q-spinner-gears color="white" size="36px"/>
@@ -282,9 +234,8 @@
                                   icon="edit"
                                   >
                                 </q-btn>
-                                <!-- <q-btn dense size="md" color="positive"  @click="downloadFile(relationData.name, props.row.__index, props.row.id)" icon="cloud_download"></q-btn> -->
                                 <q-btn dense size="md" color="positive"  @click="downloadFile(getObject(props.row, col.name).id)" icon="cloud_download"></q-btn>
-                                <q-btn dense size="md" color="negative"  @click="removeRelation(relationData.name, props.row.__index, props.row.id)" icon="remove"></q-btn>
+                                <q-btn dense size="md" color="negative"  @click="removeRelation({'relation': relationData.name, 'index': props.row.__index, 'id': props.row.id}, 'update')" icon="remove"></q-btn>
                               </q-card-actions>
                             </div>
                           </q-img>
@@ -311,11 +262,7 @@
             </q-td>
           </q-tr>
         </template>
-        <!-- <template v-slot="bottom" class="dense" v-if="!ready">
-            <generic-data-loading></generic-data-loading>
-        </template> -->
       </q-table>
-      <!-- <generic-data-loading v-if="!ready"></generic-data-loading> -->
     </template>
     <template v-if="updateModel || updateModelBatch">
       <update-model
@@ -344,6 +291,7 @@
         :modelName="modelName"
         :modelsNeeded="quasarData.modelsNeeded"
         :quasarData="quasarData"
+        :relation="relatedTo"
         v-on:profileCreated="endCreating"
         v-if="newModel">
       </new-model>
@@ -480,39 +428,27 @@ export default {
       options: {},
       visibleColumns: [],
       separator: 'horizontal',
-      // filter: '',
       filters: {
         'searchBar': { text: '' }
       },
       selectedItems: [],
       pagination: {
-        sortBy: null, // String, column "name" property value
+        sortBy: null,
         descending: false,
         page: 1,
         rowsPerPage: this.rows ? this.rows : 15
       },
-      // filters: { 'clinic_poster.clinic.nickname': [] },
       names: [],
       showSearchHelp: false,
       showActions: null
     }
   },
   watch: {
-    model () {
-      if (this.$store.state.Model.models[this.modelName].pagination) {
-        this.pagination.rowsNumber = this.$store.state.Model.models[this.modelName].pagination.total
-      }
-    },
-    'filters.deleted_at.options' () {
-      // console.log('Watcher Options')
-      // console.log(this.filters.deleted_at.options)
-    },
     'filters.searchBar.text' () {
       // console.log('Watcher')
       let value = this.filters['searchBar'].text
       if (value.indexOf('&&') > -1 && Object.keys(this.filters).length > 1) {
         this.buildFilters(value)
-        // this.filters['searchBar'].text = ''
       }
     }
   },
@@ -531,6 +467,14 @@ export default {
       if (!this.selectedItems.length || !this.can.delete) return false
       for (let item of this.selectedItems) {
         if (item.deleted_at) return false
+      }
+      return true
+    },
+    shouldRemoveForever () {
+      if (!this.$store.getters['User/isRoot']) return false
+      else if (!this.selectedItems.length || !this.can.delete) return false
+      for (let item of this.selectedItems) {
+        if (!item.deleted_at) return false
       }
       return true
     },
@@ -573,7 +517,6 @@ export default {
     },
     ready () {
       if (!this.model) return false
-      else if (!this.model.length) return false
       return true
     },
     can () {
@@ -584,22 +527,6 @@ export default {
         delete: Object.keys(this.options).length ? this.options.actions.destroy : false
       }
       return object
-      // if (this.$store.state.User.permissions.clinics) {
-      //   return {
-      //     show: this.$store.state.User.permissions.clinics.includes('show'),
-      //     create: this.$store.state.User.permissions.clinics.includes('create'),
-      //     edit: this.$store.state.User.permissions.clinics.includes('edit'),
-      //     delete: this.$store.state.User.permissions.clinics.includes('delete')
-      //   }
-      // } else if (this.permissions === undefined) {
-      //   let object = {
-      //     show: true,
-      //     create: false,
-      //     edit: false,
-      //     delete: false
-      //   }
-      //   return object
-      // } else return this.permissions
     },
     model () {
       if (this.relatedTo) {
@@ -830,9 +757,10 @@ export default {
     endCreating () {
       this.newModel = false
       this.selectedItems = []
-      if (this.permissions.edit && this.editAferCreate) {
-        this.selectedItems.push(this.$refs.table.computedRows[0])
+      if (this.can.edit && this.editAferCreate) {
+        this.selectedItems.push(this.$refs['table-' + this.modelName].computedRows[0])
         this.updateModel = true
+        this.showUpdate()
       }
     },
     endUpdating () {
