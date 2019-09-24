@@ -146,6 +146,7 @@ export function sendNewForm (context, { source }) { // CLEANED
 export function sendUpdateForm (context, { source }) { // CLEANED
   let payload = formConstructor(source.model)
   if (source.quasarInfo) payload.append('quasarData', JSON.stringify(source.quasarInfo))
+  if (source.options) payload.append('options', JSON.stringify(source.options))
   payload.append('_method', 'PATCH')
   return new Promise((resolve, reject) => {
     axios({
