@@ -5,10 +5,11 @@
     </q-card-section>
     <q-separator />
     <q-card-section class="text-center">
-      <p>{{modelQty}} {{name}} will be removed</p>
+      <p>{{modelQty}} {{name}} will be removed <strong class="text-negative" v-if="forceDeleting"> PERMANENTLY</strong></p>
       <p class="text-negative q-title">Are you Sure?</p>
     </q-card-section>
-    <q-btn color="primary" label="DO IT" class="full-width" @click="sendDestroyForm"/>
+    <q-btn color="primary" label="DO IT" class="full-width" @click="sendDestroyForm" v-if="!preventScopeSelected"/>
+    <q-btn color="info" label="CHANGE SCOPE BEFORE DELETING" class="full-width" v-else v-close-popup/>
   </q-card>
 </template>
 
@@ -22,6 +23,27 @@ export default {
   computed: {
     softDeleting () {
       return this.models[0].hasOwnProperty('deleted_at')
+    },
+    forceDeleting () {
+      for (let model of this.models) {
+        if (!model.deleted_at) return false
+      }
+      return true
+    },
+    preventScopeSelected () {
+      if (!this.forceDeleting) return false
+      if (this.name === 'clinics') {
+        if (this.$store.getters['Scope/clinicSelected']) {
+          let ids = this.models.map(i => { return i.id })
+          if (ids.includes(this.$store.getters['Scope/clinicSelected'].id)) return true
+        }
+      } else if (this.name === 'stores') {
+        if (this.$store.getters['Scope/storeSelected']) {
+          let ids = this.models.map(i => { return i.id })
+          if (ids.includes(this.$store.getters['Scope/storeSelected'].id)) return true
+        }
+      }
+      return false
     }
   },
   methods: {
@@ -33,7 +55,7 @@ export default {
       if (this.relatedTo) {
         action = this.$store.dispatch('Model/removeRelations', { name: this.name, items: this.models.map(model => { return { id: model.id, index: model.__index } }), relatedTo: this.relatedTo, parentIndex: this.parentIndex })
       } else {
-        action = this.$store.dispatch('Model/removeModels', { name: this.name, items: this.models.map(model => { return model.id }), softDeleting: this.softDeleting })
+        action = this.$store.dispatch('Model/removeModels', { name: this.name, items: this.models.map(model => { return model.id }), softDeleting: this.softDeleting, forceDeleting: this.forceDeleting })
       }
       action.then((data) => {
         this.$store.dispatch('Notify/displayMessage', { message: this.modelQty + ' ' + this.name + ' removed', position: 'top', type: 'positive' })
