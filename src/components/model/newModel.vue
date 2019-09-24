@@ -5,8 +5,10 @@
     </q-card-section>
     <q-card-section>
       <new-model-form-steps
+        :mode="relation ? 'update' : 'new'"
         :modelName="modelName"
         :quasarData="quasarData"
+        :relation="relation"
         v-on:formSent="changeStatus"
         v-on:formRespondedOK="closeModal"
         v-on:formRespondedWithErrors="changeStatus"
@@ -25,7 +27,7 @@ import NewModelFormSteps from '../model/newModelFormSteps'
 export default {
   name: 'NewModel',
   components: { NewModelFormSteps },
-  props: ['modelName', 'modelsNeeded', 'quasarData'],
+  props: ['modelName', 'modelsNeeded', 'quasarData', 'relation'],
   data () {
     return {
       visible: false
