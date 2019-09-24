@@ -76,7 +76,7 @@ export default {
       this.$emit('formSent')
       if (!this.relation) {
         let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
-        this.saveModel(payload).then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
+        this.saveModel(payload, 'new').then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
       } else {
         let payload = this.buildRelationPayload({
           relatedTo: this.quasarData.nameSpace,
