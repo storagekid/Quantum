@@ -33,7 +33,7 @@
           >
         </model-form>
         <div class="row">
-          <q-btn color="primary" label="Save Changes" class="q-mt-md full-width" @click="sendUpdateForm" v-if="step.fields.length" :disable="steps[step.title].errors"/>
+          <q-btn color="primary" label="Save Changes" class="q-mt-md full-width" @click="startUpdate" v-if="step.fields.length" :disable="steps[step.title].errors"/>
         </div>
       </q-tab-panel>
     </q-tab-panels>
@@ -70,6 +70,18 @@ export default {
     }
   },
   methods: {
+    startUpdate () {
+      if (!this.cleanForm) return false
+      else {
+        this.$emit('formSent')
+        let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
+        if (this.batchMode) {
+          this.batchModel(payload, this.source).then(() => { this.$emit('formResponded') }).catch(() => { this.$emit('formRespondedWithErrors') })
+        } else {
+          this.saveModel(payload).then(() => { this.$emit('formResponded') }).catch(() => { this.$emit('formRespondedWithErrors') })
+        }
+      }
+    },
     checkDirtyness (payload) {
       this.steps[payload.step].errors = payload.dirty
     },
