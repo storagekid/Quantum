@@ -162,23 +162,15 @@
           separator no-border dense
           v-if="relationData.quasarData.listFields.mode === 'list'"
           class="q-mt-md"
-          :class="{'dropzone': elDragged.index}"
-          @dragenter.prevent="dragEnterListener"
-          @dragleave="dragLeaveListener"
           >
           <q-item
             v-for="(item, index) in model[relationData.name]"
             :key="relationData.name+'Item'+index"
-            :draggable="relationData.quasarData.listFields.draggable"
-            @dragover="dragOverListerner($event, index)"
-            @dragstart="dragListener($event, index)"
-            @dragend="returnIt"
-            :class="{'shadow': relationData.quasarData.listFields.draggable && elDragged.index === index}"
             >
             <q-item-section avatar>
               <div class="row">
                 <q-btn-group flat class="q-gutter-sm">
-                  <q-btn size="md" flat dense color="negative" icon="delete" @click="startRemoveRelation(relationData.name, index, item.id)"/>
+                  <q-btn size="md" flat dense color="negative" icon="delete" @click="startRemoveRelation(relationData.name, index, item.id, item)"/>
                   <q-btn
                     v-if="!relationData.quasarData.listFields.draggable"
                     size="md"
@@ -269,6 +261,7 @@
           >
           <model-table
             :grid="true"
+            v-on:editRelation="editRelation"
             dense
             :modelName="relationData.name"
             :relatedTo="{name: relatedTo, index: model.__index, id: model.id}"
@@ -293,7 +286,7 @@
     <q-dialog v-model="removeModel">
       <remove-model-confirm
         :modelQty="selectedItems.length"
-        :name="relationName"
+        :name="relationData.name"
         :models="selectedItems"
         :relatedTo="relatedTo"
         :parentIndex="model.__index"
@@ -323,15 +316,6 @@ export default {
   components: { RemoveModelConfirm, CustomSelect },
   data () {
     return {
-      // Image Data
-      thumbnailsToFetch: {},
-      // END Image Data
-      // DRAG DATA
-      elDragged: {
-        index: null,
-        item: null
-      },
-      // END DRAG DATA
       showMultiuploader: false,
       openRelation: false,
       multiUpload: {
@@ -343,37 +327,32 @@ export default {
       relation: {},
       relationLoader: false,
       gridItemLoading: false,
-      selectedItems: [],
-      pagination: {
-        sortBy: null, // String, column "name" property value
-        descending: false,
-        page: 1,
-        rowsPerPage: 18 // current rows per page being displayed
-      },
-      filter: ''
+      selectedItems: []
     }
   },
   methods: {
-    startRemoveRelation (relation, index, id) {
-      console.log('startRemoveRelation')
-      this.relationLoader = true
-      let payload = {
-        'relation': relation,
-        'parentName': this.relatedTo,
-        'parentIndex': this.model.__index,
-        'index': index,
-        'id': id,
-        'sourceModel': this.modelData.nameSpace,
-        'sourceModelId': this.model.id,
-        'relatedTo': this.relationData.nameSpace,
-        'relatedToID': this.relation.id,
-        'quasarData': this.relationData
-      }
-      if (this.mode === 'update') this.removeRelation(payload, 'update').then(() => { this.relationLoader = false }).catch((response) => { this.relationLoader = false })
-      else {
-        this.model[relation].splice(index, 1)
-        this.relationLoader = false
-      }
+    startRemoveRelation (relation, index, id, item) {
+      this.selectedItems.push(item)
+      this.removeModel = true
+      // console.log('startRemoveRelation')
+      // this.relationLoader = true
+      // let payload = {
+      //   'relation': relation,
+      //   'parentName': this.relatedTo,
+      //   'parentIndex': this.model.__index,
+      //   'index': index,
+      //   'id': id,
+      //   'sourceModel': this.modelData.nameSpace,
+      //   'sourceModelId': this.model.id,
+      //   'relatedTo': this.relationData.nameSpace,
+      //   'relatedToID': this.relation.id,
+      //   'quasarData': this.relationData
+      // }
+      // if (this.mode === 'update') this.removeRelation(payload, 'update').then(() => { this.relationLoader = false }).catch((response) => { this.relationLoader = false })
+      // else {
+      //   this.model[relation].splice(index, 1)
+      //   this.relationLoader = false
+      // }
     },
     startSaveRelation () {
       this.relationLoader = true
@@ -447,85 +426,6 @@ export default {
       }
       return path
     },
-    // DRAG METHODS !!!! NOT WORKING !!!
-    dragListener (e, index) {
-      // console.log('Dragggggging Start')
-      // console.log(e.target)
-      // this.elDragged.item = this.model[this.relationData.name].slice(index, 1)
-      // this.elDragged.index = index
-      // console.log(this.elDragged.item)
-    },
-    dragOverListerner (e, index) {
-      if (e.target.draggable) console.log(e.target)
-      // console.log(index)
-    },
-    dragEnterListener (e) {
-      // console.log(e.target.className)
-      if (e.target.className.indexOf('dropzone') > -1) {
-        e.target.style.background = 'purple'
-        // console.log('Drag Enter')
-      }
-    },
-    dragLeaveListener (e) {
-      // console.log('Drag Leave')
-      e.target.style.background = ''
-    },
-    returnIt () {
-      this.elDragged.item = null
-      this.elDragged.index = null
-    },
-    // END DRAG METHODS !!!! NOT WORKING !!!
-    // IMAGES METHODS
-    fetchThumbnail (file, index) {
-      let params = {}
-      params['image'] = file
-      this.model[this.relationData.name][index]['thumbnail64'] = ''
-      this.$axios({
-        url: this.$store.state.App.dataWarehouse + 'images/thumbnail',
-        method: 'GET',
-        params: params
-      }).then((response) => {
-        this.model[this.relationData.name][index]['thumbnail64'] = response.data
-      }).catch((error) => {
-        console.log(error)
-      })
-    },
-    // fetchThumbnail (file, index) {
-    //   if (!this.model[this.relationData.name][index]['thumbnail64']) {
-    //     this.thumbnailsToFetch[index] = encodeURIComponent(file)
-    //   } else {
-    //     this.thumbnailsToFetch[index] = false
-    //   }
-    //   this.model[this.relationData.name][index]['thumbnail64'] = ''
-    // },
-    fetchThumbnails () {
-      let params = {}
-      params['images'] = this.buildThumbnailsData()
-      // this.model[this.relationData.name][index]['thumbnail64'] = ''
-      this.$axios({
-        url: this.$store.state.App.dataWarehouse + 'images/thumbnails',
-        method: 'POST',
-        data: params
-      }).then((response) => {
-        this.insertThumbnails(response.data)
-        // this.model[this.relationData.name][index]['thumbnail64'] = response.data
-      }).catch((error) => {
-        console.log(error)
-      })
-    },
-    buildThumbnailsData () {
-      let data = {}
-      for (let i = this.model[this.relationData.name].length - 1; i >= 0; i--) {
-        data[i] = encodeURIComponent(this.model[this.relationData.name][i].thumbnail)
-      }
-      return data
-    },
-    insertThumbnails (data) {
-      // console.log(data)
-      // Patata
-      // this.model[this.relationData.name][index]['thumbnail64'] = response.data
-    },
-    // END IMAGE METHODS
     // FILES METHODS
     uploadMultiFilesAdded (files, relation, field) {
       let models = {}
@@ -665,16 +565,13 @@ export default {
         resolve(file)
       })
     },
-    downloadRelationFile (relation, index, id) {
-      this.relationFileDownload({ relation: relation, index: index, id: id })
-    },
     // END FILE METHODS
     showRemoveRelation (relation) {
       this.removeModel = true
       this.relationName = relation
     },
     hideRemoveRelation () {
-      // this.removeModel = false
+      this.removeModel = false
     },
     finishRemoveRelation () {
       this.selectedItems = []
@@ -689,6 +586,14 @@ export default {
       this.buildRelationData(this.relationData)
     },
     editRelation (relation, sourceIndex, item) {
+      if (typeof relation === 'object') {
+        sourceIndex = relation.index
+        item = relation.row
+        relation = relation.name
+      }
+      // console.log(relation)
+      // console.log(sourceIndex)
+      // console.log(item)
       this.editing = sourceIndex
       // console.log(item)
       // this.editingId = item.id
@@ -744,7 +649,6 @@ export default {
   },
   mounted () {
     this.$v.$touch()
-    // this.fetchThumbnails()
   }
 }
 </script>
