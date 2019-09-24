@@ -334,45 +334,53 @@ export const ModelRelations = {
 }
 export const ModelController = {
   methods: {
-    sendNewForm () {
-      if (!this.cleanForm) {
-        return false
-      } else {
-        this.$emit('formSent')
-        let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
-        this.saveModel(payload)
+    async batchModel (data, batchSource) {
+      console.log('batchModel')
+      console.log(data)
+      console.log(batchSource)
+      // let tempModel = JSON.parse(JSON.stringify(data.model))
+      let batchRound = 0
+      let failed = []
+      let succeeded = []
+      let payload = JSON.parse(JSON.stringify(data))
+      while ((failed.length + succeeded.length) < (batchSource.length)) {
+        payload.model['id'] = batchSource[batchRound].id
+        payload.model['__index'] = batchSource[batchRound].__index
+        await this.saveModel(payload, 'update')
+          .then((response) => {
+            batchRound++
+            succeeded.push(batchSource[batchRound])
+          }).catch((response) => {
+            batchRound++
+            failed.push(batchSource[batchRound])
+          })
       }
+      return true
     },
-    cloneModel () {
-      // this.$emit('formSent')
-      // let payload = { name: this.name, model: this.fieldsObjectValueExtrator(this.model) }
-      // console.log(payload)
-      // this.saveModel(payload)
-    },
-    sendUpdateForm () {
-      if (!this.cleanForm) {
-        return false
-      } else {
-        this.$emit('formSent')
-        if (this.batchMode) {
-          for (let item of this.source) {
-            let tempModel = JSON.parse(JSON.stringify(this.model))
-            // for (let field in item) {
-            //   if (!tempModel[field]) tempModel[field] = item[field]
-            // }
-            tempModel['id'] = item.id
-            tempModel['__index'] = item.__index
-            // console.log(model)
-            let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(tempModel) }
-            // console.log(payload)
-            this.saveModel(payload)
-          }
-        } else {
-          let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
-          this.saveModel(payload)
-        }
-      }
-    },
+    // sendUpdateForm () {
+    //   if (!this.cleanForm) {
+    //     return false
+    //   } else {
+    //     this.$emit('formSent')
+    //     if (this.batchMode) {
+    //       for (let item of this.source) {
+    //         let tempModel = JSON.parse(JSON.stringify(this.model))
+    //         // for (let field in item) {
+    //         //   if (!tempModel[field]) tempModel[field] = item[field]
+    //         // }
+    //         tempModel['id'] = item.id
+    //         tempModel['__index'] = item.__index
+    //         // console.log(model)
+    //         let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(tempModel) }
+    //         // console.log(payload)
+    //         this.saveModel(payload)
+    //       }
+    //     } else {
+    //       let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
+    //       this.saveModel(payload)
+    //     }
+    //   }
+    // },
     fieldsObjectValueExtrator (data) {
       let fieldsToExtract = ['select', 'array', 'enum', 'selectFromModel']
       let copy = {}
@@ -393,52 +401,53 @@ export const ModelController = {
       }
       return copy
     },
-    saveModel (payload) { // CLEANED
-      // console.log(payload)
-      if (this.mode === 'update') {
-        this.saveModelOnUpdateController(payload)
-      } else {
-        this.saveModelOnNewController(payload)
-      }
+    saveModel (payload, mode) { // CLEANED
+      return new Promise((resolve, reject) => {
+        console.log('saveModel')
+        if (mode === 'update') {
+          this.saveModelOnUpdateController(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        } else {
+          this.saveModelOnNewController(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        }
+      })
     },
     saveModelOnUpdateController (payload) { // CLEANED
-      payload.url = this.$store.state.App.dataWarehouse + payload.name + '/' + payload.model.id
-      this.$store.dispatch('Model/sendUpdateForm', {
-        'source': payload
-      }).then((response) => {
-        // if (payload.name === 'clinics') {
-        //   this.$store.commit('Scope/updateScopeItems', { name: payload.name, item: response.model })
-        // } else {
-        //   this.$store.commit('Model/updateModelItems', { name: payload.name, item: response.model })
-        // }
-        this.$store.commit('Model/updateModelItems', { name: payload.name, item: response.model })
-        this.$store.dispatch('Notify/displayMessage', { message: 'Profile updated', position: 'top', type: 'positive' })
-        // this.buildUpdaterModel(response.model)
-        this.$emit('relationFormResponded')
-      }).catch((response) => {
-        this.$emit('relationFormResponded')
-        this.$store.dispatch('Response/responseErrorManager', response)
+      return new Promise((resolve, reject) => {
+        payload.url = this.$store.state.App.dataWarehouse + payload.name + '/' + payload.model.id
+        payload.options = this.$store.getters['Model/availableOptions'][payload.name]
+        console.log('saveModelOnUpdateController')
+        this.$store.dispatch('Model/sendUpdateForm', {
+          'source': payload
+        }).then((response) => {
+          this.$store.commit('Model/updateModelItems', { name: payload.name, item: response.model })
+          this.$store.dispatch('Notify/displayMessage', { message: 'Profile updated', position: 'top', type: 'positive' })
+          resolve(response)
+        }).catch((response) => {
+          this.$store.dispatch('Response/responseErrorManager', response)
+          reject(response)
+        })
       })
     },
     saveModelOnNewController (payload) { // CLEANED
-      payload.url = this.$store.state.App.dataWarehouse + payload.name
-      payload.options = this.$store.getters['Model/availableOptions'][payload.name]
-      this.$store.dispatch('Model/sendNewForm', {
-        'source': payload
-      }).then((response) => {
-        this.$store.commit('Model/addModelItems', { name: payload.name, items: response.model })
-        // this.$store.dispatch('Notify/displayMessage', { message: 'Model: ' + payload.name + ' Created', position: 'top', type: 'positive' })
-        this.$store.dispatch('Notify/displayMessage', {
-          message: this.$t('forms.messages.successCreate', {
-            model: this.$tc('models.' + payload.name + '.name', 1),
-            action: this.$tc('forms.actions.saved', 1)
-          }),
-          position: 'top',
-          type: 'positive' })
-        this.$emit('formRespondedOK')
-      }).catch((response) => {
-        this.$emit('formRespondedWithErrors')
-        this.$store.dispatch('Response/responseErrorManager', response)
+      return new Promise((resolve, reject) => {
+        payload.url = this.$store.state.App.dataWarehouse + payload.name
+        payload.options = this.$store.getters['Model/availableOptions'][payload.name]
+        this.$store.dispatch('Model/sendNewForm', {
+          'source': payload
+        }).then((response) => {
+          this.$store.commit('Model/addModelItems', { name: payload.name, items: response.model })
+          this.$store.dispatch('Notify/displayMessage', {
+            message: this.$t('forms.messages.successCreate', {
+              model: this.$tc('models.' + payload.name + '.name', 1),
+              action: this.$tc('forms.actions.saved', 1)
+            }),
+            position: 'top',
+            type: 'positive' })
+          resolve(response)
+        }).catch((response) => {
+          this.$store.dispatch('Response/responseErrorManager', response)
+          reject(response)
+        })
       })
     }
   }
@@ -527,61 +536,80 @@ export const RelationController = {
         })
       })
     },
-    removeRelation (relation, index, id) { // CLEANED
-      let payload = { relation: relation, index: index, id: id }
-      if (this.mode === 'update') {
-        if (this.relationData.type === 'MorphMany') this.removeMorpMany(payload)
-        else if (this.relationData.type === 'HasMany') this.removeHasMany(payload)
-        else if (this.relationData.type === 'BelongsToMany') this.removeBelongsToMany(payload)
-      } else {
-        this.model[payload.relation].splice(payload.index, 1)
-      }
-    },
-    buildRelationPayload (relation) {
-      // let id = false
-      // if (this.editing !== false) id = this.editing].id
-      let payload =
-        {
-          relation: relation,
-          model: this.relationObjectsValueExtrator(relation, this.relation),
-          index: this.editing,
-          parentIndex: this.model.__index,
-          id: this.relation['id']
-        }
+    buildRelationPayload (data) {
+      let payload = JSON.parse(JSON.stringify(data))
+      payload.model = this.relationObjectsValueExtrator(data.model, data.quasarData)
       return payload
     },
-    relationObjectsValueExtrator (relation, data) {
+    relationObjectsValueExtrator (data, quasarData) {
       let fieldsToExtract = ['select', 'array', 'selectFromModel']
       let copy = {}
       for (let field in data) {
         this.$set(copy, field, data[field])
-        if (this.relationData.quasarData.formFields[field] && data[field]) {
-          if (fieldsToExtract.includes(this.relationData.quasarData.formFields[field].type.name)) {
+        if (quasarData.quasarData.formFields[field] && data[field]) {
+          if (fieldsToExtract.includes(quasarData.quasarData.formFields[field].type.name)) {
             copy[field] = data[field].value
           }
         }
       }
       return copy
     },
-    saveBatchRelation (relation, index = 0) {
-      this.model['id'] = this.batchSource[this.batchRound].id
-      this.model['__index'] = this.batchSource[this.batchRound].__index
-      this.saveRelation(relation)
+    async batchRelation (payload, batchSource, mode) {
+      let batchRound = 0
+      let failed = []
+      let succeeded = []
+      while ((failed.length + succeeded.length) < (batchSource.length)) {
+        payload.parentId = batchSource[batchRound].id
+        payload.parentIndex = batchSource[batchRound].__index
+        let action = mode === 'update' ? 'updateRelation' : 'saveRelation'
+        await this[action](payload)
+          .then((response) => {
+            batchRound++
+            succeeded.push(batchSource[batchRound])
+          }).catch((response) => {
+            batchRound++
+            failed.push(batchSource[batchRound])
+          })
+      }
+      return true
     },
-    saveRelation (relation) { // CLEANED
-      let payload = this.buildRelationPayload(relation)
-      if (this.mode === 'update') {
+    saveRelation (payload) { // CLEANED
+      return new Promise((resolve, reject) => {
+        if (payload.index === false) {
+          this.saveRelationOnNewController(payload)
+            .then((response) => {
+              resolve(response)
+            }).catch((response) => {
+              reject(response)
+            })
+        } else {
+          this.updateRelationOnNewController(payload)
+            .then((response) => {
+              resolve(response)
+            }).catch((response) => {
+              reject(response)
+            })
+        }
+      })
+    },
+    updateRelation (payload) {
+      return new Promise((resolve, reject) => {
         if (payload.index === false) {
           this.saveRelationOnUpdateController(payload)
+            .then((response) => {
+              resolve(response)
+            }).catch((response) => {
+              reject(response)
+            })
         } else {
-          // console.log('Updating')
           this.updateRelationOnUpdateController(payload)
+            .then((response) => {
+              resolve(response)
+            }).catch((response) => {
+              reject(response)
+            })
         }
-      } else if (payload.index === false) {
-        this.saveRelationOnNewController(payload)
-      } else {
-        this.updateRelationOnNewController(payload)
-      }
+      })
     },
     updateRelationBatch (relation) {
       for (let item of this.model[relation]) {
@@ -597,174 +625,197 @@ export const RelationController = {
       }
     },
     saveRelationOnNewController (payload) { // CLEANED
-      // console.log('Save Relation on new Controller')
-      // console.log(payload)
-      if (typeof payload.model === 'number') this.model[payload.relation].push(this.getModelById(payload.relation, payload.model))
-      else this.model[payload.relation].push(payload.model)
-      this.closeRelationForm()
+      return new Promise((resolve, reject) => {
+        if (typeof payload.model === 'number') this.model[payload.relation].push(this.getModelById(payload.relation, payload.model))
+        else this.model[payload.relation].push(payload.model)
+        resolve()
+        // this.closeRelationForm()
+      })
     },
     updateRelationOnNewController (payload) { // CLEANED
-      if (this.relationData.type === 'BelongsToMany') {
-        this.model[payload.relation].splice(payload.index, 1)
-        this.model[payload.relation].push(this.getModelById(payload.relation, payload.model))
-      } else {
-        for (let field in payload.model) {
-          this.model[payload.relation][payload.index][field] = payload.model[field]
+      return new Promise((resolve, reject) => {
+        if (this.relationData.type === 'BelongsToMany') {
+          this.model[payload.relation].splice(payload.index, 1)
+          this.model[payload.relation].push(this.getModelById(payload.relation, payload.model))
+        } else {
+          for (let field in payload.model) {
+            this.model[payload.relation][payload.index][field] = payload.model[field]
+          }
         }
-      }
+        resolve()
+      })
     },
     saveRelationOnUpdateController (payload) { // CLEANED
-      if (this.relationData.type === 'MorphMany') this.saveMorpMany(payload)
-      else if (this.relationData.type === 'BelongsToMany') this.saveBelongsToMany(payload)
-      else if (this.relationData.type === 'HasMany') this.saveHasMany(payload)
-      else if (this.relationData.type === 'HasManyThrough') this.saveHasManyThrough(payload)
+      console.log('saveRelationOnUpdateController')
+      return new Promise((resolve, reject) => {
+        if (payload.quasarData.type === 'MorphMany') this.saveMorpMany(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        else if (payload.quasarData.type === 'BelongsToMany') this.saveBelongsToMany(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        else if (payload.quasarData.type === 'HasMany') this.saveHasMany(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        else if (payload.quasarData.type === 'HasManyThrough') this.saveHasManyThrough(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
     },
     updateRelationOnUpdateController (payload) { // CLEANED
-      if (this.relationData.type === 'MorphMany') this.updateMorpMany(payload)
-      else if (this.relationData.type === 'BelongsToMany') this.saveBelongsToMany(payload)
-      else if (this.relationData.type === 'HasMany') this.updateHasMany(payload)
-      else if (this.relationData.type === 'HasManyThrough') this.updateHasManyThrough(payload)
+      return new Promise((resolve, reject) => {
+        if (payload.quasarData.type === 'MorphMany') this.updateMorpMany(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        else if (payload.quasarData.type === 'BelongsToMany') this.saveBelongsToMany(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        else if (payload.quasarData.type === 'HasMany') this.updateHasMany(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        else if (payload.quasarData.type === 'HasManyThrough') this.updateHasManyThrough(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
     },
     sendNewRelationForm (payload) {
-      this.relationLoader = true
-      this.$store.dispatch('Model/sendNewForm', {
-        'source': payload
-      }).then((response) => {
-        let options = {
-          name: this.relatedTo,
-          relation: payload.relation,
-          items: response.model,
-          parentIndex: this.model.__index,
-          arrayPosition: this.relationData.quasarData.listFields.draggable ? 'end' : false
-        }
-        // console.log(options)
-        this.$store.commit('Model/addRelationItems', options)
-        this.$store.dispatch('Notify/displayMessage', { message: 'Relation Saved', position: 'top', type: 'positive' })
-        this.relationLoader = false
-        // this.closeRelationForm()
-        if (this.batchMode) {
-          this.batchRound++
-          if (this.batchSource.length > this.batchRound) {
-            this.saveBatchRelation(payload.relation, this.batchRound)
-          } else {
-            this.batchRound = 0
-            this.closeRelationForm()
+      return new Promise((resolve, reject) => {
+        this.$store.dispatch('Model/sendNewForm', {
+          'source': payload
+        }).then((response) => {
+          let options = {
+            name: payload.parentName,
+            relation: payload.relation,
+            items: response.model,
+            parentIndex: payload.parentIndex,
+            arrayPosition: payload.quasarData.quasarData.listFields.draggable ? 'end' : false
           }
-        } else {
-          this.batchRound = 0
-          this.closeRelationForm()
-        }
-      }).catch((response) => {
-        this.$store.dispatch('Response/responseErrorManager', response)
-        this.relationLoader = false
+          this.$store.commit('Model/addRelationItems', options)
+          this.$store.dispatch('Notify/displayMessage', { message: 'Relation Saved', position: 'top', type: 'positive' })
+          console.log('Responded')
+          resolve(response)
+        }).catch((response) => {
+          this.$store.dispatch('Response/responseErrorManager', response)
+          reject(response)
+        })
       })
     },
     saveMorpMany (payload) { // CLEANED
-      this.relationLoader = true
-      payload.url = this.$store.state.App.dataWarehouse + payload.relation
-      payload.relatedId = this.model.id
-      payload.nameSpace = this.modelData.nameSpace
-      this.sendNewRelationForm(payload)
-    },
-    saveBelongsToMany (payload) {
-      // this.$store.dispatch('Notify/displayMessage', { message: 'saveBelongsToMany NOT IMPLEMENTED', position: 'top', type: 'negative' })
-      // this.$store.dispatch('Notify/displayMessage', { message: 'Trying saveBelongsToMany', position: 'top', type: 'warning' })
-      payload.url = this.$store.state.App.dataWarehouse + 'belongstomany'
-      // payload[this.relationData.getForeignKeyName] = this.model.id
-      payload['sourceModel'] = this.modelData.nameSpace
-      payload['sourceModelId'] = this.model.id
-      payload['relatedTo'] = this.relationData.nameSpace
-      payload['relatedToID'] = this.relation.id
-      this.sendNewRelationForm(payload)
-    },
-    saveHasMany (payload) { // CLEANED
-      payload.url = this.$store.state.App.dataWarehouse + this.relatedTo + '/' + this.model.id + '/' + payload.relation
-      payload[this.relationData.getForeignKeyName] = this.model.id
-      this.sendNewRelationForm(payload)
-    },
-    saveHasManyThrough (payload) { // CLEANED
-      payload.url = this.$store.state.App.dataWarehouse + payload.relation
-      this.sendNewRelationForm(payload)
-    },
-    sendUpdateRelationForm (payload) {
-      this.relationLoader = true
-      this.$store.dispatch('Model/sendUpdateForm', {
-        'source': payload
-      }).then((response) => {
-        this.$store.commit('Model/updateRelationItems', { name: this.relatedTo, relation: payload.relation, item: response.model, parentIndex: this.model.__index })
-        this.$store.dispatch('Notify/displayMessage', { message: 'Relation Saved', position: 'top', type: 'positive' })
-        this.relationLoader = false
-        // this.closeRelationForm()
-        // return true
-        if (this.batchMode) {
-          this.batchRound++
-          if (this.batchSource.length > this.batchRound) {
-            this.saveBatchRelation(payload.relation, this.batchRound)
-          } else {
-            this.batchRound = 0
-            this.closeRelationForm()
-            return true
-          }
-        } else {
-          this.batchRound = 0
-          this.closeRelationForm()
-          return true
-        }
-      }).catch((response) => {
-        this.$store.dispatch('Response/responseErrorManager', response)
-        this.relationLoader = false
-        return false
+      return new Promise((resolve, reject) => {
+        console.log('saveMorpMany')
+        payload.url = this.$store.state.App.dataWarehouse + payload.relation
+        payload.quasarInfo = { 'relatedId': payload.parentId, 'parentNameSpace': payload.parentNameSpace, 'relation': payload.relation }
+        this.sendNewRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
       })
     },
-    async updateMorpMany (payload) { // CLEANED
-      // console.log('MorphMany')
-      payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
+    saveBelongsToMany (payload) {
+      return new Promise((resolve, reject) => {
+        console.log('saveBelongsToMany')
+        payload.url = this.$store.state.App.dataWarehouse + 'belongstomany'
+        payload.quasarInfo = {
+          'parentID': payload.parentId,
+          'parentNameSpace': payload.parentNameSpace,
+          'relation': payload.relation,
+          'relatedTo': payload.relatedTo,
+          'relatedToID': payload.relatedToID
+        }
+        this.sendNewRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
+    },
+    saveHasMany (payload) { // CLEANED
+      return new Promise((resolve, reject) => {
+        console.log('saveHasMany')
+        payload.url = this.$store.state.App.dataWarehouse + payload.parentName + '/' + payload.parentId + '/' + payload.relation
+        payload.quasarInfo = { 'relatedId': payload.parentId, 'parentNameSpace': payload.parentNameSpace, 'relation': payload.relation }
+        payload.model[payload.quasarData.getForeignKeyName] = payload.parentId
+        this.sendNewRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
+    },
+    saveHasManyThrough (payload) { // CLEANED
+      return new Promise((resolve, reject) => {
+        console.log('saveHasManyThrough')
+        payload.url = this.$store.state.App.dataWarehouse + payload.relation
+        this.sendNewRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
+    },
+    sendUpdateRelationForm (payload) {
+      // console.log('sendUpdateRelationForm')
       // console.log(payload)
-      await this.sendUpdateRelationForm(payload)
+      return new Promise((resolve, reject) => {
+        this.$store.dispatch('Model/sendUpdateForm', {
+          'source': payload
+        }).then((response) => {
+          let options = {
+            name: payload.parentName,
+            relation: payload.relation,
+            item: response.model,
+            parentIndex: payload.parentIndex
+          }
+          this.$store.commit('Model/updateRelationItems', options)
+          this.$store.dispatch('Notify/displayMessage', { message: 'Relation Saved', position: 'top', type: 'positive' })
+          resolve(response)
+        }).catch((response) => {
+          this.$store.dispatch('Response/responseErrorManager', response)
+          reject(response)
+        })
+      })
     },
-    async updateHasMany (payload) { // CLEANED
-      payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
-      payload[this.relationData.getForeignKeyName] = this.model.id
-      await this.sendUpdateRelationForm(payload)
+    updateMorpMany (payload) { // CLEANED
+      return new Promise((resolve, reject) => {
+        console.log('updateMorpMany')
+        payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
+        payload.quasarInfo = { 'relatedId': payload.parentId, 'parentNameSpace': payload.parentNameSpace, 'relation': payload.relation }
+        this.sendUpdateRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
     },
-    async updateHasManyThrough (payload) { // CLEANED
-      payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
-      await this.sendUpdateRelationForm(payload)
+    updateHasMany (payload) { // CLEANED
+      return new Promise((resolve, reject) => {
+        console.log('updateHasMany')
+        payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
+        payload.model[payload.quasarData.getForeignKeyName] = payload.parentId
+        this.sendUpdateRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
+    },
+    updateHasManyThrough (payload) { // CLEANED
+      return new Promise((resolve, reject) => {
+        console.log('updateHasManyThrough')
+        payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
+        this.sendUpdateRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
+    },
+    removeRelation (payload) { // CLEANED
+      console.log('removeRelation')
+      return new Promise((resolve, reject) => {
+        if (payload.quasarData.type === 'MorphMany') this.removeMorpMany(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        else if (payload.quasarData.type === 'HasMany') this.removeHasMany(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+        else if (payload.quasarData.type === 'BelongsToMany') this.removeBelongsToMany(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
     },
     sendDestroyRelationForm (payload) {
-      this.relationLoader = true
-      this.$store.dispatch('Model/sendDestroyForm', {
-        'source': payload
-      }).then((response) => {
-        let options = {
-          name: this.relatedTo,
-          relation: payload.relation,
-          id: payload.id,
-          parentIndex: this.model.__index
-        }
-        this.$store.commit('Model/removeRelationById', options)
-        this.$store.dispatch('Notify/displayMessage', { message: response.message || payload.relation + ' successfully removed', position: 'top', type: 'positive' }, { root: true })
-        this.relationLoader = false
-      }).catch((response) => {
-        this.relationLoader = false
-        this.$store.dispatch('Response/responseErrorManager', response)
+      console.log('sendDestroyRelationForm')
+      return new Promise((resolve, reject) => {
+        this.$store.dispatch('Model/sendDestroyForm', {
+          'source': payload
+        }).then((response) => {
+          let options = {
+            name: payload.parentName,
+            relation: payload.relation,
+            id: payload.id,
+            parentIndex: payload.parentIndex
+          }
+          this.$store.commit('Model/removeRelationById', options)
+          this.$store.dispatch('Notify/displayMessage', { message: response.message || payload.relation + ' successfully removed', position: 'top', type: 'positive' }, { root: true })
+          resolve(response)
+        }).catch((response) => {
+          this.$store.dispatch('Response/responseErrorManager', response)
+          reject(response)
+        })
       })
     },
     removeMorpMany (payload) { // CLEANED
-      payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
-      this.sendDestroyRelationForm(payload)
+      console.log('removeMorpMany')
+      return new Promise((resolve, reject) => {
+        payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
+        this.sendDestroyRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
     },
     removeHasMany (payload) { // CLEANED
-      payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
-      this.sendDestroyRelationForm(payload)
+      console.log('removeHasMany')
+      return new Promise((resolve, reject) => {
+        payload.url = this.$store.state.App.dataWarehouse + payload.relation + '/' + payload.id
+        this.sendDestroyRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
     },
     removeBelongsToMany (payload) { // CLEANED
-      payload.url = this.$store.state.App.dataWarehouse + 'belongstomany'
-      payload['sourceModel'] = this.modelData.nameSpace
-      payload['sourceModelId'] = this.model.id
-      payload['relatedTo'] = this.relationData.nameSpace
-      payload['relatedToID'] = this.relation.id
-      this.sendDestroyRelationForm(payload)
+      console.log('removeBelongsToMany')
+      return new Promise((resolve, reject) => {
+        payload.url = this.$store.state.App.dataWarehouse + 'belongstomany'
+        this.sendDestroyRelationForm(payload).then((response) => { resolve(response) }).catch((response) => { reject(response) })
+      })
     }
   }
 }
