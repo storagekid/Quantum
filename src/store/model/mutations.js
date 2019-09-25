@@ -1,3 +1,6 @@
+export function cleanState (state) {
+  state.models = {}
+}
 export function setModel (state, { name, options, cached = false }) {
   let model = {}
   model.creating = { state: false }
@@ -7,6 +10,7 @@ export function setModel (state, { name, options, cached = false }) {
   model.itemSelected = null
   model.items = []
   model.state = null
+  model.refreshed = null
   model.modelToSave = {}
   model.options = {
     scoped: options.scoped || false,
@@ -33,6 +37,7 @@ export function setModel (state, { name, options, cached = false }) {
 
   state.models = { ...state.models, [name]: model }
 }
+
 export function updateModelOptions (state, { name, options }) {
   state.models[name].options = {
     scoped: options.scoped || false,
@@ -52,6 +57,7 @@ export function updateModelOptions (state, { name, options }) {
 }
 export function setModelItems (state, { name, items }) {
   state.models[name].items = items.data ? items.data : items
+  state.models[name].refreshed = Date.now()
 }
 export function addViewFetched (state, { name, id }) {
   state.models[name].viewsFetched.push(id)
