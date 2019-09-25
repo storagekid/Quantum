@@ -267,7 +267,8 @@ export default {
     }
   },
   created () {
-    if (this.$store.state.Scope.clinic.clinics.selected.length === 1) {
+    // console.log(this.$router.currentRoute.name)
+    if (this.$store.state.Scope.clinic.clinics.selected.length === 1 && this.$router.currentRoute.name === 'login') {
       // console.log('1 Clinic')
       if (localStorage.lastPage) {
         this.$router.push({
