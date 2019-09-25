@@ -70,6 +70,6 @@ export function bootApp (context) {
   }
 }
 export function resetState (context) {
-  context.commit('Model/cleanState', null, { root: true })
   context.commit('Scope/clearScope', null, { root: true })
+  context.commit('Model/cleanState', null, { root: true })
 }
