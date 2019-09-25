@@ -12,9 +12,7 @@
 export default {
   name: 'Entrance',
   data () {
-    return {
-      leftDrawer: true
-    }
+    return {}
   }
 }
 </script>
