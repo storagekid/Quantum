@@ -119,7 +119,7 @@ export default {
       }
     },
     setStartModels (profile) {
-      console.log(profile)
+      // console.log(profile)
       let counties = []
       let countyIds = []
       let states = []
