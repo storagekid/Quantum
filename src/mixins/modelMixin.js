@@ -18,6 +18,22 @@ export const ModelsFetcher = {
             let model = this.modelsNeeded[name]
             if (!this.$store.state.Model.models[name] || model.refresh) {
               // console.log('Getting Models')
+              if (!this.$store.state.Model.models[name]) {
+                // console.log('No Refreshed Model')
+              } else if (!this.$store.state.Model.models[name].items.length) {
+                // console.log('No Items Yet in Model')
+              } else {
+                // console.log('Refreshed Model')
+                let now = Date.now()
+                now = now - 10000
+                // console.log(now)
+                // console.log(this.$store.state.Model.models[name].refreshed)
+                if (now < this.$store.state.Model.models[name].refreshed) {
+                  counter = counter + 1
+                  if (counter === size) resolve(size)
+                  continue
+                }
+              }
               this.$store.dispatch('Model/getModel', {
                 'model': name,
                 'options': model
