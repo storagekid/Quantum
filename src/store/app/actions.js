@@ -1,4 +1,5 @@
 export function bootApp (context) {
+  context.commit('Model/cleanState', null, { root: true })
   if (localStorage.settings) context.commit('App/setSettingsFromStorage', JSON.parse(localStorage.settings), { root: true })
   if (localStorage.token && localStorage.user && localStorage.scope && localStorage.menus && localStorage.routes) {
     context.commit('Auth/setToken', localStorage.token, { root: true })
@@ -69,5 +70,6 @@ export function bootApp (context) {
   }
 }
 export function resetState (context) {
+  context.commit('Model/cleanState', null, { root: true })
   context.commit('Scope/clearScope', null, { root: true })
 }
