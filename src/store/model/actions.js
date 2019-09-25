@@ -75,7 +75,9 @@ export function getModel (context, { model, options }) {
     if (options.clinics) {
       params['clinic_id'] = options.clinics
     } else {
-      params = context.rootState.Scope.mode === 'clinic' ? { clinic_id: context.rootState.Scope.clinic.clinics.selected } : { store_id: context.rootState.Scope.store.stores.selected.join() }
+      params = context.rootState.Scope.mode === 'clinic'
+        ? { clinic_id: context.rootState.Scope.clinic.clinics.selected.map(i => { return i.id }) }
+        : { store_id: context.rootState.Scope.store.stores.selected.map(i => { return i.id }) }
     }
   }
   params.options = context.getters.availableOptions[model]
