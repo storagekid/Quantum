@@ -55,7 +55,7 @@ import ClinicSelector from './clinicSelector'
 import StoreSelector from './storeSelector'
 
 export default {
-  // name: 'ComponentName',
+  name: 'ScopeTopBar',
   components: { ClinicSelector, StoreSelector },
   data () {
     return {
