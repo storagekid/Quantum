@@ -6,60 +6,50 @@
     <q-separator />
     <q-card-section>
       <form>
-        <q-select
-          multiple
-          :display-value="countriesText"
-          v-model="countrySelected"
-          label="Selecciona un País"
-          stack-label
-          :options="countries"
-        >
-        <template v-slot:append>
-          <q-icon name="clear" @click.stop="countrySelected = []" />
-        </template>
-        </q-select>
-        <q-select
-          multiple
-          use-input
-          input-debounce="0"
-          :display-value="statesText"
-          v-model="stateSelected"
-          label="Selecciona una CCAA"
-          stack-label
-          :options="states"
-        >
-        <template v-slot:append>
-          <q-icon name="clear" @click.stop="stateSelected = []" />
-        </template>
-        </q-select>
-        <q-select
-          multiple
-          use-input
-          input-debounce="0"
-          :display-value="countiesText"
-          v-model="countySelected"
-          label="Selecciona una Provincia"
-          stack-label
-          :options="counties"
-        >
-        <template v-slot:append>
-          <q-icon name="clear" @click.stop="countySelected = []" />
-        </template>
-        </q-select>
-        <q-select
-          multiple
-          use-input
-          input-debounce="0"
-          :display-value="clinicsText"
-          v-model="clinicSelected"
-          label="Selecciona una Clínica"
-          stack-label
-          :options="clinics"
-        >
-        <template v-slot:append>
-          <q-icon name="clear" @click.stop="clinicSelected = []" />
-        </template>
-        </q-select>
+        <custom-select
+          :dense="true"
+          :multiple="true"
+          :clearable="true"
+          :hide-bottom-space="true"
+          :field="{name: 'countries', type: { model: 'countries', default: { text: 'Selecciona un País'} }}"
+          :sourceOptions="countries"
+          :initValue="countrySelected"
+          @updated="updateCustomSelect('countrySelected', $event)"
+          >
+        </custom-select>
+        <custom-select
+          :dense="true"
+          :clearable="true"
+          :multiple="true"
+          :hide-bottom-space="true"
+          :field="{name: 'states', type: { model: 'states', default: { text: 'Selecciona una CCAA'} }}"
+          :sourceOptions="states"
+          :initValue="stateSelected"
+          @updated="updateCustomSelect('stateSelected', $event)"
+          >
+        </custom-select>
+        <custom-select
+          :dense="true"
+          :clearable="true"
+          :multiple="true"
+          :hide-bottom-space="true"
+          :field="{name: 'counties', type: { model: 'counties', default: { text: 'Selecciona una Provincia'} }}"
+          :sourceOptions="counties"
+          :initValue="countySelected"
+          @updated="updateCustomSelect('countySelected', $event)"
+          >
+        </custom-select>
+        <custom-select
+          :dense="true"
+          :clearable="true"
+          :multiple="true"
+          :hide-bottom-space="true"
+          :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona una Clínica'} }}"
+          :sourceOptions="clinics"
+          :initValue="clinicSelected"
+          @updated="updateCustomSelect('clinicSelected', $event)"
+          >
+        </custom-select>
         <q-btn color="primary" label="Aceptar" class="q-mt-md full-width" @click="setScope"/>
       </form>
     </q-card-section>
@@ -70,8 +60,13 @@
 </template>
 
 <script>
+import CustomSelect from '../form/customSelect'
+import { Helpers } from '../../mixins/helpers'
+
 export default {
   name: 'ClinicSelector',
+  mixins: [Helpers],
+  components: { CustomSelect },
   data () {
     return {
       visible: false,
@@ -173,17 +168,19 @@ export default {
         })
     },
     initialScope () {
-      if (this.$store.state.Scope.clinic.clinics.selected.length) {
-        this.clinicSelected = this.$store.state.Scope.clinic.clinics.selected
-      }
-      if (this.$store.state.Scope.clinic.counties.selected.length) {
-        this.countySelected = this.$store.state.Scope.clinic.counties.selected
+      // console.log('initialScope')
+      if (this.$store.state.Scope.clinic.countries.selected.length) {
+        this.countrySelected = this.$store.state.Scope.clinic.countries.selected
       }
       if (this.$store.state.Scope.clinic.states.selected.length) {
         this.stateSelected = this.$store.state.Scope.clinic.states.selected
       }
-      if (this.$store.state.Scope.clinic.countries.selected.length) {
-        this.countrySelected = this.$store.state.Scope.clinic.countries.selected
+      if (this.$store.state.Scope.clinic.counties.selected.length) {
+        this.countySelected = this.$store.state.Scope.clinic.counties.selected
+      }
+      if (this.$store.state.Scope.clinic.clinics.selected.length) {
+        // console.log('Clinics.Selected')
+        this.clinicSelected = this.$store.state.Scope.clinic.clinics.selected
       }
     }
   },
@@ -199,8 +196,6 @@ export default {
         this.$router.push({ name: this.$store.state.App.homePage })
       }
     }
-  },
-  mounted () {
     this.initialScope()
   }
 }
