@@ -7,7 +7,7 @@
     bottom-slots
     :disable="disable"
     :counter="counter"
-    :max-values="max ? max : sourceOptions.length"
+    :max-values="max ? max : sourceOptions ? sourceOptions.length : undefined"
     :error="error"
     :error-message="errorMessage"
     :name="field ? field.name : relation"
