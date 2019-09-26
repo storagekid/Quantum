@@ -13,6 +13,7 @@ export function setModel (state, { name, options, cached = false }) {
   model.refreshed = null
   model.modelToSave = {}
   model.options = {
+    refresh: options.refresh || false,
     scoped: options.scoped || false,
     scopedThrough: options.scopedThrough || false,
     clinics: options.clinics || false,
@@ -40,6 +41,7 @@ export function setModel (state, { name, options, cached = false }) {
 
 export function updateModelOptions (state, { name, options }) {
   state.models[name].options = {
+    refresh: options.refresh || false,
     scoped: options.scoped || false,
     scopedThrough: options.scopedThrough || false,
     clinics: options.clinics || false,
