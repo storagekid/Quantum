@@ -91,7 +91,7 @@ export function getModel (context, { model, options }) {
       // console.log(params)
       if (params['paginate']) context.commit('setModelPagination', { name: model, data: response.data.model })
       context.commit('setModelQuasarData', { name: model, data: response.data.quasarData })
-      resolve()
+      resolve(response)
     }).catch((error) => {
       reject(error)
     })
