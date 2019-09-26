@@ -7,69 +7,6 @@
       <menu-item :item="item" :key="item.id" :parentGroups="[]" menuName="admin-menu">
       </menu-item>
     </template>
-    <!-- <q-item dark dense :to="{name: 'clinics'}" :exact="true" clickable v-ripple class="bg-warning">
-      <q-item-section avatar>
-      <q-avatar text-color="white" icon="keyboard_backspace" font-size=".5em" rounded></q-avatar>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label style="font-weight: bold">
-          {{$t('menus.main.adminArea.title')}}
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item dense :to="{name: 'admin-dashboard'}" :exact="true">
-      <q-item-section avatar>
-        <q-avatar text-color="accent" icon="dashboard" font-size=".5em" rounded></q-avatar>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label style="font-weight: bold">
-          {{$t('menus.main.adminDashboard.title')}}
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item dense :to="{name: 'users'}" :exact="true">
-      <q-item-section avatar>
-        <q-avatar text-color="accent" icon="person" font-size=".5em" rounded></q-avatar>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label style="font-weight: bold">
-          {{$t('menus.main.users.title')}}
-        </q-item-label>
-        <q-item-label caption>
-          {{$t('menus.main.users.subtitle')}}
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item dense :to="{name: 'groups'}" :exact="true">
-      <q-item-section avatar>
-        <q-avatar text-color="accent" icon="people" font-size=".5em" rounded></q-avatar>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label style="font-weight: bold">
-          {{$t('menus.main.groups.title')}}
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item dense :to="{name: 'menus'}" :exact="true">
-      <q-item-section avatar>
-        <q-avatar text-color="accent" icon="menu" font-size=".5em" rounded></q-avatar>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label style="font-weight: bold">
-          {{$t('menus.main.menus.title')}}
-        </q-item-label>
-      </q-item-section>
-    </q-item>
-    <q-item dense :to="{name: 'menu-items'}" :exact="true">
-      <q-item-section avatar>
-        <q-avatar text-color="accent" icon="menu_book" font-size=".5em" rounded></q-avatar>
-      </q-item-section>
-      <q-item-section>
-        <q-item-label style="font-weight: bold">
-          {{$t('menus.main.menu_items.title')}}
-        </q-item-label>
-      </q-item-section>
-    </q-item> -->
   </q-list>
 </template>
 
@@ -86,10 +23,6 @@ export default {
     menu () {
       return this.$store.state.App.menus.filter((i) => { return i.name === 'admin_menu' })[0]
     }
-  },
-  mounted () {
-    // console.log(this.$router.currentRoute.name)
-    // console.log(this.$router.currentRoute)
   }
 }
 </script>

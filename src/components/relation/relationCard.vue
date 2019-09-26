@@ -334,25 +334,6 @@ export default {
     startRemoveRelation (relation, index, id, item) {
       this.selectedItems.push(item)
       this.removeModel = true
-      // console.log('startRemoveRelation')
-      // this.relationLoader = true
-      // let payload = {
-      //   'relation': relation,
-      //   'parentName': this.relatedTo,
-      //   'parentIndex': this.model.__index,
-      //   'index': index,
-      //   'id': id,
-      //   'sourceModel': this.modelData.nameSpace,
-      //   'sourceModelId': this.model.id,
-      //   'relatedTo': this.relationData.nameSpace,
-      //   'relatedToID': this.relation.id,
-      //   'quasarData': this.relationData
-      // }
-      // if (this.mode === 'update') this.removeRelation(payload, 'update').then(() => { this.relationLoader = false }).catch((response) => { this.relationLoader = false })
-      // else {
-      //   this.model[relation].splice(index, 1)
-      //   this.relationLoader = false
-      // }
     },
     startSaveRelation () {
       this.relationLoader = true

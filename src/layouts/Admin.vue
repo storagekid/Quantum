@@ -39,7 +39,6 @@
       v-model="leftDrawerOpen"
       content-class="bg-accent text-accent shadow-5"
       >
-      <!-- <profile-card></profile-card> -->
       <div class="flex column justify-center" style="min-height: 50px">
         <language-menu styles="margin: 0" btn-classes="q-pa-sm"></language-menu>
       </div>

@@ -21,6 +21,7 @@ import FR from 'svg-country-flags/png250px/fr.png'
 import DE from 'svg-country-flags/png250px/de.png'
 
 export default {
+  name: 'LanguageMenu',
   props: ['classes', 'styles', 'btn-styles', 'btn-classes'],
   data () {
     return {

@@ -1,7 +1,6 @@
 <template>
-  <q-layout> <!-- Be sure to play with the Layout demo on docs -->
+  <q-layout>
     <q-page-container class="entrance-bg">
-      <!-- This is where pages get injected -->
       <router-view />
     </q-page-container>
 

@@ -36,7 +36,6 @@
           <p class="text-center text-h6 text-warning q-pt-md">No hay acciones que realizar</p>
         </q-card-section>
         <q-card-actions align="right" v-if="!uploading.length || !items.length">
-          <!-- <q-btn label="Cancel" color="primary"/> -->
           <q-btn label="Cerrar" color="info" @click="$emit('Finished')"/>
         </q-card-actions>
       </q-card>

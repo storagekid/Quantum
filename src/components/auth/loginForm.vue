@@ -71,24 +71,10 @@ export default {
         })
           .then(({ data }) => {
             // console.log(data)
-            // if (data) return
             localStorage.setItem('token', data.access_token)
             this.$store.commit('Auth/setToken', data.access_token)
             this.$emit('logged', data)
             this.visible = false
-            // this.$store.dispatch('User/getUser')
-            //   .then((response) => {
-            //     this.$emit('logged', response)
-            //     this.visible = false
-            //   })
-            //   .catch((response) => {
-            //     this.visible = false
-            //     if (response) {
-            //       this.$store.dispatch('Response/responseErrorManager', response)
-            //     } else {
-            //       this.$store.dispatch('Response/responseNoResponse')
-            //     }
-            //   })
           })
           .catch((error) => {
             this.visible = false

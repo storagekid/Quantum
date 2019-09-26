@@ -632,14 +632,9 @@ export default {
       if (!this.selectedItems.length) this.selectedItems = this.$refs['table-' + this.modelName].computedRows
       else if (this.selectedItems.length && this.selectedItems.length !== this.$refs['table-' + this.modelName].computedRowsNumber) this.selectedItems = this.filteredModel
       else this.selectedItems = []
-      // this.selectedItems = this.selectedItems.length ? this.selectedItems = [] : this.$refs['table-' + this.modelName].computedRows
     },
     sortColumn (column) {
       this.$refs['table-' + this.modelName].sort(column.name)
-      // if (this.$refs['table-' + this.modelName].columnToSort) {
-      //   if (this.$refs['table-' + this.modelName].columnToSort.label === column.label && this.$refs['table-' + this.modelName].columnToSort.__thClass.indexOf('desc') > -1) this.sortIcon = 'arrow_downward'
-      //   else this.sortIcon = 'arrow_upward'
-      // }
     },
     updateCustomSelectFilter (payload, object) {
       if (!this.filters[object]) this.$set(this.filters, object, [])
@@ -833,9 +828,6 @@ export default {
     } else if (this.$store.state.Model.models[this.modelName].pagination) {
       this.$set(this.pagination, 'rowsNumber', this.$store.state.Model.models[this.modelName].pagination.total)
     }
-    // if (this.startFilter) {
-    //   this.filter = this.startFilter
-    // }
   },
   mounted () {
     if (this.startFilter) {

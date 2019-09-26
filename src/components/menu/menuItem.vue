@@ -63,7 +63,6 @@ export default {
     expanded () {
       // console.log(this.$router.currentRoute.name)
       // console.log(this.childrenNames)
-      // if (!this.childrenNames.length === (this.children.length + this.item.children.length)) return false
       return this.childrenNames.includes(this.currentRoute)
     },
     childrenNames () {
@@ -99,10 +98,6 @@ export default {
       // console.log(e)
       this.children = e
     }
-  },
-  beforeUpdate () {
-    // console.log(this.expanded)
-    // console.log('Before Updateing')
   },
   mounted () {
     this.value = this.expanded

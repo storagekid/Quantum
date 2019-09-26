@@ -30,13 +30,6 @@ export default {
     setCurrentRoute (e) {
       this.currentRoute = e
     }
-  },
-  beforeUpdate () {
-    // console.log('Before Updateing')
-  },
-  mounted () {
-    // console.log(this.$router.currentRoute.name)
-    // console.log(this.$router.currentRoute)
   }
 }
 </script>

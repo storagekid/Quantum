@@ -73,12 +73,6 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
-        path: '/profiles/:id',
-        name: 'profile-show',
-        component: () => import('components/profile/profileShow.vue'),
-        meta: { requiresAuth: true }
-      },
-      {
         path: '/clinics',
         name: 'clinics',
         component: () => import('pages/Clinics.vue'),

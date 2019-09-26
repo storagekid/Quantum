@@ -129,14 +129,6 @@ export default {
   },
   created () {
     this.value = this.initValue
-  },
-  mounted () {
-    // console.log('Custom Select:')
-    // console.log(this.field)
-    // console.log('Sources:')
-    // console.log(this.sourceOptions)
-    // console.log('Options:')
-    // console.log(this.options)
   }
 }
 </script>

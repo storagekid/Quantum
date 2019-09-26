@@ -151,14 +151,7 @@ export default {
         show: false,
         items: []
       },
-      selectedItems: [],
-      pagination: {
-        sortBy: null, // String, column "name" property value
-        descending: false,
-        page: 1,
-        rowsPerPage: 18 // current rows per page being displayed
-      },
-      filter: ''
+      selectedItems: []
     }
   },
   watch: {
