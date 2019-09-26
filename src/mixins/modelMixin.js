@@ -6,44 +6,41 @@ export const ModelsFetcher = {
   },
   methods: {
     getModelsNeeded () {
-      this.$q.loading.show({
-        delay: 100
-      })
       return new Promise((resolve, reject) => {
+        let counter = 0
+        this.$q.loading.show()
         if (this.modelsNeeded) {
           // console.log('Models Needed')
-          let counter = 0
           let size = Object.keys(this.modelsNeeded).length
           for (let name in this.modelsNeeded) {
             let model = this.modelsNeeded[name]
             if (!this.$store.state.Model.models[name] || model.refresh) {
               // console.log('Getting Models')
+              // console.log(name)
+              // console.log(model)
               if (!this.$store.state.Model.models[name]) {
-                // console.log('No Refreshed Model')
+                // console.log('Not found in STORE')
               } else if (!this.$store.state.Model.models[name].items.length) {
                 // console.log('No Items Yet in Model')
-              } else {
-                // console.log('Refreshed Model')
-                let now = Date.now()
-                now = now - 10000
-                // console.log(now)
-                // console.log(this.$store.state.Model.models[name].refreshed)
-                if (now < this.$store.state.Model.models[name].refreshed) {
-                  counter = counter + 1
-                  if (counter === size) resolve(size)
-                  continue
-                }
+              } else if (this.compareOptions(name)) {
+                // console.log('Same  Options')
+                counter = counter + 1
+                if (counter === size) resolve(size)
+                continue
               }
               this.$store.dispatch('Model/getModel', {
                 'model': name,
                 'options': model
               }).then((response) => {
+                // console.log('Response on model: ' + name)
+                // console.log(response)
                 counter = counter + 1
                 if (counter === size) resolve(size)
               }).catch((error) => {
+                // console.log('Catch on model: ' + name)
                 counter = counter + 1
                 this.$store.dispatch('Response/responseErrorManager', error.response)
-                if (counter === size) reject()
+                if (counter === size) reject(size)
               })
             } else if (!this.$store.state.Model.models[name].quasarData && !this.modelsNeeded[name].noQuasar) {
               this.$store.dispatch('Model/getQuasarData', {
@@ -54,7 +51,7 @@ export const ModelsFetcher = {
               }).catch((error) => {
                 counter = counter + 1
                 this.$store.dispatch('Response/responseErrorManager', error.response)
-                if (counter === size) reject()
+                if (counter === size) reject(size)
               })
             } else {
               counter = counter + 1
@@ -62,19 +59,33 @@ export const ModelsFetcher = {
             }
           }
         } else {
-          // console.log('No Models Needed')
           this.$q.loading.hide()
         }
       })
+    },
+    compareOptions (model) {
+      let storeOptions = this.$store.getters['Model/availableOptions'][model]
+      for (let option in this.modelsNeeded[model]) {
+        if (!storeOptions[option]) return false
+        else if (typeof this.modelsNeeded[model][option] !== 'object') {
+          if (this.modelsNeeded[model][option] !== storeOptions[option]) return false
+        } else {
+          if (JSON.stringify(this.modelsNeeded[model][option]) !== JSON.stringify(storeOptions[option])) return false
+        }
+      }
+      return true
     }
   },
-  mounted () {
-    // console.log('Model Fetcher Mounted Hook')
-    this.getModelsNeeded().then((size) => {
-      this.modelsFetched = size
-      this.$q.loading.hide()
-    }).catch((response) => {
-      this.$q.loading.hide()
+  beforeRouteEnter (to, from, next) {
+    console.log('beforeRouteEnter')
+    next(vm => {
+      // vm.getModelsNeeded()
+      vm.getModelsNeeded().then((size) => {
+        vm.modelsFetched = size
+        vm.$q.loading.hide()
+      }).catch((response) => {
+        vm.$q.loading.hide()
+      })
     })
   }
 }
