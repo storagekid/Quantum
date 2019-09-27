@@ -103,55 +103,26 @@
         :mode="mode"
         :batchMode="batchMode"
         :batchSource="batchSource"
-        v-on:multiUploadSent="showMultiUpload"
-        v-on:multiUploadFileSuccess="multiUploadFileSuccess"
-        v-on:multiUploadFileFailed="multiUploadFileFailed"
-        v-on:multiUploadFinish="clearMultiUpload"
         >
       </relation-card>
     </template>
-    <multi-upload-bars
-      v-if="multiUpload.show"
-      :opened="multiUpload.show"
-      :items="multiUpload.items"
-      >
-    </multi-upload-bars>
-    <q-dialog v-model="removeModel">
-      <remove-model-confirm
-        :modelQty="selectedItems.length"
-        :name="relationName"
-        :models="selectedItems"
-        :relatedTo="modelName"
-        :parentIndex="model.__index"
-        v-on:confirmed="hideRemoveRelation"
-        v-on:finished="finishRemoveRelation"
-        >
-      </remove-model-confirm>
-    </q-dialog>
   </form>
 </template>
 
 <script>
 import { Helpers } from '../../mixins/helpers'
-import MultiUploadBars from '../loaders/multiUploadBars'
-import RemoveModelConfirm from './removeModelConfirm'
 import CustomSelect from '../form/customSelect'
+import { customSelectMixins } from '../../mixins/customSelectMixins'
 import RelationCard from '../relation/relationCard'
 
 export default {
   name: 'ModelForm',
-  mixins: [Helpers],
+  mixins: [Helpers, customSelectMixins],
   props: ['mode', 'modelName', 'model', 'quasarData', 'step', 'batchMode', 'batchSource'],
-  components: { RemoveModelConfirm, RelationCard, MultiUploadBars, CustomSelect },
+  components: { RelationCard, CustomSelect },
   data () {
     return {
-      removeModel: false,
-      relationName: null,
-      multiUpload: {
-        show: false,
-        items: []
-      },
-      selectedItems: []
+      relationName: null
     }
   },
   watch: {
@@ -160,48 +131,6 @@ export default {
     }
   },
   methods: {
-    getFamily () {
-      let ids = []
-      if (this.batchSource.children) {
-        this.batchSource.children.map(i => { ids.push(i.id) })
-      }
-      ids.push(this.model.id)
-      return ids
-    },
-    hideDatePicker (index) {
-      let picker = 'qDateProxy-' + index
-      console.log(picker)
-      this.$refs[picker][0].hide()
-    },
-    showMultiUpload (payload) {
-      for (let item of payload.items) {
-        this.$set(item, 'phase', 'waiting')
-      }
-      payload.items[0].phase = 'uploading'
-      this.multiUpload.items = payload.items
-      this.multiUpload.show = true
-      // console.log(this.multiUpload.items)
-    },
-    multiUploadFileSuccess (payload) {
-      this.multiUpload.items[payload.index].phase = 'success'
-      if (payload.index < this.multiUpload.items.length - 1) {
-        this.multiUpload.items[payload.index + 1].phase = 'uploading'
-      }
-    },
-    multiUploadFileFailed (payload) {
-      this.multiUpload.items[payload.index].done = 'failed'
-      if (payload.index < this.multiUpload.items.length - 1) {
-        this.multiUpload.items[payload.index + 1].phase = 'uploading'
-      }
-    },
-    clearMultiUpload () {
-      this.multiUpload.show = false
-      this.multiUpload.items = []
-    },
-    getModelById (name, id) {
-      if (this.$store.state.Model.models[name]) return this.$store.state.Model.models[name].items.filter(item => item.id === id)[0]
-      return this.$store.state.Scope[this.$store.state.Scope.mode][name].items.filter(item => item.id === id)[0]
-    },
     getErrors (field) {
       for (let param in field.$params) {
         if (!field[param]) {
@@ -214,22 +143,6 @@ export default {
           return this.$t(error)
         }
       }
-    },
-    showRemoveRelation (relation) {
-      this.removeModel = true
-      this.relationName = relation
-    },
-    hideRemoveRelation () {
-      this.removeModel = false
-    },
-    finishRemoveRelation () {
-      this.selectedItems = []
-      this.relationName = null
-    },
-    getRelationListOptions (name) {
-      if (this.$store.state.Model.models[name]) return this.$store.state.Model.models[name].items.filter(item => this.model[name].includes(item.id))
-      else if (name === 'clinics') return this.$store.state.Scope.clinic[name].items.filter(item => this.model[name].includes(item.id))
-      else if (name === 'stores') return this.$store.state.Scope.store[name].items.filter(item => this.model[name].includes(item.id))
     },
     validateFromLaravel (rules) {
       let validations = {}
