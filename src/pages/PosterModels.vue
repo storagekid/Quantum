@@ -26,8 +26,7 @@ export default {
         poster_models: {
           full: true
         }
-      },
-      modelSelected: null
+      }
     }
   }
 }
