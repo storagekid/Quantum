@@ -139,8 +139,6 @@ export default {
           cache: false
         }
       },
-      tableModels: {
-      },
       modelSelected: null,
       confirm: {
         state: false,
