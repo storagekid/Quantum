@@ -90,7 +90,6 @@
             v-if="campaignOptions.length"
             :dense="true"
             counter
-            :max="true"
             :hide-bottom-space="true"
             :field="{name: 'campaigns', type: { model: 'clinics', default: { text: 'Selecciona una campaña'} }}"
             :sourceOptions="campaignOptions"
@@ -106,6 +105,15 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <multi-async-action-bars
+      v-if="multiAsyncAction.show"
+      :opened="multiAsyncAction.show"
+      :items="multiAsyncAction.items"
+      headerText="Generando Distribuciones de Fachadas"
+      keyField="nickname"
+      v-on:Finished="clearMultiUpload"
+      >
+    </multi-async-action-bars>
   </q-page>
 </template>
 
@@ -114,11 +122,13 @@ import { Helpers } from '../mixins/helpers'
 import { ModelsFetcher } from '../mixins/modelMixin'
 import { FileDownloadMethods } from '../mixins/fileMixin'
 import CustomSelect from '../components/form/customSelect'
+import { multiAsyncActionBarsMixins } from '../mixins/multiAsyncActionBarsMixins'
+import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'PosterDistributionDashboard',
-  mixins: [ ModelsFetcher, FileDownloadMethods, Helpers ],
-  components: { CustomSelect },
+  mixins: [ ModelsFetcher, FileDownloadMethods, Helpers, multiAsyncActionBarsMixins ],
+  components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {
       modelName: 'clinics',
@@ -130,7 +140,7 @@ export default {
           appends: ['clinic_distributions_by_campaign', 'open']
         },
         campaigns: {
-          refresh: false,
+          refresh: true,
           withCount: ['campaign_posters']
         }
       },
