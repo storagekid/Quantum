@@ -270,7 +270,6 @@
         :modelName="modelName"
         :batchMode="batchMode"
         :model="batchMode ? selectedItems : selectedItems[0]"
-        :modelsNeeded="quasarData.modelsNeeded"
         :quasarData="quasarData"
         v-on:modelUpdated="endUpdating"
         v-if="updateModel">
@@ -290,7 +289,6 @@
     <q-dialog v-model="newModel">
       <new-model
         :modelName="modelName"
-        :modelsNeeded="quasarData.modelsNeeded"
         :quasarData="quasarData"
         :relation="relatedTo"
         v-on:profileCreated="endCreating"
@@ -411,7 +409,7 @@ import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
-  props: ['modelName', 'relatedTo', 'modelsNeeded', 'getModelView', 'permissions', 'dense', 'grid', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass'],
+  props: ['modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass'],
   mixins: [ModelsFetcher, searchMethods, FileDownloadMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {

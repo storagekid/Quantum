@@ -27,7 +27,7 @@ import NewModelFormSteps from '../model/newModelFormSteps'
 export default {
   name: 'NewModel',
   components: { NewModelFormSteps },
-  props: ['modelName', 'modelsNeeded', 'quasarData', 'relation'],
+  props: ['modelName', 'quasarData', 'relation'],
   data () {
     return {
       visible: false

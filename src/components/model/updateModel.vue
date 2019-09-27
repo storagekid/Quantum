@@ -30,7 +30,7 @@ import UpdateModelTabs from '../model/updateModelTabs'
 export default {
   name: 'UpdateModel',
   components: { UpdateModelTabs },
-  props: ['modelName', 'model', 'batchMode', 'modelsNeeded', 'quasarData'],
+  props: ['modelName', 'model', 'batchMode', 'quasarData'],
   data () {
     return {
       visible: false
