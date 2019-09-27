@@ -126,10 +126,15 @@ export function getQuasarData (context, { model }) {
   })
 }
 export function sendNewForm (context, { source }) { // CLEANED
+  // console.log('sendNewForm')
+  // console.log(source)
+  // console.log(source.model)
   let payload = formConstructor(source.model)
+  // console.log(payload)
   if (source.quasarInfo) payload.append('quasarData', JSON.stringify(source.quasarInfo))
   if (source.options) payload.append('options', JSON.stringify(source.options))
   let headers = {}
+  // console.log('HERE')
   headers['Content-Type'] = 'multipart/form-data'
   return new Promise((resolve, reject) => {
     axios({
