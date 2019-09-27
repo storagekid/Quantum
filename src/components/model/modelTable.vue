@@ -403,16 +403,16 @@ import UpdateModel from './updateModel'
 import RemoveModelConfirm from './removeModelConfirm'
 import RestoreModelConfirm from './restoreModelConfirm'
 import CloneModelConfirm from './cloneModelConfirm'
+import { customSelectMixins } from '../../mixins/customSelectMixins'
 import CustomSelect from '../form/customSelect'
 import { FileDownloadMethods } from '../../mixins/fileMixin'
-import { Helpers } from '../../mixins/helpers'
 import { ModelsFetcher } from '../../mixins/modelMixin'
 import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
   props: ['modelName', 'relatedTo', 'modelsNeeded', 'getModelView', 'permissions', 'dense', 'grid', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass'],
-  mixins: [ModelsFetcher, searchMethods, FileDownloadMethods, Helpers],
+  mixins: [ModelsFetcher, searchMethods, FileDownloadMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {
     return {
@@ -644,15 +644,15 @@ export default {
     sortColumn (column) {
       this.$refs['table-' + this.modelName].sort(column.name)
     },
-    updateCustomSelectFilter (payload, object) {
-      if (!this.filters[object]) this.$set(this.filters, object, [])
-      if (!payload) this.filters[object] = []
-      else {
-        let values = []
-        payload.forEach((i) => { values.push(i.value) })
-        this.filters[object] = values
-      }
-    },
+    // updateCustomSelectFilter (payload, object) {
+    //   if (!this.filters[object]) this.$set(this.filters, object, [])
+    //   if (!payload) this.filters[object] = []
+    //   else {
+    //     let values = []
+    //     payload.forEach((i) => { values.push(i.value) })
+    //     this.filters[object] = values
+    //   }
+    // },
     exports () {
       this.downloadingExcel = true
       this.$axios({

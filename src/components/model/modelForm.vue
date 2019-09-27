@@ -110,14 +110,13 @@
 </template>
 
 <script>
-import { Helpers } from '../../mixins/helpers'
 import CustomSelect from '../form/customSelect'
 import { customSelectMixins } from '../../mixins/customSelectMixins'
 import RelationCard from '../relation/relationCard'
 
 export default {
   name: 'ModelForm',
-  mixins: [Helpers, customSelectMixins],
+  mixins: [customSelectMixins],
   props: ['mode', 'modelName', 'model', 'quasarData', 'step', 'batchMode', 'batchSource'],
   components: { RelationCard, CustomSelect },
   data () {

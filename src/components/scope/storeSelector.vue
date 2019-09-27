@@ -39,11 +39,11 @@
 
 <script>
 import CustomSelect from '../form/customSelect'
-import { Helpers } from '../../mixins/helpers'
+import { customSelectMixins } from '../../mixins/customSelectMixins'
 
 export default {
   name: 'StoreSelector',
-  mixins: [Helpers],
+  mixins: [customSelectMixins],
   components: { CustomSelect },
   data () {
     return {

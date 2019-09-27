@@ -316,7 +316,6 @@
 <script>
 import { ModelRelations, RelationController, SortingRelation } from '../../mixins/modelMixin'
 import { searchMethods } from '../../mixins/tableMixin'
-import { Helpers } from '../../mixins/helpers'
 import { FileDownloadMethods } from '../../mixins/fileMixin'
 import RemoveModelConfirm from '../model/removeModelConfirm'
 import { customSelectMixins } from '../../mixins/customSelectMixins'
@@ -327,7 +326,7 @@ import MultiAsyncActionBars from '../loaders/multiAsyncActionBars'
 export default {
   name: 'RelationCard',
   props: ['relationData', 'relatedTo', 'model', 'modelData', 'mode', 'batchMode', 'batchSource'],
-  mixins: [ModelRelations, RelationController, SortingRelation, searchMethods, FileDownloadMethods, Helpers, multiAsyncActionBarsMixins, customSelectMixins],
+  mixins: [ModelRelations, RelationController, SortingRelation, searchMethods, FileDownloadMethods, multiAsyncActionBarsMixins, customSelectMixins],
   components: { RemoveModelConfirm, CustomSelect, MultiAsyncActionBars },
   data () {
     return {

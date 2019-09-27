@@ -61,11 +61,11 @@
 
 <script>
 import CustomSelect from '../form/customSelect'
-import { Helpers } from '../../mixins/helpers'
+import { customSelectMixins } from '../../mixins/customSelectMixins'
 
 export default {
   name: 'ClinicSelector',
-  mixins: [Helpers],
+  mixins: [customSelectMixins],
   components: { CustomSelect },
   data () {
     return {

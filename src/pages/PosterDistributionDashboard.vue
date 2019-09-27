@@ -118,16 +118,16 @@
 </template>
 
 <script>
-import { Helpers } from '../mixins/helpers'
 import { ModelsFetcher } from '../mixins/modelMixin'
 import { FileDownloadMethods } from '../mixins/fileMixin'
+import { customSelectMixins } from '../mixins/customSelectMixins'
 import CustomSelect from '../components/form/customSelect'
 import { multiAsyncActionBarsMixins } from '../mixins/multiAsyncActionBarsMixins'
 import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'PosterDistributionDashboard',
-  mixins: [ ModelsFetcher, FileDownloadMethods, Helpers, multiAsyncActionBarsMixins ],
+  mixins: [ ModelsFetcher, FileDownloadMethods, customSelectMixins, multiAsyncActionBarsMixins ],
   components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {
@@ -200,12 +200,6 @@ export default {
           this.confirm.loading = false
           this.resetDialog()
         })
-    },
-    groupedBy (array, key) {
-      return array.reduce(function (rv, x) {
-        (rv[x[key]] = rv[x[key]] || []).push(x)
-        return rv
-      }, {})
     },
     showPDFGenerator (clinic) {
       this.confirm.state = true

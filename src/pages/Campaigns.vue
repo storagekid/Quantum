@@ -88,15 +88,15 @@
 </template>
 
 <script>
-import { Helpers } from '../mixins/helpers'
 import { ModelsFetcher } from '../mixins/modelMixin'
+import { customSelectMixins } from '../mixins/customSelectMixins'
 import CustomSelect from '../components/form/customSelect'
 import { multiAsyncActionBarsMixins } from '../mixins/multiAsyncActionBarsMixins'
 import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'CampaignsPage',
-  mixins: [ ModelsFetcher, Helpers, multiAsyncActionBarsMixins ],
+  mixins: [ ModelsFetcher, customSelectMixins, multiAsyncActionBarsMixins ],
   components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {

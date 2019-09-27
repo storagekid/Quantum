@@ -572,7 +572,6 @@
 </template>
 
 <script>
-import { Helpers } from '../mixins/helpers'
 import { ModelsFetcher, ModelController } from '../mixins/modelMixin'
 import { FileDownloadMethods } from '../mixins/fileMixin'
 import CustomSelect from '../components/form/customSelect'
@@ -580,7 +579,7 @@ import { customSelectMixins } from '../mixins/customSelectMixins'
 
 export default {
   name: 'PosterDistribution',
-  mixins: [ModelsFetcher, ModelController, FileDownloadMethods, Helpers, customSelectMixins],
+  mixins: [ModelsFetcher, ModelController, FileDownloadMethods, customSelectMixins],
   components: { CustomSelect },
   data () {
     return {
