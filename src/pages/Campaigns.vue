@@ -2,7 +2,6 @@
   <q-page class="q-pa-md">
     <model-table
       :modelName="modelName"
-      :modelsNeeded="tableModels"
       :dense="true"
       :getModelView="true"
       :rows="20"
@@ -51,7 +50,6 @@
             :dense="true"
             multiple
             counter
-            :max="true"
             :hide-bottom-space="true"
             :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona las clínicas'} }}"
             :sourceOptions="clinicOptions"
@@ -93,11 +91,12 @@
 import { Helpers } from '../mixins/helpers'
 import { ModelsFetcher } from '../mixins/modelMixin'
 import CustomSelect from '../components/form/customSelect'
+import { multiAsyncActionBarsMixins } from '../mixins/multiAsyncActionBarsMixins'
 import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'CampaignsPage',
-  mixins: [ ModelsFetcher, Helpers ],
+  mixins: [ ModelsFetcher, Helpers, multiAsyncActionBarsMixins ],
   components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {
@@ -123,9 +122,7 @@ export default {
           scoped: false,
           refresh: true,
           with: ['clinic_poster_priorities']
-        }
-      },
-      tableModels: {
+        },
         poster_models: {
           scoped: false,
           refresh: false,
@@ -142,6 +139,8 @@ export default {
           cache: false
         }
       },
+      tableModels: {
+      },
       modelSelected: null,
       confirm: {
         state: false,
@@ -151,13 +150,7 @@ export default {
         fake: true
       },
       clinicOptions: [],
-      clinicsSelected: [],
-      multiAsyncAction: {
-        show: false,
-        items: [],
-        success: [],
-        failed: []
-      }
+      clinicsSelected: []
     }
   },
   computed: {
@@ -232,15 +225,13 @@ export default {
         }
       }
       this.multiAsyncAction.items = distributions
-      this.multiUploadFiles({
-        items: this.multiAsyncAction.items
-      })
+      this.multiAsyncAction.show = true
     },
     generateCLinicsDistributionPDF (campaign) {
       // Select All clinics
       let items = this.$store.state.Model.models.clinics.items
       // Select a Bunch of clinics
-      // let items = this.$store.state.Model.models.clinics.items.slice(0, 10) // Last Index 218
+      items = this.$store.state.Model.models.clinics.items.slice(0, 1) // Last Index 218
       // Select By Clinic IDs
       // let items = this.$store.state.Model.models.clinics.items.filter(i => { return i.id > 199 && i.id < 216 })
       // items = this.$store.state.Model.models.clinics.items.filter(i => { return [1].includes(i.id) })
@@ -258,14 +249,9 @@ export default {
           if (i.clinic_distributions_by_campaign.hasOwnProperty('')) return true
         }
       })
-      // if (items.length) {
-      //   console.log(items)
-      //   return false
-      // }
       items.map(i => {
         let actionPayload = {}
         actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/posterDistributionByCampaing'
-        // actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/posterDistribution'
         actionPayload.method = 'POST'
         actionPayload.params = {
           'campaign': campaign.id,
@@ -274,100 +260,7 @@ export default {
         i.actionPayload = actionPayload
       })
       this.multiAsyncAction.items = items
-      this.multiUploadFiles({
-        items: this.multiAsyncAction.items
-      })
-    },
-    // Multi Async Actions Methods
-    async multiUploadFiles (payload) {
-      // console.log('Multi Async Actions Launched')
-      // console.log(payload)
-      for (let item of payload.items) {
-        this.$set(item, 'phase', 'waiting')
-      }
       this.multiAsyncAction.show = true
-      let success = []
-      let failed = []
-      let round = 0
-      while ((success.length + failed.length) < payload.items.length) {
-        let item = payload.items[round]
-        payload.items[round].phase = 'uploading'
-        await this.sendAction(item)
-          .then((response) => {
-            this.$emit('multiUploadFileSuccess', { index: round })
-            success.push(item)
-            this.multiAsyncAction.success.push(item)
-            payload.items[round].phase = 'success'
-            // console.log('Success')
-            // console.log('Success: ' + success.length)
-            // console.log('Items: ' + payload.items.length)
-            round++
-          }).catch(() => {
-            // this.$emit('multiUploadFileFailed', { index: round })
-            failed.push(item)
-            this.multiAsyncAction.failed.push(item)
-            payload.items[round].phase = 'failed'
-            // console.log('Failed')
-            // console.log('Failed: ' + failed.length)
-            // console.log('Items: ' + payload.items.length)
-            round++
-          })
-      }
-      return true
-    },
-    sendAction (payload) {
-      // console.log('Send File')
-      // console.log(payload)
-      return new Promise((resolve, reject) => {
-        this.$axios({
-          url: payload.actionPayload.url,
-          method: payload.actionPayload.method,
-          params: payload.actionPayload.params
-        }).then((response) => {
-          // this.$store.commit('Model/addRelationItems', { name: this.relatedTo, relation: payload.relation, items: response.model, parentIndex: this.model.__index })
-          this.$store.dispatch('Notify/displayMessage', { message: 'Action Completed', position: 'top', type: 'positive' })
-          resolve(response)
-        }).catch((response) => {
-          this.$store.dispatch('Notify/displayMessage', { message: 'Action Failed', position: 'top', type: 'negative' })
-          // this.$store.dispatch('Response/responseErrorManager', response)
-          reject(response)
-        })
-      })
-    },
-    sendMultiFiles () {
-      this.multiUploadFiles({
-        relation: this.openRelation,
-        items: this.multiUpload.items,
-        parentIndex: this.model.__index
-      })
-      // this.closeRelationForm()
-    },
-    showMultiUpload (payload) {
-      for (let item of payload.items) {
-        this.$set(item, 'phase', 'waiting')
-      }
-      payload.items[0].phase = 'uploading'
-      this.multiUpload.items = payload.items
-      this.multiUpload.show = true
-      // console.log(this.multiUpload.items)
-    },
-    multiUploadFileSuccess (payload) {
-      this.multiUpload.items[payload.index].phase = 'success'
-      if (payload.index < this.multiUpload.items.length - 1) {
-        this.multiUpload.items[payload.index + 1].phase = 'uploading'
-      }
-    },
-    multiUploadFileFailed (payload) {
-      this.multiUpload.items[payload.index].done = 'failed'
-      if (payload.index < this.multiUpload.items.length - 1) {
-        this.multiUpload.items[payload.index + 1].phase = 'uploading'
-      }
-    },
-    clearMultiUpload () {
-      this.multiAsyncAction.show = false
-      this.multiAsyncAction.items = []
-      this.multiAsyncAction.failed = []
-      this.multiAsyncAction.success = []
     },
     clearConfirm () {
       this.confirm = {
@@ -394,10 +287,6 @@ export default {
       // items = items.filter(i => { return i.poster_distributions.length })
       items = items.filter(i => {
         if (!i.campaign_facades.length) return false
-        // if (i.ends_at < campaign.starts_at && i.deleted_at) return false
-        // let clinicStart = new Date(i.starts_at)
-        // let campaignEnd = new Date(campaign.ends_at)
-        // if (clinicStart > campaignEnd) return false
         for (let pdf of i.campaign_facades) {
           if (pdf.campaign_id === campaign.id) return true
         }
