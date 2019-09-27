@@ -5,15 +5,16 @@ export const ModelsFetcher = {
     }
   },
   methods: {
-    getModelsNeeded () {
+    getModelsNeeded (object = 'modelsNeeded') {
       return new Promise((resolve, reject) => {
         let counter = 0
         this.$q.loading.show()
-        if (this.modelsNeeded) {
-          // console.log('Models Needed')
-          let size = Object.keys(this.modelsNeeded).length
-          for (let name in this.modelsNeeded) {
-            let model = this.modelsNeeded[name]
+        if (this[object]) {
+          // console.log('getModelsNeeded')
+          // console.log(object)
+          let size = Object.keys(this[object]).length
+          for (let name in this[object]) {
+            let model = this[object][name]
             if (!this.$store.state.Model.models[name] || model.refresh) {
               // console.log('Getting Models')
               // console.log(name)
@@ -42,7 +43,7 @@ export const ModelsFetcher = {
                 this.$store.dispatch('Response/responseErrorManager', error.response)
                 if (counter === size) reject(size)
               })
-            } else if (!this.$store.state.Model.models[name].quasarData && !this.modelsNeeded[name].noQuasar) {
+            } else if (!this.$store.state.Model.models[name].quasarData && !this[object][name].noQuasar) {
               this.$store.dispatch('Model/getQuasarData', {
                 'model': name
               }).then((response) => {
@@ -76,8 +77,18 @@ export const ModelsFetcher = {
       return true
     }
   },
+  created () {
+    // console.log('created in ModelsFetcher')
+    // vm.getModelsNeeded()
+    this.getModelsNeeded('componentModels').then((size) => {
+      this.modelsFetched = size
+      this.$q.loading.hide()
+    }).catch((response) => {
+      this.$q.loading.hide()
+    })
+  },
   beforeRouteEnter (to, from, next) {
-    console.log('beforeRouteEnter')
+    // console.log('beforeRouteEnter')
     next(vm => {
       // vm.getModelsNeeded()
       vm.getModelsNeeded().then((size) => {
