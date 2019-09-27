@@ -26,7 +26,7 @@
         >
         <template v-slot:top="props" class="dense">
           <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete)">
-            <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="newModel = !newModel" v-if="can.create"/>
+            <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="newModel = !newModel" v-if="can.create && (!relatedTo && !grid)"/>
             <q-btn-group flat rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
               <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="edit" @click="showUpdate" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
@@ -42,6 +42,7 @@
             <q-btn size="sm" rounded color="green" icon="grid_on" :label="!$q.screen.lt.md ? 'Excel' : ''" :loading="downloadingExcel" @click="confirm.state = true" v-if="can.show"/>
           </q-btn-group>
           <q-btn-group rounded class="q-mr-md">
+            <q-btn size="sm" rounded color="blue" icon="clear_all" :label="!$q.screen.lt.md ? 'Seleccionar Todo' : ''" @click="selectedItems = model" :disabled="selectedItems.length === model.length" v-if="relatedTo && grid"/>
             <q-btn size="sm" rounded color="blue" icon="clear_all" :label="!$q.screen.lt.md ? 'Borrar Selección' : ''" @click="selectedItems = []" :disabled="!selectedItems.length"/>
             <q-btn size="sm" rounded color="blue" icon="format_clear" :label="!$q.screen.lt.md ? 'Quitar Filtros' : ''" @click="clearFilters" :disabled="!filter"/>
           </q-btn-group>
@@ -300,7 +301,14 @@
       <clone-model-confirm :name="modelName" :model="selectedItems[0]" v-on:confirmed="cloneConfirmed"></clone-model-confirm>
     </q-dialog>
     <q-dialog v-model="removeModel">
-      <remove-model-confirm :modelQty="selectedItems.length" :name="modelName" :models="selectedItems" v-on:confirmed="removeConfirmed"></remove-model-confirm>
+      <remove-model-confirm
+        :modelQty="selectedItems.length"
+        :name="modelName"
+        :models="selectedItems"
+        :relatedTo="relatedTo ? relatedTo.name : null"
+        :parentIndex="relatedTo ? relatedTo.index : null"
+        v-on:confirmed="removeConfirmed">
+      </remove-model-confirm>
     </q-dialog>
     <q-dialog v-model="restoreModel">
       <restore-model-confirm :modelQty="selectedItems.length" :name="modelName" :models="selectedItems" :quasarData="quasarData" v-on:confirmed="restoreConfirmed"></restore-model-confirm>
