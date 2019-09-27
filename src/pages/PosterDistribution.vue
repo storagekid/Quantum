@@ -576,10 +576,11 @@ import { Helpers } from '../mixins/helpers'
 import { ModelsFetcher, ModelController } from '../mixins/modelMixin'
 import { FileDownloadMethods } from '../mixins/fileMixin'
 import CustomSelect from '../components/form/customSelect'
+import { customSelectMixins } from '../mixins/customSelectMixins'
 
 export default {
   name: 'PosterDistribution',
-  mixins: [ModelsFetcher, ModelController, FileDownloadMethods, Helpers],
+  mixins: [ModelsFetcher, ModelController, FileDownloadMethods, Helpers, customSelectMixins],
   components: { CustomSelect },
   data () {
     return {
@@ -875,12 +876,12 @@ export default {
       let newdate = date.replace(/\//g, '-')
       return newdate >= this.clinicSelected.starts_at
     },
-    hideDatePicker (index) {
-      let picker = 'qDateProxy-' + index
-      // console.log(picker)
-      if (this.$refs[picker][0]) this.$refs[picker][0].hide()
-      else this.$refs[picker].hide()
-    },
+    // hideDatePicker (index) {
+    //   let picker = 'qDateProxy-' + index
+    //   // console.log(picker)
+    //   if (this.$refs[picker][0]) this.$refs[picker][0].hide()
+    //   else this.$refs[picker].hide()
+    // },
     composeFacade (index, force = false) {
       this.btnLoaders.compose = true
       let payload = { relation: 'poster_distributions', id: this.designs[index].id }

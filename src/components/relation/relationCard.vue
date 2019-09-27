@@ -298,6 +298,18 @@
     <q-inner-loading :showing="relationLoader">
       <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
     </q-inner-loading>
+    <multi-async-action-bars
+      v-if="multiAsyncAction.show"
+      :opened="multiAsyncAction.show"
+      :items="multiAsyncAction.items"
+      :relation="relationData.name"
+      :relatedTo="relatedTo"
+      :parentIndex="model.__index"
+      :headerText="'Creando nuevo ' + relationData.name"
+      keyField="nickname"
+      v-on:Finished="clearMultiUpload"
+      >
+    </multi-async-action-bars>
   </q-card>
 </template>
 
@@ -307,13 +319,16 @@ import { searchMethods } from '../../mixins/tableMixin'
 import { Helpers } from '../../mixins/helpers'
 import { FileDownloadMethods } from '../../mixins/fileMixin'
 import RemoveModelConfirm from '../model/removeModelConfirm'
+import { customSelectMixins } from '../../mixins/customSelectMixins'
 import CustomSelect from '../form/customSelect'
+import { multiAsyncActionBarsMixins } from '../../mixins/multiAsyncActionBarsMixins'
+import MultiAsyncActionBars from '../loaders/multiAsyncActionBars'
 
 export default {
   name: 'RelationCard',
   props: ['relationData', 'relatedTo', 'model', 'modelData', 'mode', 'batchMode', 'batchSource'],
-  mixins: [ModelRelations, RelationController, SortingRelation, searchMethods, FileDownloadMethods, Helpers],
-  components: { RemoveModelConfirm, CustomSelect },
+  mixins: [ModelRelations, RelationController, SortingRelation, searchMethods, FileDownloadMethods, Helpers, multiAsyncActionBarsMixins, customSelectMixins],
+  components: { RemoveModelConfirm, CustomSelect, MultiAsyncActionBars },
   data () {
     return {
       showMultiuploader: false,
@@ -367,11 +382,11 @@ export default {
           }).catch(() => { this.relationLoader = false })
       }
     },
-    hideDatePicker (index) {
-      let picker = 'qDateProxy-' + index
-      // console.log(picker)
-      this.$refs[picker][0].hide()
-    },
+    // hideDatePicker (index) {
+    //   let picker = 'qDateProxy-' + index
+    //   // console.log(picker)
+    //   this.$refs[picker][0].hide()
+    // },
     renderStore (object, path) {
       // console.log('Render Store')
       // console.log(object)
@@ -506,9 +521,19 @@ export default {
             else if (state === 'MU') newObject.state_id = states['Murcia, Región de']
             else if (state === 'NA') newObject.state_id = states['Navarra, Comunidad Foral de']
             else if (state === 'PV') newObject.state_id = states['País Vasco']
-            this.multiUpload.items.push(newObject)
+            let temp = { model: {} }
+            temp.model = newObject
+            temp.model.nickname =
+              this.$store.state.Model.models.poster_models.items.filter(i => { return i.id === temp.model.poster_model_id })[0].name + ' ' +
+              this.$store.state.Model.models.posters.items.filter(i => { return i.id === temp.model.poster_id })[0].name + ' ' +
+              temp.model.type
+            this.multiAsyncAction.items.push(temp)
           }
-        } else this.multiUpload.items.push(object)
+        } else {
+          let temp = { model: {} }
+          temp.model = object
+          this.multiAsyncAction.items.push(temp)
+        }
       }
     },
     removeFiles (files) {
@@ -517,11 +542,8 @@ export default {
       }
     },
     failedMethod () {
-      this.multiUploadFiles({
-        relation: this.openRelation,
-        items: this.multiUpload.items,
-        parentIndex: this.model.__index
-      })
+      console.log('failedMethod')
+      this.sendMultiFiles()
       this.closeRelationForm()
     },
     uploadFiles (files) {
@@ -530,11 +552,21 @@ export default {
       })
     },
     sendMultiFiles () {
-      this.multiUploadFiles({
-        relation: this.openRelation,
-        items: this.multiUpload.items,
-        parentIndex: this.model.__index
+      console.log('Send Multi Files')
+      this.multiAsyncAction.items.map(i => {
+        let actionPayload = {}
+        actionPayload.url = this.$store.state.App.dataWarehouse + this.relatedTo + '/' + this.model.id + '/' + this.relationData.name
+        actionPayload.method = 'POST'
+        actionPayload.params = {}
+        i.actionPayload = actionPayload
+        i.model[this.relationData.getForeignKeyName] = this.model.id
       })
+      this.multiAsyncAction.show = true
+      // this.multiUploadFiles({
+      //   relation: this.openRelation,
+      //   items: this.multiUpload.items,
+      //   parentIndex: this.model.__index
+      // })
       // this.closeRelationForm()
     },
     uploadFilesAdded (files, relation, field) {
