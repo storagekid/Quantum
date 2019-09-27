@@ -422,7 +422,6 @@ export default {
         index: null,
         blueprint: null
       },
-      campaignSelected: '',
       newModel: false,
       cloneModel: false,
       updateModel: false,
@@ -517,10 +516,10 @@ export default {
         }
       }
     },
-    checkIndeterminate () {
-      if (this.selectedItems.length && this.selectedItems.length !== this.model.length) return true
-      return false
-    },
+    // checkIndeterminate () {
+    //   if (this.selectedItems.length && this.selectedItems.length !== this.model.length) return true
+    //   return false
+    // },
     ready () {
       if (!this.model) return false
       return true
@@ -550,10 +549,10 @@ export default {
         return this.$store.state.Model.models[this.relatedTo.name].quasarData.relations[this.modelName].quasarData
       } else return this.$store.state.Model.models[this.modelName].quasarData
     },
-    selectedId () {
-      if (this.selectedItems.length > 0) return this.selectedItems[0].id
-      return false
-    },
+    // selectedId () {
+    //   if (this.selectedItems.length > 0) return this.selectedItems[0].id
+    //   return false
+    // },
     batchForm () {
       if (this.quasarData) {
         if (Object.keys(this.quasarData.relations).length) return true
@@ -830,7 +829,7 @@ export default {
   created () {
     this.getTable()
     if (this.relatedTo) {
-      console.log('Relation Table')
+      // console.log('Relation Table')
     } else if (this.$store.state.Model.models[this.modelName].pagination) {
       this.$set(this.pagination, 'rowsNumber', this.$store.state.Model.models[this.modelName].pagination.total)
     }
