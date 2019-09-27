@@ -47,10 +47,11 @@
 
 <script>
 import { required, email, minLength } from 'vuelidate/lib/validators'
+import { FormMixins } from '../../mixins/formMixins'
 
 export default {
   name: 'loginForm',
-  components: {},
+  mixins: [FormMixins],
   data () {
     return {
       visible: false,
@@ -85,20 +86,6 @@ export default {
               this.$store.dispatch('Response/responseNoResponse')
             }
           })
-      }
-    },
-    getErrors (field) {
-      // console.log(field)
-      for (let param in field.$params) {
-        if (!field[param]) {
-          let error = 'forms.errors.' + param
-          if (param === 'minLength') {
-            return this.$t(error, { min: field.$params[param].min })
-          } else if (param === 'maxLength') {
-            return this.$t(error, { max: field.$params[param].max })
-          }
-          return this.$t(error)
-        }
       }
     }
   },
