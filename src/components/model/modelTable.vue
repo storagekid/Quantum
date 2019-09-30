@@ -5,9 +5,11 @@
         :class="wrapperClass ? wrapperClass : 'custom-table-wrapper'"
         v-if="model"
         :table-class="tableClass ? tableClass : 'custom-table'"
+        :table-header-class="tableHeaderClass"
         :dense="!($q.screen.lt.md || dense) ? true : dense"
         :loading="loading"
         :grid="grid"
+        :grid-header="gridHeader"
         :hide-header="false"
         :ref="'table-' + modelName"
         :data="model"
@@ -42,7 +44,9 @@
             <q-btn size="sm" rounded color="green" icon="grid_on" :label="!$q.screen.lt.md ? 'Excel' : ''" :loading="downloadingExcel" @click="confirm.state = true" v-if="can.show"/>
           </q-btn-group>
           <q-btn-group rounded class="q-mr-md">
-            <q-btn size="sm" rounded color="blue" icon="clear_all" :label="!$q.screen.lt.md ? 'Seleccionar Todo' : ''" @click="selectedItems = model" :disabled="selectedItems.length === model.length" v-if="relatedTo && grid"/>
+            <!-- Old Old Select All Before Quasar v.1.1.6 -->
+              <!-- <q-btn size="sm" rounded color="blue" icon="clear_all" :label="!$q.screen.lt.md ? 'Seleccionar Todo' : ''" @click="selectedItems = model" :disabled="selectedItems.length === model.length" v-if="relatedTo && grid"/> -->
+            <!-- END Old Select All -->
             <q-btn size="sm" rounded color="blue" icon="clear_all" :label="!$q.screen.lt.md ? 'Borrar Selección' : ''" @click="selectedItems = []" :disabled="!selectedItems.length"/>
             <q-btn size="sm" rounded color="blue" icon="format_clear" :label="!$q.screen.lt.md ? 'Quitar Filtros' : ''" @click="clearFilters" :disabled="!filter"/>
           </q-btn-group>
@@ -83,51 +87,53 @@
             :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
             @click="props.toggleFullscreen"
           />
-          <div v-if="$refs['table-' + modelName] && grid" class="custom-table full-width">
-            <div class="q-table q-mb-sm q-mt-xs">
-              <q-tr class="row justify-between full-width">
-                <template v-for="column in $refs['table-' + modelName].computedCols">
-                  <template v-if="column.onGrid !== 'hide'">
-                    <th :class="[column.__thClass, filter.indexOf(column.label) > -1 ? 'filtered' : '']" :key="column.name" auto-width v-if="visibleColumns.includes(column.name)">
-                      <div>
-                        {{ column.label }}
-                        <q-icon :class="[column.__iconClass]" @click="sortColumn(column)" :name="column.__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-icon>
-                        <q-icon :class="[column.__filterClass]" name="filter_list">
-                          <q-popup-proxy transition-show="flip-up" transition-hide="flip-down">
-                            <div class="q-pa-md custom-table filter">
-                              <q-option-group
-                                class="text-h6"
-                                v-model="filters[column.name].options"
-                                :options="[
-                                  {label: 'Buscar', value: 'has'},
-                                  {label: 'Exacto', value: 'is'},
-                                  {label: 'Excluir', value: 'not'},
-                                  {label: 'Incluir', value: 'in'},
-                                  {label: 'Sí', value: 'some'},
-                                  {label: 'No', value: 'empty'}
-                                ]"
-                                color="primary"
-                                inline
-                                dense
-                              />
-                              <q-input
-                                v-model="filters[column.name].text"
-                                debounce="800"
-                                v-if="!['empty', 'some'].includes(filters[column.name].options)"
-                                :disable="['empty', 'some'].includes(filters[column.name].options)"
-                                dense
-                                >
-                              </q-input>
-                            </div>
-                          </q-popup-proxy>
-                        </q-icon>
-                      </div>
-                    </th>
+          <!-- Old Table Headers Before Quasar v.1.1.6 -->
+            <!-- <div v-if="$refs['table-' + modelName] && grid" class="custom-table full-width">
+              <div class="q-table q-mb-sm q-mt-xs">
+                <q-tr class="row justify-between full-width">
+                  <template v-for="column in $refs['table-' + modelName].computedCols">
+                    <template v-if="column.onGrid !== 'hide'">
+                      <th :class="[column.__thClass, filter.indexOf(column.label) > -1 ? 'filtered' : '']" :key="column.name" auto-width v-if="visibleColumns.includes(column.name)">
+                        <div>
+                          {{ column.label }}
+                          <q-icon :class="[column.__iconClass]" @click="sortColumn(column)" :name="column.__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-icon>
+                          <q-icon :class="[column.__filterClass]" name="filter_list">
+                            <q-popup-proxy transition-show="flip-up" transition-hide="flip-down">
+                              <div class="q-pa-md custom-table filter">
+                                <q-option-group
+                                  class="text-h6"
+                                  v-model="filters[column.name].options"
+                                  :options="[
+                                    {label: 'Buscar', value: 'has'},
+                                    {label: 'Exacto', value: 'is'},
+                                    {label: 'Excluir', value: 'not'},
+                                    {label: 'Incluir', value: 'in'},
+                                    {label: 'Sí', value: 'some'},
+                                    {label: 'No', value: 'empty'}
+                                  ]"
+                                  color="primary"
+                                  inline
+                                  dense
+                                />
+                                <q-input
+                                  v-model="filters[column.name].text"
+                                  debounce="800"
+                                  v-if="!['empty', 'some'].includes(filters[column.name].options)"
+                                  :disable="['empty', 'some'].includes(filters[column.name].options)"
+                                  dense
+                                  >
+                                </q-input>
+                              </div>
+                            </q-popup-proxy>
+                          </q-icon>
+                        </div>
+                      </th>
+                    </template>
                   </template>
-                </template>
-              </q-tr>
-            </div>
-          </div>
+                </q-tr>
+              </div>
+            </div> -->
+          <!-- END Old Table Headers -->
         </template>
         <q-tr slot="header" slot-scope="props" :props="props" v-if="ready">
           <q-th class="text-left" auto-width dense>
@@ -409,7 +415,7 @@ import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
-  props: ['modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass'],
+  props: ['modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass'],
   mixins: [ModelsFetcher, searchMethods, FileDownloadMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {
