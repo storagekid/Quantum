@@ -21,6 +21,58 @@ function formConstructor (source) {
   }
   return payload
 }
+export function setInitModels (context, profile) {
+  let counties = []
+  let countyIds = []
+  let states = []
+  let stateIds = []
+  let countries = []
+  let countryIds = []
+  let clinicIds = []
+  let storeIds = []
+  if (profile.clinicScope) {
+    Object.keys(profile.clinicScope).map((k) => {
+      clinicIds.push(profile.clinicScope[k].id)
+      if (!countyIds.includes(profile.clinicScope[k].county.id)) {
+        counties.push(profile.clinicScope[k].county)
+        countyIds.push(profile.clinicScope[k].county.id)
+      }
+      if (!stateIds.includes(profile.clinicScope[k].county.state_id)) {
+        states.push(profile.clinicScope[k].county.state)
+        stateIds.push(profile.clinicScope[k].county.state_id)
+      }
+      if (!countryIds.includes(profile.clinicScope[k].county.state.country_id)) {
+        countries.push(profile.clinicScope[k].county.state.country)
+        countryIds.push(profile.clinicScope[k].county.state.country_id)
+      }
+    })
+    context.commit('setModel', { name: 'clinics', options: {} })
+    context.commit('setModelItems', { name: 'clinics', items: profile.clinicScope })
+    let scope = { countries: countries, states: states, counties: counties, clinics: profile.clinicScope }
+    context.commit('Scope/setScopeMode', 'clinic', { root: true })
+    context.commit('Scope/initScope', scope, { root: true })
+  }
+  if (profile.storeScope) {
+    Object.keys(profile.storeScope).map((k) => {
+      storeIds.push(profile.storeScope[k].id)
+      if (!countryIds.includes(profile.storeScope[k].country_id)) {
+        countries.push(profile.storeScope[k].country)
+        countryIds.push(profile.storeScope[k].country_id)
+      }
+    })
+    context.commit('setModel', { name: 'stores', options: {} })
+    context.commit('setModelItems', { name: 'stores', items: profile.storeScope })
+    let scope = { countries: countries, stores: profile.storeScope }
+    context.commit('Scope/setScopeMode', 'store', { root: true })
+    context.commit('Scope/initScope', scope, { root: true })
+  }
+  context.commit('setModel', { name: 'counties', options: {} })
+  context.commit('setModelItems', { name: 'counties', items: counties })
+  context.commit('setModel', { name: 'states', options: {} })
+  context.commit('setModelItems', { name: 'states', items: states })
+  context.commit('setModel', { name: 'countries', options: {} })
+  context.commit('setModelItems', { name: 'countries', items: countries })
+}
 export function updateScopedModels (context) {
   return new Promise((resolve, reject) => {
     if (context.rootState.Scope.clinic.clinics.selected.length > 9) {
