@@ -4,7 +4,6 @@
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
       :dense="true"
-      wrapperClass="dashboard-table"
       hideHeaderButtons
       tableView="PosterDistributionDashBoard"
       rows="10"
