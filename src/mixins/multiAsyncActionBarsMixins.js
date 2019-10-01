@@ -3,6 +3,8 @@ export const multiAsyncActionBarsMixins = {
     return {
       multiAsyncAction: {
         show: false,
+        headerText: 'Multiaction Send',
+        keyField: 'id',
         items: [],
         success: [],
         failed: []

@@ -7,7 +7,7 @@
       <q-card v-if="uploading">
         <q-card-section class="bg-primary text-white">
           <div class="text-h5 text-center">
-            {{ headerText ? headerText : 'Multiaction Send'}}
+            {{ headerText }}
           </div>
         </q-card-section>
         <q-card-section v-if="items.length">
@@ -54,7 +54,7 @@ export default {
   },
   computed: {
     uploadingText () {
-      return this.uploading[0]['model'] ? this.uploading[0].model[this.keyField ? this.keyField : 'id'] : this.uploading[0][this.keyField ? this.keyField : 'id']
+      return this.uploading[0]['model'] ? this.uploading[0].model[this.keyField] : this.uploading[0][this.keyField]
     },
     uploading () {
       let item = this.items.filter(item => { return item.phase === 'uploading' })
