@@ -26,7 +26,11 @@
         <template v-if="item.item">
           <template v-if="Object.keys(item.item).length">
             <div v-for="(distributions, campaign) in item.item" :key="campaign">
-              {{ campaign === '' ? 'Por defecto: ' : campaign }} {{ distributions.length }}
+              <span v-if="campaign === ''">Por defecto: {{ distributions.length }}</span>
+              <span v-else class="text-primary">
+                <span class="text-italic text-caption">{{ $store.state.Model.models.campaigns.items.filter(i => { return i.id === parseInt(campaign) })[0].name }} </span>
+                <strong>{{ distributions.length }}</strong>
+              </span>
             </div>
           </template>
           <div v-else class="text-negative text-italic"> No tiene</div>
