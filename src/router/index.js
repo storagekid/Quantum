@@ -27,15 +27,15 @@ export default function ({ store }) {
       // this route requires auth, check if logged in
       // if not, redirect to login page.
       if (!localStorage.token) {
-        console.log('Router TO Login')
+        // console.log('Router TO Login')
         next({
           name: 'login',
           query: { redirect: to.fullPath }
         })
       } else if (to.name === 'home') next()
       else if (!store.state.App.routes.length) {
-        console.log('Router TO Included in LocalStorage')
-        console.log(JSON.parse(localStorage.routes).includes(to.name))
+        // console.log('Router TO Included in LocalStorage')
+        // console.log(JSON.parse(localStorage.routes).includes(to.name))
         if (!JSON.parse(localStorage.routes).includes(to.name)) {
           next({
             name: 'home'
@@ -43,29 +43,31 @@ export default function ({ store }) {
         }
         next()
       } else {
-        console.log('Router TO Included')
+        // console.log('Router TO Included')
         // console.log(store.state.App.routes)
         // console.log(to.name)
         // console.log(store.state.App.routes.includes(to.name))
         if (!store.state.App.routes.includes(to.name) && to.name !== 'logout') {
-          console.log('WTF')
+          // console.log('WTF')
           let name
           if (localStorage.settings) {
             name = JSON.parse(localStorage.settings)['home']
+            if (!store.state.App.routes.includes(name)) name = store.state.App.routes[0]
           } else {
             name = store.state.App.routes[0]
           }
+          // console.log('NAME: ' + name)
           next({
             name: name
           })
         } else {
-          console.log('THERE')
+          // console.log('THERE')
           if (to.matched[0].path !== '/auth') localStorage.setItem('lastPage', to.name)
           next()
         }
       }
     } else {
-      console.log('Last NEXT')
+      // console.log('Last NEXT')
       next() // make sure to always call next()!
     }
   })
