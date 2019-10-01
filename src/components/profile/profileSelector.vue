@@ -12,7 +12,7 @@
           radio
           :options="profiles"
         />
-        <q-btn color="primary" label="Aceptar" class="q-mt-md full-width" @click="$emit('profile-selected', profileSelected.id)" :disabled="profileSelected === null"/>
+        <q-btn color="primary" label="Aceptar" class="q-mt-md full-width" @click="getScope(profileSelected.id)" :disabled="profileSelected === null"/>
       </form>
     </q-card-section>
     <q-inner-loading :showing="visible">
@@ -29,6 +29,28 @@ export default {
     return {
       profileSelected: null,
       visible: false
+    }
+  },
+  methods: {
+    getScope (id) {
+      this.visible = true
+      this.$axios.get(this.$store.state.App.dataWarehouse + 'profiles', {
+        params: {
+          options: {
+            ids: [id],
+            with: ['clinics', 'stores'],
+            appends: [
+              'storeScope',
+              'clinicScope'
+            ]
+          }
+        }
+      }).then((response) => {
+        this.visible = false
+        this.$emit('profile-selected', { id: id, profile: response.data.model[0] })
+      }).catch((response) => {
+        this.visible = false
+      })
     }
   }
 }
