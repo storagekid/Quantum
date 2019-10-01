@@ -260,7 +260,9 @@
           class="text-center"
           >
           <model-table
+            tableHeaderClass="custom-table"
             :grid="true"
+            :gridHeader="true"
             v-on:editRelation="editRelation"
             dense
             :modelName="relationData.name"
