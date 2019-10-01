@@ -24,7 +24,7 @@ export function setScope (state, scope) {
 }
 export function setScopeMode (state, mode) {
   state.mode = mode
-  localStorage.setItem('scope', JSON.stringify(state))
+  // localStorage.setItem('scope', JSON.stringify(state))
 }
 export function clearScope (state) {
   state.clinic = {
@@ -47,6 +47,12 @@ export function setScopeFromStorage (state, scope) {
   state.clinic.states.selected = scope.clinic.states.selected
   state.store.stores.selected = scope.store.stores.selected
   state.store.countries.selected = scope.store.countries.selected
+  state.clinic.clinics.items = scope.clinic.clinics.items
+  state.clinic.counties.items = scope.clinic.counties.items
+  state.clinic.countries.items = scope.clinic.countries.items
+  state.clinic.states.items = scope.clinic.states.items
+  state.store.stores.items = scope.store.stores.items
+  state.store.countries.items = scope.store.countries.items
   state.mode = scope.mode
   state.setted = true
 }
