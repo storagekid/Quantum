@@ -113,13 +113,19 @@ export default {
       return this.$store.state.Model.models.countries.items
     },
     states () {
-      return this.$store.state.Model.models.states.items.filter(i => { return this.countriesIDs.includes(i.country_id) })
+      return this.countrySelected.length
+        ? this.$store.state.Model.models.states.items.filter(i => { return this.countriesIDs.includes(i.country_id) })
+        : this.$store.state.Model.models.states.items
     },
     counties () {
-      return this.$store.state.Model.models.counties.items.filter(i => { return this.statesIDs.includes(i.state_id) })
+      return this.stateSelected.length
+        ? this.$store.state.Model.models.counties.items.filter(i => { return this.statesIDs.includes(i.state_id) })
+        : this.$store.state.Model.models.counties.items
     },
     clinics () {
-      return this.$store.state.Model.models.clinics.items.filter(i => { return this.countiesIDs.includes(i.county_id) })
+      return this.countySelected.length
+        ? this.$store.state.Model.models.clinics.items.filter(i => { return this.countiesIDs.includes(i.county_id) })
+        : this.$store.state.Model.models.clinics.items
     }
   },
   methods: {
@@ -171,17 +177,17 @@ export default {
       // console.log('initialScope')
       if (this.$store.state.Scope.clinic.countries.selected.length) {
         this.countrySelected = this.$store.state.Scope.clinic.countries.selected
-      }
+      } else { this.countrySelected = this.countries }
       if (this.$store.state.Scope.clinic.states.selected.length) {
         this.stateSelected = this.$store.state.Scope.clinic.states.selected
-      }
+      } else { this.stateSelected = this.states }
       if (this.$store.state.Scope.clinic.counties.selected.length) {
         this.countySelected = this.$store.state.Scope.clinic.counties.selected
-      }
+      } else { this.countySelected = this.counties }
       if (this.$store.state.Scope.clinic.clinics.selected.length) {
         // console.log('Clinics.Selected')
         this.clinicSelected = this.$store.state.Scope.clinic.clinics.selected
-      }
+      } else this.clinicSelected = [this.clinics[0]]
     }
   },
   created () {
