@@ -3,13 +3,13 @@
       <q-btn
         icon="swap_horiz"
         icon-right="domain"
-        v-if="$store.state.Scope.store.stores.ids.length && (mode === 'clinic')"
+        v-if="$store.state.Scope.store.stores.items.length && (mode === 'clinic')"
         @click="openStoreSelector = true"
       />
       <template v-if="mode === 'store'">
         <q-btn
           @click="openStoreSelector = true"
-          :disabled="$store.state.Scope.store.stores.ids.length === 1"
+          :disabled="$store.state.Scope.store.stores.items.length === 1"
         >
           <q-toolbar-title v-if="!storeSelected">{{storeText}}</q-toolbar-title>
           <q-toolbar-title v-else>
@@ -23,7 +23,7 @@
       <template v-else-if="mode === 'clinic'">
         <q-btn
           @click="openSelector = true"
-          :disabled="$store.state.Scope.clinic.clinics.ids.length === 1"
+          :disabled="$store.state.Scope.clinic.clinics.items.length === 1"
           class="q-py-sm"
         >
           <q-toolbar-title v-if="!clinicSelected">{{text}}</q-toolbar-title>
@@ -38,7 +38,7 @@
       <q-btn
         icon="swap_horiz"
         icon-right="store_mall_directory"
-        v-if="$store.state.Scope.clinic.clinics.ids.length && (mode === 'store')"
+        v-if="$store.state.Scope.clinic.clinics.items.length && (mode === 'store')"
         @click="openSelector = true"
       />
       <q-dialog v-model="openStoreSelector">
