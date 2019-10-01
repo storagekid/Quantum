@@ -174,7 +174,6 @@ export default {
         })
     },
     initialScope () {
-      // console.log('initialScope')
       if (this.$store.state.Scope.clinic.countries.selected.length) {
         this.countrySelected = this.$store.state.Scope.clinic.countries.selected
       } else { this.countrySelected = this.countries }
@@ -185,7 +184,6 @@ export default {
         this.countySelected = this.$store.state.Scope.clinic.counties.selected
       } else { this.countySelected = this.counties }
       if (this.$store.state.Scope.clinic.clinics.selected.length) {
-        // console.log('Clinics.Selected')
         this.clinicSelected = this.$store.state.Scope.clinic.clinics.selected
       } else this.clinicSelected = [this.clinics[0]]
     }
