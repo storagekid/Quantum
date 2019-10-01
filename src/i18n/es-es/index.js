@@ -9,6 +9,10 @@ export default {
   },
   menus: {
     main: {
+      home: {
+        title: 'Inicio',
+        subtitle: ''
+      },
       'admin-area': {
         title: 'Admin Area',
         subtitle: ''
