@@ -25,9 +25,9 @@
           :disable="!item.item.campaign_posters_count"
           >
           <div class="column q-gutter-sm q-py-sm">
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="generateCLinicsDistributionPDF(item.item)"></q-btn>
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Rehacer Fachadas" @click="generateCLinicDistributionFacades(item.item)" :disable="true"></q-btn>
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Lanzar Distribución" @click="showLauncher(item.item)"></q-btn>
+            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="showGenerateClinicDistributionPDF(item.item)"></q-btn>
+            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Rehacer Fachadas" @click="showGenerateCLinicDistributionFacades(item.item)" :disable="false"></q-btn>
+            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Lanzar Distribución" @click="showCampaignDistributionLauncher(item.item)"></q-btn>
           </div>
         </q-btn-dropdown>
       </template>
@@ -71,7 +71,7 @@
         </q-card-section>
         <q-card-actions align="right">
           <q-btn label="Cancel" color="primary" v-close-popup />
-          <q-btn label="Confirmar" color="positive" v-close-popup @click="launchDistribution()" :disable="!clinicsSelected.length"/>
+          <q-btn label="Confirmar" color="positive" v-close-popup @click="startAction" :disable="!clinicsSelected.length"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -79,8 +79,8 @@
       v-if="multiAsyncAction.show"
       :opened="multiAsyncAction.show"
       :items="multiAsyncAction.items"
-      headerText="Generando Distribuciones de Fachadas"
-      keyField="nickname"
+      :headerText="multiAsyncAction.headerText"
+      :keyField="multiAsyncAction.keyField"
       v-on:Finished="clearMultiUpload"
       >
     </multi-async-action-bars>
@@ -115,6 +115,7 @@ export default {
           scoped: false,
           refresh: true,
           cache: false,
+          withTrashed: true,
           with: ['poster_distributions', 'campaign_facades'],
           appends: ['clinic_distributions_by_campaign']
         },
@@ -145,7 +146,8 @@ export default {
         id: null,
         index: null,
         item: null,
-        fake: true
+        fake: true,
+        action: null
       },
       clinicOptions: [],
       clinicsSelected: []
@@ -185,17 +187,13 @@ export default {
     }
   },
   methods: {
-    generateCLinicDistributionFacades (campaign) {
-      let distributions = []
-      // Select All clinics
+    startAction () {
+      this[this.confirm.action]()
+    },
+    showGenerateCLinicDistributionFacades (campaign) {
+      this.confirm.item = campaign
+      this.confirm.action = 'generateClinicDistributionFacades'
       let items = this.$store.state.Model.models.clinics.items
-      // Select a Bunch of clinics
-      // items = this.$store.state.Model.models.clinics.items.slice(0, 10) // Last Index 218
-      // Select By Clinic IDs
-      // let items = this.$store.state.Model.models.clinics.items.filter(i => { return i.id > 199 && i.id < 216 })
-      // items = this.$store.state.Model.models.clinics.items.filter(i => { return [1].includes(i.id) })
-      // Filter if the clinic has no Distributions
-      // items = items.filter(i => { return i.poster_distributions.length })
       items = items.filter(i => {
         if (i.ends_at < campaign.starts_at && i.deleted_at) return false
         let clinicStart = new Date(i.starts_at)
@@ -205,13 +203,37 @@ export default {
           if (i.clinic_distributions_by_campaign.hasOwnProperty('')) return true
         }
       })
-      for (let clinic of items) {
+      this.clinicOptions = items
+      this.confirm.state = true
+    },
+    generateClinicDistributionFacades () {
+      let campaign = this.confirm.item
+      let distributions = []
+      for (let clinic of this.clinicsSelected) {
         if (clinic.poster_distributions.length) {
-          // console.log(clinic)
-          if (!clinic.poster_distributions) continue
+          let campaignFound = []
+          let noCampaign = []
           for (let dist of clinic.poster_distributions) {
+            if (dist.campaign_id === campaign.id) campaignFound.push(dist)
+            else noCampaign.push(dist)
+          }
+          let defDists = []
+          if (campaignFound.length) defDists = campaignFound
+          else {
+            let endDate = []
+            let noEndDate = []
+            for (let dist of noCampaign) {
+              if (dist.starts_at < campaign.ends_at) {
+                if (!dist.ends_at) noEndDate.push(dist)
+                else if (dist.ends_at >= campaign.ends_at) endDate.push(dist)
+              }
+              if (endDate.length) defDists = endDate
+              else defDists = noEndDate
+            }
+          }
+          for (let dist of defDists) {
             let actionPayload = {}
-            actionPayload.url = this.$store.state.App.dataWarehouse + 'poster_distributions/' + dist.id + '/compose'
+            actionPayload.url = this.$store.state.App.dataWarehouse + 'poster_distributions/' + dist.id + '/complete'
             actionPayload.method = 'GET'
             actionPayload.params = {
               'campaign': campaign.id,
@@ -223,25 +245,19 @@ export default {
         }
       }
       this.multiAsyncAction.items = distributions
+      this.multiAsyncAction.headerText = 'Generating ' + campaign.name + ' Facades'
       this.multiAsyncAction.show = true
+      this.clearConfirm()
     },
-    generateCLinicsDistributionPDF (campaign) {
-      // Select All clinics
+    showGenerateClinicDistributionPDF (campaign) {
+      this.confirm.item = campaign
+      this.confirm.action = 'generateClinicsDistributionPDF'
+      this.clinicOptions = []
       let items = this.$store.state.Model.models.clinics.items
-      // Select a Bunch of clinics
-      items = this.$store.state.Model.models.clinics.items.slice(0, 1) // Last Index 218
-      // Select By Clinic IDs
-      // let items = this.$store.state.Model.models.clinics.items.filter(i => { return i.id > 199 && i.id < 216 })
-      // items = this.$store.state.Model.models.clinics.items.filter(i => { return [1].includes(i.id) })
-      // Filter if the clinic has no Distributions
-      // items = items.filter(i => { return i.poster_distributions.length })
       items = items.filter(i => {
         if (i.ends_at < campaign.starts_at && i.deleted_at) return false
         let clinicStart = new Date(i.starts_at)
         let campaignEnd = new Date(campaign.ends_at)
-        // console.log(i.starts_at)
-        // console.log(campaign.ends_at)
-        // console.log(clinicStart > campaignEnd)
         if (clinicStart > campaignEnd) return false
         if (typeof i.clinic_distributions_by_campaign === 'object') {
           if (i.clinic_distributions_by_campaign.hasOwnProperty('')) return true
@@ -257,32 +273,21 @@ export default {
         }
         i.actionPayload = actionPayload
       })
-      this.multiAsyncAction.items = items
+      this.clinicOptions = items
+      this.confirm.state = true
+    },
+    generateClinicsDistributionPDF () {
+      let campaign = this.confirm.item
+      this.multiAsyncAction.items = this.clinicsSelected
+      this.multiAsyncAction.headerText = 'Generating ' + campaign.name + ' PDFs'
       this.multiAsyncAction.show = true
+      this.clearConfirm()
     },
-    clearConfirm () {
-      this.confirm = {
-        state: false,
-        id: null,
-        index: null,
-        item: null,
-        fake: true
-      }
-      this.clinicsSelected = []
-    },
-    showLauncher (campaign) {
+    showCampaignDistributionLauncher (campaign) {
       // console.log(campaign)
       this.confirm.item = campaign
-      this.clinicOptions = []
-      // Select All clinics
+      this.confirm.action = 'campaignDistributionLauncher'
       let items = this.$store.state.Model.models.clinics.items
-      // Select a Bunch of clinics
-      // items = this.$store.state.Model.models.clinics.items.slice(0, 10) // Last Index 218
-      // Select By Clinic IDs
-      // let items = this.$store.state.Model.models.clinics.items.filter(i => { return i.id > 199 && i.id < 216 })
-      // items = this.$store.state.Model.models.clinics.items.filter(i => { return [1].includes(i.id) })
-      // Filter if the clinic has no Distributions
-      // items = items.filter(i => { return i.poster_distributions.length })
       items = items.filter(i => {
         if (!i.campaign_facades.length) return false
         for (let pdf of i.campaign_facades) {
@@ -293,7 +298,8 @@ export default {
       this.clinicOptions = items
       this.confirm.state = true
     },
-    launchDistribution () {
+    campaignDistributionLauncher () {
+      let campaign = this.confirm.item
       for (let clinic of this.clinicsSelected) {
         let actionPayload = {}
         actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + clinic.id + '/posterDistributionLauncher'
@@ -303,12 +309,22 @@ export default {
           'fake': this.confirm.fake
         }
         clinic.actionPayload = actionPayload
-        this.multiAsyncAction.items.push(clinic)
       }
-      this.multiUploadFiles({
-        items: this.multiAsyncAction.items
-      })
+      this.multiAsyncAction.items = this.clinicsSelected
+      this.multiAsyncAction.headerText = 'Sending ' + campaign.name + ' Distribution PDFs'
+      this.multiAsyncAction.show = true
       this.clearConfirm()
+    },
+    clearConfirm () {
+      this.confirm = {
+        state: false,
+        id: null,
+        index: null,
+        item: null,
+        fake: true,
+        action: null
+      }
+      this.clinicsSelected = []
     }
   }
 }
