@@ -8,7 +8,7 @@
           leave-active-class="animated bounceOutRight"
         >
           <login-form v-if="loginCard" v-on:logged="loggedIn" key="loginCard"></login-form>
-          <profile-selector v-if="profileCard" :profiles="profiles" v-on:profile-selected="getScope" key="profileCard"></profile-selector>
+          <profile-selector v-if="profileCard" :profiles="profiles" v-on:profile-selected="parseProfile" key="profileCard"></profile-selector>
           <realm-selector v-if="realmCard" v-on:realmSelected="realmSelected" key="realmCard"></realm-selector>
           <clinic-selector v-if="clinicCard" key="clinicCard" v-on:ClinicScopeSelected="finishLoggin"></clinic-selector>
           <store-selector v-if="storeCard" key="storeCard" v-on:StoreScopeSelected="finishLoggin"></store-selector>
@@ -71,25 +71,34 @@ export default {
       this.loginCard = false
       this.checkProfiles()
     },
-    getScope (id) {
-      this.visible = true
-      this.setProfile(id)
-      this.$axios.get(this.$store.state.App.dataWarehouse + 'profiles', {
-        params: {
-          ids: [id],
-          with: ['clinics', 'stores'],
-          appends: [
-            'storeScope',
-            'clinicScope'
-          ]
-        }
-      }).then((response) => {
-        this.setUser()
-        this.setStartModels(response.data.model[0])
-        this.profileCard = false
-        this.checkRealm()
-      })
+    parseProfile (payload) {
+      this.setProfile(payload.id)
+      this.setUser()
+      this.setStartModels(payload.profile)
+      this.profileCard = false
+      this.checkRealm()
     },
+    // getScope (id) {
+    //   this.visible = true
+    //   this.setProfile(id)
+    //   this.$axios.get(this.$store.state.App.dataWarehouse + 'profiles', {
+    //     params: {
+    //       options: {
+    //         ids: [id],
+    //         with: ['clinics', 'stores'],
+    //         appends: [
+    //           'storeScope',
+    //           'clinicScope'
+    //         ]
+    //       }
+    //     }
+    //   }).then((response) => {
+    //     this.setUser()
+    //     this.setStartModels(response.data.model[0])
+    //     this.profileCard = false
+    //     this.checkRealm()
+    //   })
+    // },
     checkRealm () {
       let groups = Object.keys(this.user.groupsInfo)
       if (groups.includes('Administrators')) {
@@ -119,69 +128,35 @@ export default {
       }
     },
     setStartModels (profile) {
-      // console.log(profile)
-      let counties = []
-      let countyIds = []
-      let states = []
-      let stateIds = []
-      let countries = []
-      let countryIds = []
-      let clinicIds = []
-      let storeIds = []
-      if (profile.clinicScope.length) {
-        Object.keys(profile.clinicScope).map((k) => {
-          clinicIds.push(profile.clinicScope[k].id)
-          if (!countyIds.includes(profile.clinicScope[k].county.id)) {
-            counties.push(profile.clinicScope[k].county)
-            countyIds.push(profile.clinicScope[k].county.id)
-          }
-          if (!stateIds.includes(profile.clinicScope[k].county.state_id)) {
-            states.push(profile.clinicScope[k].county.state)
-            stateIds.push(profile.clinicScope[k].county.state_id)
-          }
-          if (!countryIds.includes(profile.clinicScope[k].county.state.country_id)) {
-            countries.push(profile.clinicScope[k].county.state.country)
-            countryIds.push(profile.clinicScope[k].county.state.country_id)
-          }
-        })
-        this.$store.commit('Model/setModel', { name: 'clinics', options: {} })
-        this.$store.commit('Model/setModelItems', { name: 'clinics', items: profile.clinicScope })
-      }
-      if (profile.storeScope.length) {
-        Object.keys(profile.storeScope).map((k) => {
-          storeIds.push(profile.storeScope[k].id)
-          if (!countryIds.includes(profile.storeScope[k].country_id)) {
-            countries.push(profile.storeScope[k].country)
-            countryIds.push(profile.storeScope[k].country_id)
-          }
-        })
-        this.$store.commit('Model/setModel', { name: 'stores', options: {} })
-        this.$store.commit('Model/setModelItems', { name: 'stores', items: profile.storeScope })
-      }
-      this.$store.commit('Model/setModel', { name: 'counties', options: {} })
-      this.$store.commit('Model/setModelItems', { name: 'counties', items: counties })
-      this.$store.commit('Model/setModel', { name: 'states', options: {} })
-      this.$store.commit('Model/setModelItems', { name: 'states', items: states })
-      this.$store.commit('Model/setModel', { name: 'countries', options: {} })
-      this.$store.commit('Model/setModelItems', { name: 'countries', items: countries })
-
-      this.$store.commit('Scope/initScope', { storeIds, clinicIds, countyIds, stateIds, countryIds })
+      this.$store.dispatch('Model/setInitModels', profile)
     },
     checkClinics () {
       this.$store.commit('Scope/setScopeMode', 'clinic')
-      if (this.$store.state.Scope.clinic.clinics.ids.length > 1) {
+      if (this.$store.state.Scope.clinic.clinics.items.length > 1) {
         this.clinicCard = true
         this.visible = false
       } else {
+        this.$store.commit('Scope/setScope',
+          {
+            countries: this.$store.state.Scope.clinic.countries.items,
+            states: this.$store.state.Scope.clinic.states.items,
+            counties: this.$store.state.Scope.clinic.counties.items,
+            clinics: this.$store.state.Scope.clinic.clinics.items
+          })
         this.finishLoggin()
       }
     },
     checkStores () {
       this.$store.commit('Scope/setScopeMode', 'store')
-      if (this.$store.state.Scope.store.stores.ids.length > 1) {
+      if (this.$store.state.Scope.store.stores.items.length > 1) {
         this.storeCard = true
         this.visible = false
       } else {
+        this.$store.commit('Scope/setScope',
+          {
+            countries: this.$store.state.Scope.clinic.countries.items,
+            stores: this.$store.state.Scope.store.stores.items
+          })
         this.finishLoggin()
       }
     },
