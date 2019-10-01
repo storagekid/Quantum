@@ -71,7 +71,11 @@ export default {
   },
   computed: {
     ready () {
-      if (this.$store.state.Scope.clinic.clinics.selected.length === 1) return true
+      if (this.$store.state.Scope.clinic.clinics.selected.length === 1) {
+        if (this.$store.state.Model.models['profiles']) {
+          if (this.$store.state.Model.models['profiles'].items) return true
+        }
+      }
       return false
     },
     model () {
