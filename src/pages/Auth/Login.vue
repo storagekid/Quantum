@@ -78,27 +78,6 @@ export default {
       this.profileCard = false
       this.checkRealm()
     },
-    // getScope (id) {
-    //   this.visible = true
-    //   this.setProfile(id)
-    //   this.$axios.get(this.$store.state.App.dataWarehouse + 'profiles', {
-    //     params: {
-    //       options: {
-    //         ids: [id],
-    //         with: ['clinics', 'stores'],
-    //         appends: [
-    //           'storeScope',
-    //           'clinicScope'
-    //         ]
-    //       }
-    //     }
-    //   }).then((response) => {
-    //     this.setUser()
-    //     this.setStartModels(response.data.model[0])
-    //     this.profileCard = false
-    //     this.checkRealm()
-    //   })
-    // },
     checkRealm () {
       let groups = Object.keys(this.user.groupsInfo)
       if (groups.includes('Administrators')) {
