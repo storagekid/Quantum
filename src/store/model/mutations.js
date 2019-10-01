@@ -38,7 +38,6 @@ export function setModel (state, { name, options, cached = false }) {
 
   state.models = { ...state.models, [name]: model }
 }
-
 export function updateModelOptions (state, { name, options }) {
   state.models[name].options = {
     refresh: options.refresh || false,
