@@ -422,7 +422,7 @@
                         size="sm"
                         >
                         <div class="column q-gutter-sm q-py-sm">
-                          <template v-for="campaign in campaignOptions">
+                          <template v-for="campaign in campaignOptionsByDistribution(design)">
                             <q-btn
                               v-if="!design.complete_facades_campaigns.includes(campaign.id) && campaign.campaign_posters_count"
                               flat
@@ -640,13 +640,7 @@ export default {
   },
   computed: {
     campaignOptions () {
-      if (this.dateSelected) {
-        return this.$store.state.Model.models.campaigns.items.filter(i => {
-          if (this.designsInRange[0].ends_at) return i.starts_at >= this.dateSelected.value && this.designsInRange[0].ends_at > i.starts_at
-          return i.ends_at >= this.dateSelected.value
-        })
-      }
-      return []
+      return this.$store.state.Model.models.campaigns.items
     },
     dates () {
       let dates = []
@@ -803,6 +797,17 @@ export default {
     }
   },
   methods: {
+    campaignOptionsByDistribution (dist) {
+      let items = this.$store.state.Model.models.campaigns.items.filter(i => {
+        let cStarts = new Date(i.starts_at)
+        let cEnds = new Date(i.ends_at)
+        let dStarts = new Date(dist.starts_at)
+        let dEnds = new Date(dist.ends_at)
+        if (!dist.ends_at) return cEnds > dStarts
+        else return i.id === dist.campaign_id || (cStarts >= dStarts && cEnds <= dEnds)
+      })
+      return items
+    },
     cloneDistributions () {
       this.$q.loading.show()
       let designIds = []
