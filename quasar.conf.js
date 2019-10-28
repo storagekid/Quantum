@@ -56,6 +56,7 @@ module.exports = function (ctx) {
         'QCheckbox',
         'QDate',
         'QUploader',
+        'QUploaderAddTrigger',
         'QInnerLoading',
         'QSpinnerGears',
         'QTable',
