@@ -22,7 +22,7 @@ export const customSelectMixins = {
     updateCustomSelect (object, payload, onRelation = false) {
       if (onRelation) {
         if (this.relationData.type === 'BelongsToMany') {
-          console.log('BelongsToMany CustomSelect')
+          // console.log('BelongsToMany CustomSelect')
           this.relation = payload
           this.$v.relation.$touch()
         } else {
