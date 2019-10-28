@@ -43,9 +43,12 @@
 </template>
 
 <script>
+import { FileMethods } from '../../mixins/fileMixin'
+
 export default {
   name: 'MultiAsyncActionBars',
-  props: ['items', 'opened', 'keyField', 'headerText', 'relation', 'relatedTo', 'parentIndex'],
+  props: ['items', 'opened', 'keyField', 'headerText', 'relation', 'relatedTo', 'parentIndex', 'mode', 'model'],
+  mixins: [ FileMethods ],
   data () {
     return {
       success: [],
@@ -71,11 +74,13 @@ export default {
   },
   methods: {
     async multiUploadFiles () {
-      console.log('Multi Async Actions Launched')
+      // console.log('Multi Async Actions Launched')
       // console.log(payload)
       for (let item of this.items) {
         this.$set(item, 'phase', 'waiting')
       }
+      console.log('Updating Model???')
+      console.log(this.mode)
       // this.multiAsyncAction.show = true
       let success = []
       let failed = []
@@ -84,13 +89,35 @@ export default {
         let item = this.items[round]
         this.items[round].phase = 'uploading'
         if (this.relation) {
-          console.log('Has Relation')
+          // console.log('Has Relation')
           item.url = item.actionPayload.url
           await this.$store.dispatch('Model/sendNewForm', {
             'source': item
           }).then((response) => {
             this.$store.commit('Model/addRelationItems', { name: this.relatedTo, relation: this.relation, items: response.model, parentIndex: this.parentIndex })
             this.$store.dispatch('Notify/displayMessage', { message: 'Relation Saved', position: 'top', type: 'positive' })
+            this.$emit('multiUploadFileSuccess', { index: round })
+            success.push(item)
+            this.success.push(item)
+            this.items[round].phase = 'success'
+            round++
+          }).catch((response) => {
+            this.$store.dispatch('Response/responseErrorManager', response)
+            failed.push(item)
+            this.failed.push(item)
+            this.items[round].phase = 'failed'
+            round++
+          })
+        } else if (this.mode === 'updateModel') {
+          console.log('Updating Model')
+          console.log(item)
+          item.url = item.actionPayload.url
+          await this.$store.dispatch('Model/sendUpdateForm', {
+            'source': item
+          }).then((response) => {
+            console.log(this.model)
+            if (this.model.persist) this.$store.commit('Model/updateModelItems', { name: this.model.name, item: response.model })
+            this.$store.dispatch('Notify/displayMessage', { message: 'Model Updated', position: 'top', type: 'positive' })
             this.$emit('multiUploadFileSuccess', { index: round })
             success.push(item)
             this.success.push(item)
@@ -123,16 +150,25 @@ export default {
     },
     sendAction (payload) {
       // console.log('Send File')
-      // console.log(payload)
+      if (!payload.actionPayload.responseType) payload.actionPayload.responseType = 'json'
+      console.log(payload)
       return new Promise((resolve, reject) => {
         this.$axios({
           url: payload.actionPayload.url,
           method: payload.actionPayload.method,
-          params: payload.actionPayload.params
+          params: payload.actionPayload.params,
+          responseType: payload.actionPayload.responseType
         }).then((response) => {
           // if (this.relation) {
           //   this.$store.commit('Model/addRelationItems', { name: this.relatedTo, relation: this.relation, items: response.model, parentIndex: this.parentIndex })
           // }
+          console.log(payload.actionPayload.download)
+          if (payload.actionPayload.responseType) {
+            if (payload.actionPayload.responseType === 'blob' || payload.actionPayload.download) {
+              console.log('Expecting Blob')
+              this.triggerDownload(response)
+            }
+          }
           this.$store.dispatch('Notify/displayMessage', { message: 'Action Completed', position: 'top', type: 'positive' })
           resolve(response)
         }).catch((response) => {
