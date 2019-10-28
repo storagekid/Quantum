@@ -17,6 +17,10 @@ export default {
         title: 'Admin Area',
         subtitle: ''
       },
+      'admin-exit': {
+        title: 'Back to User',
+        subtitle: ''
+      },
       'admin-dashboard': {
         title: 'Panel de Administración',
         subtitle: ''
@@ -65,8 +69,28 @@ export default {
         title: 'Organization Charts',
         subtitle: ''
       },
+      marketing: {
+        title: 'Marketing',
+        subtitle: ''
+      },
+      legals: {
+        title: 'Legals',
+        subtitle: ''
+      },
+      promotions: {
+        title: 'Promotions',
+        subtitle: ''
+      },
+      claims: {
+        title: 'Claims',
+        subtitle: ''
+      },
       campaigns: {
         title: 'Campaigns',
+        subtitle: ''
+      },
+      posters: {
+        title: 'Posters',
         subtitle: ''
       },
       'poster-distribution': {
@@ -89,6 +113,22 @@ export default {
         title: 'Poster Models',
         subtitle: ''
       },
+      'mailing-draw': {
+        title: 'Mailing',
+        subtitle: ''
+      },
+      mailings: {
+        title: 'Mailing Campaigns',
+        subtitle: ''
+      },
+      'mailing-designs': {
+        title: 'Mailing Designs',
+        subtitle: ''
+      },
+      'clinic-mailings': {
+        title: 'Mailing/Clinic',
+        subtitle: ''
+      },
       'sanitary-codes': {
         title: 'Sanitary Codes',
         subtitle: ''
@@ -97,8 +137,68 @@ export default {
         title: 'Users',
         subtitle: ''
       },
+      'scope-draw': {
+        title: 'Ámbito',
+        subtitle: ''
+      },
+      'scope-countries': {
+        title: 'Countries',
+        subtitle: ''
+      },
+      'scope-counties': {
+        title: 'Counties',
+        subtitle: ''
+      },
+      'scope-states': {
+        title: 'States',
+        subtitle: ''
+      },
+      'scope-clinics': {
+        title: 'Clinics',
+        subtitle: ''
+      },
+      'scope-stores': {
+        title: 'Stores',
+        subtitle: ''
+      },
+      'scope-companies': {
+        title: 'Companies',
+        subtitle: ''
+      },
+      'scope-languages': {
+        title: 'Languages',
+        subtitle: ''
+      },
+      'scope-currencies': {
+        title: 'Currencies',
+        subtitle: ''
+      },
       clinics: {
         title: 'Clinics',
+        subtitle: ''
+      },
+      stands: {
+        title: 'Stands',
+        subtitle: ''
+      },
+      'purchasing-draw': {
+        title: 'Purchasing',
+        subtitle: ''
+      },
+      providers: {
+        title: 'Providers',
+        subtitle: ''
+      },
+      products: {
+        title: 'Products',
+        subtitle: ''
+      },
+      services: {
+        title: 'Services',
+        subtitle: ''
+      },
+      rrhh: {
+        title: 'Human Resources',
         subtitle: ''
       }
     }

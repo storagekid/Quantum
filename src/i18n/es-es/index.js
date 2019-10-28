@@ -17,6 +17,10 @@ export default {
         title: 'Admin Area',
         subtitle: ''
       },
+      'admin-exit': {
+        title: 'Volver a Usuario',
+        subtitle: ''
+      },
       'admin-dashboard': {
         title: 'Panel de Administración',
         subtitle: ''
@@ -65,8 +69,28 @@ export default {
         title: 'Organigramas',
         subtitle: ''
       },
+      marketing: {
+        title: 'Marketing',
+        subtitle: ''
+      },
+      legals: {
+        title: 'Legales',
+        subtitle: ''
+      },
+      promotions: {
+        title: 'Promociones',
+        subtitle: ''
+      },
+      claims: {
+        title: 'Reclamos',
+        subtitle: ''
+      },
       campaigns: {
         title: 'Campañas',
+        subtitle: ''
+      },
+      posters: {
+        title: 'Cartelería',
         subtitle: ''
       },
       'poster-distribution': {
@@ -89,6 +113,22 @@ export default {
         title: 'Modelos Cartel',
         subtitle: ''
       },
+      'mailing-draw': {
+        title: 'Buzoneo',
+        subtitle: ''
+      },
+      mailings: {
+        title: 'Campañas Buzoneo',
+        subtitle: ''
+      },
+      'mailing-designs': {
+        title: 'Diseños Buzoneo',
+        subtitle: ''
+      },
+      'clinic-mailings': {
+        title: 'Buzoneo/Clínica',
+        subtitle: ''
+      },
       'sanitary-codes': {
         title: 'Códigos Sanitarios',
         subtitle: ''
@@ -97,8 +137,68 @@ export default {
         title: 'Usuarios',
         subtitle: ''
       },
+      'scope-draw': {
+        title: 'Ámbito',
+        subtitle: ''
+      },
+      'scope-countries': {
+        title: 'Países',
+        subtitle: ''
+      },
+      'scope-counties': {
+        title: 'Provincias',
+        subtitle: ''
+      },
+      'scope-states': {
+        title: 'CCAA',
+        subtitle: ''
+      },
+      'scope-clinics': {
+        title: 'Clínicas',
+        subtitle: ''
+      },
+      'scope-stores': {
+        title: 'Oficinas',
+        subtitle: ''
+      },
+      'scope-companies': {
+        title: 'Empresas',
+        subtitle: ''
+      },
+      'scope-languages': {
+        title: 'Idiomas',
+        subtitle: ''
+      },
+      'scope-currencies': {
+        title: 'Divisas',
+        subtitle: ''
+      },
       clinics: {
         title: 'Clínicas',
+        subtitle: ''
+      },
+      stands: {
+        title: 'Stands',
+        subtitle: ''
+      },
+      'purchasing-draw': {
+        title: 'Compras',
+        subtitle: ''
+      },
+      providers: {
+        title: 'Proveedores',
+        subtitle: ''
+      },
+      products: {
+        title: 'Productos',
+        subtitle: ''
+      },
+      services: {
+        title: 'Servicios',
+        subtitle: ''
+      },
+      rrhh: {
+        title: 'Recursos Humanos',
         subtitle: ''
       }
     }
