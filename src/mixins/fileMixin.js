@@ -1,5 +1,21 @@
-export const FileDownloadMethods = {
+export const FileMethods = {
   methods: {
+    uploadFile (payload) {
+      return new Promise((resolve, reject) => {
+        // console.log(id)
+        let url = this.$store.state.App.dataWarehouse + 'files'
+        this.$axios({
+          'url': url,
+          method: 'POST'
+        }).then((response) => {
+          this.$store.dispatch('Notify/displayMessage', { message: 'File Saved', position: 'top', type: 'positive' }, { root: true })
+          resolve()
+        }).catch((response) => {
+          this.$store.dispatch('Response/responseErrorManager', response)
+          reject()
+        })
+      })
+    },
     downloadFile (id) {
       return new Promise((resolve, reject) => {
         // console.log(id)
