@@ -4,7 +4,7 @@
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
       :dense="true"
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       >
       <template slot="body-cell-parent.name" slot-scope="item" :item="item">
         <q-chip dense square color="secondary" text-color="primary" v-if="item.item">{{ item.item }}</q-chip>

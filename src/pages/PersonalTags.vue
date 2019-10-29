@@ -47,11 +47,11 @@
 
 <script>
 import { ModelsFetcher } from '../mixins/modelMixin'
-import { FileDownloadMethods } from '../mixins/fileMixin'
+import { FileMethods } from '../mixins/fileMixin'
 
 export default {
   name: 'personal-tags',
-  mixins: [ModelsFetcher, FileDownloadMethods],
+  mixins: [ModelsFetcher, FileMethods],
   data () {
     return {
       modelName: 'profiles',
@@ -169,15 +169,15 @@ export default {
             // console.log('HERE')
             vm.readBinaryFile(fileEntry)
           } else {
-            console.log('Trying to Read not Image File')
+            // console.log('Trying to Read not Image File')
             // vm.readFile(fileEntry)
           }
         }
         fileWriter.onerror = function (e) {
-          console.log('Failed file write: ' + e.toString())
+          // console.log('Failed file write: ' + e.toString())
         }
         if (!dataObj) {
-          console.log('Object NULL')
+          // console.log('Object NULL')
           dataObj = new Blob(['some file data'], { type: 'text/plain' })
         }
         fileWriter.write(dataObj)
@@ -224,8 +224,8 @@ export default {
           //   })
           // Persist File Approach
           window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function (dirEntry) {
-            console.log('file system open: ' + dirEntry.name)
-            console.log('Dir: ' + cordova.file.externalDataDirectory)
+            // console.log('file system open: ' + dirEntry.name)
+            // console.log('Dir: ' + cordova.file.externalDataDirectory)
             // vm.getSampleFile(dirEntry)
             // vm.createDirectory(dirEntry)
             var blob = new Blob([response.data], { type: 'application/pdf' })

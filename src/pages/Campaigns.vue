@@ -5,7 +5,7 @@
       :dense="true"
       :getModelView="true"
       :rows="20"
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       >
       <template slot="body-cell-open" slot-scope="item" :item="item">
         <q-icon name="check_circle" v-if="item.item" color="positive"></q-icon>

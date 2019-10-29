@@ -4,7 +4,7 @@
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
       :dense="true"
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       >
       <template slot="body-cell-name" slot-scope="item" :item="item">
         <q-btn size="md" dense flat color="primary">{{ item.item }}</q-btn>

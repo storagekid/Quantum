@@ -6,7 +6,7 @@
       :dense="true"
       :editAferCreate="true"
       :getModelView="true"
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       >
       <template slot="body-cell-emails" slot-scope="item" :item="item">
         <div v-for="(email, index) in item.item" :key="index">

@@ -573,13 +573,13 @@
 
 <script>
 import { ModelsFetcher, ModelController } from '../mixins/modelMixin'
-import { FileDownloadMethods } from '../mixins/fileMixin'
+import { FileMethods } from '../mixins/fileMixin'
 import CustomSelect from '../components/form/customSelect'
 import { customSelectMixins } from '../mixins/customSelectMixins'
 
 export default {
   name: 'PosterDistribution',
-  mixins: [ModelsFetcher, ModelController, FileDownloadMethods, customSelectMixins],
+  mixins: [ModelsFetcher, ModelController, FileMethods, customSelectMixins],
   components: { CustomSelect },
   data () {
     return {
@@ -762,13 +762,13 @@ export default {
         this.$store.dispatch('Model/getModelView', { model: 'clinics', id: this.clinicSelected.value, params: { view: 'distributions' } })
           .then((data) => {
             this.model = data.model
-            console.log('HERE')
+            // console.log('HERE')
             // console.log(data.model)
             if (this.model.poster_distributions.length) this.buildModelDesigns(this.model.poster_distributions)
             this.model['originalPosterPriorities'] = JSON.parse(JSON.stringify(this.model.posters))
             this.visible = false
           }).catch((response) => {
-            console.log('THERE')
+            // console.log('THERE')
             this.$store.dispatch('Response/responseErrorManager', response)
             this.visible = false
           })
@@ -970,7 +970,7 @@ export default {
       this.startUploader()
     },
     buildModelDesigns (designs) {
-      console.log('Building Designs')
+      // console.log('Building Designs')
       this.designs = []
       for (let design of designs) {
         let baseDesign = this.createDesign()
@@ -997,7 +997,7 @@ export default {
         baseDesign.distributions['height'] = data['height']
         baseDesign.distributions['holders'] = []
         baseDesign.distributions['posterIds'] = data['posterIds'] ? data['posterIds'] : []
-        console.log('There')
+        // console.log('There')
         if (data['holders'].length) {
           for (let holder of data['holders']) {
             if (!holder.lastX) holder['lastX'] = 0
@@ -1011,14 +1011,14 @@ export default {
         }
         if (baseDesign.distributions.holders.length) {
           let campaignId = baseDesign.campaign_id ? baseDesign.campaign_id : ''
-          console.log('Beyond')
-          console.log('Campaign: ' + campaignId)
+          // console.log('Beyond')
+          // console.log('Campaign: ' + campaignId)
           for (let holder of baseDesign.distributions.holders) {
             holder.ext = this.model.posters[campaignId].filter(i => { return i.id === holder.ext })[0]
             holder.int = this.model.posters[campaignId].filter(i => { return i.id === holder.int })[0]
           }
         }
-        console.log('Finish ' + design.id)
+        // console.log('Finish ' + design.id)
         this.designs.push(baseDesign)
       }
     },

@@ -8,7 +8,7 @@
       tableView="PosterDistributionDashBoard"
       rows="10"
       startFilter="&&Carteles!=&&Distribuciones!=&&Activa=="
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       >
       <template slot="body-cell-deleted_at" slot-scope="item" :item="item">
         <q-icon name="check_circle" v-if="item.item" color="negative"></q-icon>
@@ -122,7 +122,7 @@
 
 <script>
 import { ModelsFetcher } from '../mixins/modelMixin'
-import { FileDownloadMethods } from '../mixins/fileMixin'
+import { FileMethods } from '../mixins/fileMixin'
 import { customSelectMixins } from '../mixins/customSelectMixins'
 import CustomSelect from '../components/form/customSelect'
 import { multiAsyncActionBarsMixins } from '../mixins/multiAsyncActionBarsMixins'
@@ -130,7 +130,7 @@ import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'PosterDistributionDashboard',
-  mixins: [ ModelsFetcher, FileDownloadMethods, customSelectMixins, multiAsyncActionBarsMixins ],
+  mixins: [ ModelsFetcher, FileMethods, customSelectMixins, multiAsyncActionBarsMixins ],
   components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {

@@ -16,7 +16,7 @@
       :rows="modelsNeeded.clinic_poster_priorities.paginate"
       :dense="true"
       startFilter="&&Activa!=&&Fecha de Baja=="
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       v-on:tableReady="tableReady = true"
       >
       <template slot="body-cell-clinic_poster.clinic.active" slot-scope="item" :item="item">

@@ -3,6 +3,7 @@
     <model-table
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
+      :dense="true"
       v-if="modelsReady"
       >
     </model-table>
@@ -10,17 +11,16 @@
 </template>
 
 <script>
-import { ModelsFetcher } from '../../mixins/modelMixin'
+import { ModelsFetcher } from '../../../mixins/modelMixin'
 
 export default {
-  name: 'GroupsPage',
+  name: 'scope-companies',
   mixins: [ModelsFetcher],
   data () {
     return {
-      modelName: 'groups',
+      modelName: 'companies',
       modelsNeeded: {
-        groups: {
-          withCount: ['users']
+        companies: {
         }
       }
     }

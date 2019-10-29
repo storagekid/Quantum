@@ -9,7 +9,7 @@
       :editAferCreate="true"
       :getModelView="true"
       startFilter="&&Activa!=&&Fecha de Baja=="
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       >
       <template slot="body-cell-clinic.active" slot-scope="item" :item="item">
         <q-icon name="check_circle" v-if="item.item" color="positive"></q-icon>

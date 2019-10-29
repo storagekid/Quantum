@@ -4,7 +4,7 @@
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
       :dense="true"
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       >
     </model-table>
   </q-page>

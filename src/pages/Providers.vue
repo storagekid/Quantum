@@ -2,7 +2,9 @@
   <q-page class="q-pa-md">
     <model-table
       :modelName="modelName"
-      :modelsNeeded="modelsNeeded"
+      :dense="true"
+      :getModelView="true"
+      :rows="20"
       v-if="modelsReady"
       >
     </model-table>
@@ -10,17 +12,18 @@
 </template>
 
 <script>
-import { ModelsFetcher } from '../../mixins/modelMixin'
+import { ModelsFetcher } from '../mixins/modelMixin'
 
 export default {
-  name: 'GroupsPage',
-  mixins: [ModelsFetcher],
+  name: 'providers',
+  mixins: [ ModelsFetcher ],
   data () {
     return {
-      modelName: 'groups',
+      modelName: 'providers',
       modelsNeeded: {
-        groups: {
-          withCount: ['users']
+        providers: {
+          full: true,
+          refresh: true
         }
       }
     }

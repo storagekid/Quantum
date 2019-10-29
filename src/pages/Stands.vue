@@ -7,10 +7,7 @@
       :editAferCreate="true"
       :dense="true"
       rows="10"
-      v-show="!show"
-      v-on:show="toggleShow"
       v-if="modelsReady"
-      startFilter="&&Activa!="
       >
       <template slot="body-cell-nickname" slot-scope="item" :item="item">
             <span class="text-bold text-primary">{{ item.item ? item.item : '-' }}</span>
@@ -33,12 +30,6 @@
             <span class="text-bold text-italic text-caption">{{ phone.type }} -</span> {{ phone.number }}
         </div>
       </template>
-      <template slot="body-cell-clinic_siblings" slot-scope="item" :item="item">
-        <div v-for="(sibling, index) in item.item" :key="index">
-            <span class="text-bold text-italic text-caption">{{ $store.state.Model.models.clinics.items.filter(i => { return i.id === sibling.sibling_id })[0].label }}</span>
-            <span class="text-bold text-italic text-caption text-red"> - {{ sibling.type }}</span>
-        </div>
-      </template>
     </model-table>
     <clinic-view v-if="show" :id="show"></clinic-view>
     <q-page-sticky position="top-left" :offset="[5, 5]" v-if="show">
@@ -58,18 +49,16 @@
 <script>
 
 import { ModelsFetcher } from '../mixins/modelMixin'
-import ClinicView from '../components/clinic/ClinicView'
 
 export default {
-  name: 'ClinicsPage',
+  name: 'stands',
   mixins: [ModelsFetcher],
-  components: { ClinicView },
   data () {
     return {
-      modelName: 'clinics',
+      modelName: 'stands',
       show: null,
       modelsNeeded: {
-        clinics: {
+        stands: {
           full: true,
           refresh: true,
           withTrashed: true,

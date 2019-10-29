@@ -4,7 +4,7 @@
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
       :dense="true"
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       >
       <template slot="body-cell-sanitary_codes" slot-scope="item" :item="item">
         {{ item.item.length }}

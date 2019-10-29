@@ -4,7 +4,7 @@
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
       :dense="true"
-      v-if="Object.keys(modelsNeeded).length === modelsFetched"
+      v-if="modelsReady"
       >
       <template slot="body-cell-sanitizable_type" slot-scope="item" :item="item">
         {{ item.item.substring(item.item.indexOf('\\')+1) }}
