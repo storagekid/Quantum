@@ -28,6 +28,7 @@
             v-on:dirtiness="checkDirtyness"
             v-on:loading="$emit('loading')"
             v-on:loaded="$emit('loaded')"
+            v-on:filesAdded="filesAdded"
           >
         </model-form>
         <div class="row">
@@ -40,13 +41,13 @@
 
 <script>
 import ModelForm from './modelForm'
-import { ModelUpdaterBuilder, ModelController } from '../../mixins/modelMixin'
+import { ModelUpdaterBuilder, ModelController, ModelRelations, RelationController } from '../../mixins/modelMixin'
 
 export default {
   name: 'UpdateModelTabs',
-  props: ['source', 'modelName', 'quasarData', 'mode', 'batchMode'],
+  props: ['source', 'modelName', 'quasarData', 'mode', 'batchMode', 'relation'],
   components: { ModelForm },
-  mixins: [ModelUpdaterBuilder, ModelController],
+  mixins: [ ModelUpdaterBuilder, ModelController, ModelRelations, RelationController ],
   data () {
     return {
       tabName: 0,
@@ -68,9 +69,12 @@ export default {
     }
   },
   methods: {
+    filesAdded (payload) {
+      this.model[payload.field] = payload.files[0]
+    },
     startUpdate () {
       if (!this.cleanForm) return false
-      else {
+      else if (!this.relation) {
         this.$emit('formSent')
         let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
         if (this.batchMode) {
@@ -78,6 +82,24 @@ export default {
         } else {
           this.saveModel(payload, 'update').then(() => { this.$emit('formResponded') }).catch(() => { this.$emit('formRespondedWithErrors') })
         }
+      } else {
+        this.$emit('formSent')
+        let payload = this.buildRelationPayload({
+          relatedTo: this.quasarData.nameSpace,
+          relatedToID: this.model.id,
+          relation: this.modelName,
+          model: this.model,
+          index: this.model.__index,
+          parentName: this.relation.name,
+          parentNameSpace: this.$store.state.Model.models[this.relation.name].quasarData.nameSpace,
+          parentIndex: this.relation.index,
+          parentId: this.relation.id,
+          id: this.model.id,
+          quasarData: this.$store.state.Model.models[this.relation.name].quasarData.relations[this.modelName]
+        })
+        this.updateRelation(payload).then(() => {
+          this.$emit('formResponded')
+        }).catch(() => { this.$emit('formRespondedWithErrors') })
       }
     },
     checkDirtyness (payload) {

@@ -9,6 +9,7 @@
         :batchMode="batchMode"
         :modelName="modelName"
         :source="model"
+        :relation="relation"
         :quasarData="quasarData"
         v-on:formSent="changeStatus"
         v-on:formResponded="closeModal"
@@ -30,7 +31,7 @@ import UpdateModelTabs from '../model/updateModelTabs'
 export default {
   name: 'UpdateModel',
   components: { UpdateModelTabs },
-  props: ['modelName', 'model', 'batchMode', 'quasarData'],
+  props: ['modelName', 'model', 'batchMode', 'quasarData', 'relation'],
   data () {
     return {
       visible: false
