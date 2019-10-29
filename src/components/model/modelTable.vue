@@ -162,7 +162,9 @@
                           {label: 'Excluir', value: 'not'},
                           {label: 'Incluir', value: 'in'},
                           {label: 'Sí', value: 'some'},
-                          {label: 'No', value: 'empty'}
+                          {label: 'No', value: 'empty'},
+                          {label: 'Únicos', value: 'uniques'},
+                          {label: 'Duplicados', value: 'clones'}
                         ]"
                         color="primary"
                         inline
@@ -171,8 +173,8 @@
                       <q-input
                         v-model="filters[column.name].text"
                         debounce="800"
-                        v-if="!['empty', 'some'].includes(filters[column.name].options)"
-                        :disable="['empty', 'some'].includes(filters[column.name].options)"
+                        v-if="!['empty', 'some', 'clones', 'uniques'].includes(filters[column.name].options)"
+                        :disable="['empty', 'some', 'clones', 'uniques'].includes(filters[column.name].options)"
                         dense
                         >
                       </q-input>
@@ -207,31 +209,33 @@
               </q-card-section>
               <q-separator />
               <q-card-section class="q-pa-sm">
-                <q-list dense>
+                <q-list dense @mouseover.stop="showActions = props.row.id">
                   <q-item
                     v-for="col in props.cols"
                     :key="col.name"
                     class="justify-between"
                     style='padding: 0; min-height: 10px; line-height: 1.2'
-                    @mouseover.stop="showActions = props.row.id"
                     >
                       <template v-if="col.onGrid !== 'hide'">
                         <template v-if="col.onGrid === 'footer'">
-                          <q-img
-                            spinner-color="primary"
-                            spinner-size="82px"
-                            contain
-                            :src="$store.state.App.publicSources + '/' + getItem(props.row, col.name)"
-                            basic
-                            style="max-height:150px; min-height: 100px"
-                            class="q-mt-sm bg-color-primary">
-                            <template v-if="col.value === ''">
-                              <div class="absolute-full flex flex-center bg-primary text-white">
-                                <q-spinner-gears color="white" size="36px"/>
-                                <!-- Image not found -->
-                              </div>
-                            </template>
-                            <div class="absolute-bottom text-subtitle1 text-center q-pa-xs" v-if="showActions === props.row.id" >
+                          <div class="full-width row">
+                            <q-img
+                              v-if="col.value"
+                              spinner-color="primary"
+                              spinner-size="82px"
+                              contain
+                              :src="$store.state.App.publicSources + '/' + getItem(props.row, col.name)"
+                              basic
+                              style="max-height:150px; min-height: 100px; min-width: 50px"
+                              class="q-mt-sm bg-color-primary">
+                              <template v-if="!col.value">
+                                <div class="absolute-full flex flex-center bg-primary text-white">
+                                  <q-spinner-gears color="white" size="36px"/>
+                                  <!-- Image not found -->
+                                </div>
+                              </template>
+                            </q-img>
+                            <div class="full-width text-subtitle1 text-center q-pa-xs" v-if="showActions === props.row.id" >
                               <q-card-actions class="justify-between q-pa-none">
                                 <q-btn
                                   dense
@@ -245,7 +249,7 @@
                                 <q-btn dense size="md" color="negative"  @click="removeRelation({'relation': relationData.name, 'index': props.row.__index, 'id': props.row.id}, 'update')" icon="remove"></q-btn>
                               </q-card-actions>
                             </div>
-                          </q-img>
+                          </div>
                         </template>
                         <template v-else>
                           <q-item-section avatar>
@@ -276,6 +280,7 @@
         :modelName="modelName"
         :batchMode="batchMode"
         :model="batchMode ? selectedItems : selectedItems[0]"
+        :relation="relatedTo"
         :quasarData="quasarData"
         v-on:modelUpdated="endUpdating"
         v-if="updateModel">
@@ -409,14 +414,14 @@ import RestoreModelConfirm from './restoreModelConfirm'
 import CloneModelConfirm from './cloneModelConfirm'
 import { customSelectMixins } from '../../mixins/customSelectMixins'
 import CustomSelect from '../form/customSelect'
-import { FileDownloadMethods } from '../../mixins/fileMixin'
+import { FileMethods } from '../../mixins/fileMixin'
 import { ModelsFetcher } from '../../mixins/modelMixin'
 import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
   props: ['modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass'],
-  mixins: [ModelsFetcher, searchMethods, FileDownloadMethods, customSelectMixins],
+  mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {
     return {
@@ -498,6 +503,8 @@ export default {
           if (!ref) continue
           if (this.filters[column].options === 'some') filter += '&&' + ref.label + '!='
           else if (this.filters[column].options === 'empty') filter += '&&' + ref.label + '=='
+          else if (this.filters[column].options === 'clones') filter += '&&' + ref.label + '=2='
+          else if (this.filters[column].options === 'uniques') filter += '&&' + ref.label + '=1='
           else if (this.filters[column].text) {
             if (this.filters[column].options === 'has') filter += '&&' + ref.label + '==' + this.filters[column].text
             else if (this.filters[column].options === 'is') filter += '&&' + ref.label + '=="' + this.filters[column].text
@@ -636,7 +643,7 @@ export default {
       }
     },
     log (item) {
-      console.log(item)
+    // console.log(item)
     },
     toggleSelection () {
       // console.log(this.$refs['table-' + this.modelName])
@@ -819,6 +826,10 @@ export default {
             i['field'] = function (row) {
               let item = row[names[0]]
               for (let i = 1; i < names.length; i++) {
+                if (!item) {
+                  console.log('Null on Table')
+                  continue
+                }
                 item = item[names[i]]
               }
               return item
