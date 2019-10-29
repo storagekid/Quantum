@@ -68,6 +68,18 @@
                   v-model="relation[field.name]"
                   @blur="$v.relation[field.name].$touch()"
                   />
+                <q-input
+                  v-if="field.type.name === 'number'"
+                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
+                  bottom-slots
+                  :error="relationData.quasarData.fields.includes(field.name) ? $v.relation[field.name].$error : false"
+                  :name="field.name"
+                  :label="field.label"
+                  stack-label
+                  v-model="relation[field.name]"
+                  type="number"
+                  @blur="$v.relation[field.name].$touch()"
+                  />
                 <q-uploader
                   v-if="field.type.name === 'file'"
                   :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
@@ -318,7 +330,7 @@
 <script>
 import { ModelRelations, RelationController, SortingRelation } from '../../mixins/modelMixin'
 import { searchMethods } from '../../mixins/tableMixin'
-import { FileDownloadMethods } from '../../mixins/fileMixin'
+import { FileMethods } from '../../mixins/fileMixin'
 import RemoveModelConfirm from '../model/removeModelConfirm'
 import { customSelectMixins } from '../../mixins/customSelectMixins'
 import CustomSelect from '../form/customSelect'
@@ -328,7 +340,7 @@ import MultiAsyncActionBars from '../loaders/multiAsyncActionBars'
 export default {
   name: 'RelationCard',
   props: ['relationData', 'relatedTo', 'model', 'modelData', 'mode', 'batchMode', 'batchSource'],
-  mixins: [ModelRelations, RelationController, SortingRelation, searchMethods, FileDownloadMethods, multiAsyncActionBarsMixins, customSelectMixins],
+  mixins: [ModelRelations, RelationController, SortingRelation, searchMethods, FileMethods, multiAsyncActionBarsMixins, customSelectMixins],
   components: { RemoveModelConfirm, CustomSelect, MultiAsyncActionBars },
   data () {
     return {
@@ -543,7 +555,7 @@ export default {
       }
     },
     failedMethod () {
-      console.log('failedMethod')
+      // console.log('failedMethod')
       this.sendMultiFiles()
       this.closeRelationForm()
     },
@@ -553,7 +565,7 @@ export default {
       })
     },
     sendMultiFiles () {
-      console.log('Send Multi Files')
+      // console.log('Send Multi Files')
       this.multiAsyncAction.items.map(i => {
         let actionPayload = {}
         actionPayload.url = this.$store.state.App.dataWarehouse + this.relatedTo + '/' + this.model.id + '/' + this.relationData.name
