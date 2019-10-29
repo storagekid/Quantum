@@ -6,13 +6,13 @@
     :group="item.name"
     v-if="item.children.length"
     :key="item.id"
-    :value="value"
+    :value="expanded"
     >
     <menu-item
       v-for="child in item.children"
       :item="child"
       :key="child.id"
-      v-on:children="checkChildren"
+      v-on:children="checkChildren($event, child.id)"
       :parentGroups="groups"
       :menuName="menuName"
       :currentRoute="currentRoute"
@@ -51,14 +51,15 @@ export default {
   data () {
     return {
       children: [],
+      checked: [],
       value: false
     }
   },
-  watch: {
-    expanded () {
-      this.value = this.expanded
-    }
-  },
+  // watch: {
+  //   expanded () {
+  //     this.value = this.expanded
+  //   }
+  // },
   computed: {
     expanded () {
       // console.log(this.$router.currentRoute.name)
@@ -96,9 +97,13 @@ export default {
       // console.log('Button hitted')
       this.$store.commit('App/setSetting', { name: 'home', value: name })
     },
-    checkChildren (e) {
-      // console.log(e)
-      this.children = e
+    checkChildren (e, id) {
+      if (this.checked.includes(id)) return
+      console.log('CheckChildren')
+      console.log(e)
+      this.children = [...e, ...this.children]
+      this.checked.push(id)
+      // console.log(this.children)
     }
   },
   mounted () {
