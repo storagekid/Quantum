@@ -7,49 +7,84 @@ export const searchMethods = {
   methods: {
     filterMethod (rows, terms, cols = this.computedCols, cellValue = this.getCellValue) {
       let app = this
+      // let countingFields = ['=1=', '=2=']
       if (terms.indexOf('&&') > -1 && terms.length > 4) {
         let words = terms.toLowerCase().split('&&')
         words.forEach((i) => {
-          rows = rows.filter(
-            row => cols.some(function (col) {
+          // Finding Clones
+          if (i.indexOf('=2=') > -1) {
+            // console.log('Finding Clones')
+            let columnName = i.split('=2=')
+            let countedValues = {}
+            let col = cols.filter(function (col) { return col.label.toLowerCase() === columnName[0] })[0]
+            rows.forEach((row) => {
               let value = app.getItem(row, col.name) + ''
-              // console.log(value)
-              if (Array.isArray(value)) {
-                value = JSON.stringify(value)
-                value = JSON.stringify(value)
-                // console.log('Array')
-              }
-              if (i.indexOf('==') > -1) {
-                let columnName = i.split('==')
-                if (col.label.toLowerCase() === columnName[0]) {
-                  if (!columnName[1]) return (value === null || value === '' || value === 'false')
-                  return value.toLowerCase().indexOf(columnName[1]) !== -1
+              if (!countedValues[value]) countedValues[value] = 1
+              else countedValues[value]++
+            })
+            rows = rows.filter((row) => {
+              let value = app.getItem(row, col.name) + ''
+              return value && countedValues[value] > 1
+            })
+            // console.log(countedValues)
+          // Finding Uniques
+          } else if (i.indexOf('=1=') > -1) {
+            // console.log('Finding Uniques')
+            let columnName = i.split('=1=')
+            let countedValues = {}
+            let col = cols.filter(function (col) { return col.label.toLowerCase() === columnName[0] })[0]
+            rows.forEach((row) => {
+              let value = app.getItem(row, col.name) + ''
+              if (!countedValues[value]) countedValues[value] = 1
+              else countedValues[value]++
+            })
+            rows = rows.filter((row) => {
+              let value = app.getItem(row, col.name) + ''
+              return value && countedValues[value] === 1
+            })
+            // console.log(countedValues)
+          } else {
+            rows = rows.filter(
+              row => cols.some(function (col) {
+                let value = app.getItem(row, col.name) + ''
+                // console.log(value)
+                if (Array.isArray(value)) {
+                  value = JSON.stringify(value)
+                  value = JSON.stringify(value)
+                  // console.log('Array')
                 }
-              } else if (i.indexOf('=in=') > -1) {
-                let columnName = i.split('=in=')
-                if (col.label.toLowerCase() === columnName[0]) {
-                  let finds = columnName[1].split('|')
-                  for (let find of finds) {
-                    if (value.toLowerCase().indexOf(find) > -1) return true
+                if (i.indexOf('==') > -1) {
+                  let columnName = i.split('==')
+                  if (col.label.toLowerCase() === columnName[0]) {
+                    if (!columnName[1]) return (value === null || value === '' || value === 'false')
+                    return value.toLowerCase().indexOf(columnName[1]) !== -1
                   }
-                  return false
+                } else if (i.indexOf('=in=') > -1) {
+                  let columnName = i.split('=in=')
+                  if (col.label.toLowerCase() === columnName[0]) {
+                    let finds = columnName[1].split('|')
+                    for (let find of finds) {
+                      if (value.toLowerCase().indexOf(find) > -1) return true
+                    }
+                    return false
+                  }
+                } else if (i.indexOf('!=') > -1) {
+                  let columnName = i.split('!=')
+                  if (col.label.toLowerCase() === columnName[0]) {
+                    // console.log(columnName[0])
+                    // console.log(value)
+                    if (!columnName[1]) return (value !== '' && value !== 'false')
+                    return value.toLowerCase().indexOf(columnName[1]) === -1
+                  }
                 }
-              } else if (i.indexOf('!=') > -1) {
-                let columnName = i.split('!=')
-                if (col.label.toLowerCase() === columnName[0]) {
-                  // console.log(columnName[0])
-                  // console.log(value)
-                  if (!columnName[1]) return (value !== '' && value !== 'false')
-                  return value.toLowerCase().indexOf(columnName[1]) === -1
-                }
-              }
-              if (i[0] === '"') {
-                if (value.toLowerCase() === i.substring(1)) {
-                  return true
-                }
-              } else return value.toLowerCase().indexOf(i) !== -1
-            }, app)
-          )
+                if (i[0] === '"') {
+                  if (value.toLowerCase() === i.substring(1)) {
+                    return true
+                  }
+                } else return value.toLowerCase().indexOf(i) !== -1
+              }, app)
+            )
+          }
         })
         let ids = []
         for (let i = rows.length - 1; i >= 0; i--) {
@@ -77,22 +112,16 @@ export const searchMethods = {
       if (name.indexOf('.') > -1) {
         let names = name.split('.')
         let item = row[names[0]]
-        if (typeof item === 'boolean') {
-          return item
-        }
+        if (typeof item === 'boolean') return item
         if (!item) return ''
         for (let i = 1; i < names.length; i++) {
+          if (!item[names[i]]) return ''
           item = item[names[i]]
-          if (typeof item === 'boolean') {
-            return item
-          }
+          if (typeof item === 'boolean') return item
           if (!item) return ''
         }
-        if (typeof item !== 'string') {
-          return item.label
-        } else if (typeof item === 'boolean') {
-          return item
-        }
+        if (typeof item === 'object') return item.label
+        else if (typeof item === 'boolean') return item
         return item
       } else if (Array.isArray(row[name])) {
         let value = JSON.stringify(row[name])
@@ -104,7 +133,9 @@ export const searchMethods = {
       if (name.indexOf('.') > -1) {
         let names = name.split('.')
         let item = row[names[0]]
+        if (!item) return ''
         for (let i = 1; i < names.length - 1; i++) {
+          if (!item) return ''
           item = item[names[i]]
         }
         return item
