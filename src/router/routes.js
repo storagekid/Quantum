@@ -25,6 +25,24 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/legals',
+        name: 'legals',
+        component: () => import('pages/Legals.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/promotions',
+        name: 'promotions',
+        component: () => import('pages/Promotions.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/claims',
+        name: 'claims',
+        component: () => import('pages/Claims.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/campaigns',
         name: 'campaigns',
         component: () => import('pages/Campaigns.vue'),
@@ -67,15 +85,57 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/mailings',
+        name: 'mailings',
+        component: () => import('pages/Mailings.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/mailing-designs',
+        name: 'mailing-designs',
+        component: () => import('pages/MailingDesigns.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/clinic-mailings',
+        name: 'clinic-mailings',
+        component: () => import('pages/ClinicMailings.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/profiles',
         name: 'profiles',
         component: () => import('pages/Profiles.vue'),
         meta: { requiresAuth: true }
       },
       {
+        path: '/providers',
+        name: 'providers',
+        component: () => import('pages/Providers.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/products',
+        name: 'products',
+        component: () => import('pages/Products.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/services',
+        name: 'services',
+        component: () => import('pages/Services.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/clinics',
         name: 'clinics',
         component: () => import('pages/Clinics.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/stands',
+        name: 'stands',
+        component: () => import('pages/Stands.vue'),
         meta: { requiresAuth: true }
       }
     ]
@@ -107,6 +167,54 @@ const routes = [
         path: '/admin-dashboard',
         name: 'admin-dashboard',
         component: () => import('pages/Admin/Dashboard.vue')
+      },
+      {
+        path: '/scope-countries',
+        name: 'scope-countries',
+        component: () => import('pages/Admin/Scope/Countries.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/scope-states',
+        name: 'scope-states',
+        component: () => import('pages/Admin/Scope/States.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/scope-counties',
+        name: 'scope-counties',
+        component: () => import('pages/Admin/Scope/Counties.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/scope-clinics',
+        name: 'scope-clinics',
+        component: () => import('pages/Admin/Scope/Clinics.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/scope-stores',
+        name: 'scope-stores',
+        component: () => import('pages/Admin/Scope/Stores.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/scope-companies',
+        name: 'scope-companies',
+        component: () => import('pages/Admin/Scope/Companies.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/scope-languages',
+        name: 'scope-languages',
+        component: () => import('pages/Admin/Scope/Languages.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/scope-currencies',
+        name: 'scope-currencies',
+        component: () => import('pages/Admin/Scope/Currencies.vue'),
+        meta: { requiresAuth: true }
       },
       {
         path: '/users',
