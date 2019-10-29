@@ -1,7 +1,7 @@
 <template>
   <q-expansion-item
     :icon="item.icon"
-    :label="item.name"
+    :label="$t('menus.main.' +item.name +'.title')"
     expand-separator
     :group="item.name"
     v-if="item.children.length"
@@ -67,9 +67,11 @@ export default {
     },
     childrenNames () {
       let names = []
-      if (this.item.children.length) {
-        for (let child of this.item.children) {
-          names.push(child.name)
+      if (this.item.children) {
+        if (this.item.children.length) {
+          for (let child of this.item.children) {
+            names.push(child.name)
+          }
         }
       }
       if (names.length) this.$emit('children', names)
@@ -91,7 +93,7 @@ export default {
       this.$emit('routeChanged', name)
     },
     setHomePage (name) {
-      console.log('Button hitted')
+      // console.log('Button hitted')
       this.$store.commit('App/setSetting', { name: 'home', value: name })
     },
     checkChildren (e) {
