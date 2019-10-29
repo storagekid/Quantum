@@ -284,7 +284,7 @@ export default {
           'ids': this.confirm.item.design_clinics[mailingDesign.id]
         }
         mailingDesign.actionPayload = actionPayload
-        if (this.confirm.rename) {
+        if (this.confirm.options.rename) {
           let newMailingDesign = JSON.parse(JSON.stringify(mailingDesign))
           let actionPayload = {}
           actionPayload.url = this.$store.state.App.dataWarehouse + 'mailing_designs/' + mailingDesign.id + '/IndesignRenameGenerator'
