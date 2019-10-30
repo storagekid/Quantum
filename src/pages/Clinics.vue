@@ -1,6 +1,7 @@
 <template>
   <q-page class="q-pa-md">
     <model-table
+      :sticky="true"
       :modelName="modelName"
       :getModelView="true"
       :modelsNeeded="modelsNeeded"

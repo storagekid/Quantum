@@ -1,8 +1,8 @@
 <template>
-  <div padding v-if="model" class="bg-white">
+  <div padding v-if="model" :class="{'bg-white': true, 'sticky-table': sticky ? true : false}">
     <template v-if="!updateModel">
       <q-table
-        :class="wrapperClass ? wrapperClass : 'custom-table-wrapper'"
+        :class="wrapperClass ? wrapperClass : sticky === true ? 'custom-table-wrapper my-sticky-header-column-table' : 'custom-table-wrapper'"
         v-if="model"
         :table-class="tableClass ? tableClass : 'custom-table'"
         :table-header-class="tableHeaderClass"
@@ -442,7 +442,7 @@ import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
-  props: ['modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass'],
+  props: ['modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky'],
   mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {

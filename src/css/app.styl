@@ -37,7 +37,69 @@
         box-shadow: none !important;
     }
 }
+.sticky-table {
+    max-height: $stickyTableHeight
+}
 .custom-table-wrapper {
+    &.my-sticky-header-column-table {
+        /* specifying max-width so the example can
+        highlight the sticky column on any browser window */
+        // max-width: 600px
+        max-height: $stickyTableHeight
+        /* max height is important */
+        .q-table__middle {
+            max-height: $stickyTableMiddle
+        } 
+        td:first-child /* bg color is important for td; just specify one */ {
+            background: lighten($secondary, 10%) !important
+        }
+        td:first-child, td:nth-child(2) {
+            opacity: 1 !important
+        }
+        tr:first-child th, tr:nth-child(2) th {
+            position: sticky
+            top: 0
+            opacity: 1 /* opacity is important */
+            z-index: 2 /* higher than z-index for td below */
+            background: #fff /* bg color is important; just specify one */
+        } 
+        tr:first-child th:first-child, tr:first-child th:nth-child(2) {
+            z-index: 3 /* highest z-index */
+        }
+        td:first-child, td:nth-child(2) {
+            z-index: 1
+        }
+        td:first-child, th:first-child {
+            position: sticky
+            left: 0
+        }
+        td:nth-child(2), th:nth-child(2) {
+            position: sticky
+            left: 45px
+        }
+        tr.deleted {
+            opacity: 1
+            background: rgb(255,230,230);
+            td {
+                background: inherit;
+                opacity: .5
+            }
+            &.selected {
+                td {
+                    background: rgb(230,190,190);
+                    opacity: .8
+                    * {
+                        opacity: .8
+                    }
+                }
+            }
+        }
+        tr.selected {
+            td {
+                background: rgb(225,225,225);
+            }
+        }
+    }
     &.filter {
         .q-radio__label {
             font-size: .6em;
@@ -63,7 +125,7 @@
                 }
             }
             &.first {
-                background: rgba($secondary, .3);
+                background: lighten($secondary, 50%);
             }
         }
         tr.deleted {
