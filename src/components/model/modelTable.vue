@@ -185,18 +185,40 @@
             </th>
           </template>
         </q-tr>
-        <template v-for="column in columns" :slot="'body-cell-' + column.name" slot-scope="props" :props="props" >
-          <q-td :key="column.name" v-if="column.name !== 'actions'" auto-width>
-            <slot :name="'body-cell-' + column.name" v-bind:item="getItem(props.row, column.name)" v-if="column.name.indexOf('.') > -1">
-              {{ column.name.indexOf('.') > -1 ? getItem(props.row, column.name) : props.value }}
-            </slot>
-            <slot :name="'body-cell-' + column.name" v-bind:item="props.row[column.field]" v-else>
-              {{ props.value }}
-            </slot>
-          </q-td>
-          <q-td :key="column.name" v-else auto-width>
-            <slot :name="'body-cell-' + column.name" v-bind:item="props.row"></slot>
-          </q-td>
+        <template v-slot:body="props">
+          <!-- <template v-for="prop in props" slot-scope="props" :props="props" > -->
+            <q-tr :class="{selected: props.selected ? true : false, patata: true, deleted: props.row.deleted_at ? true : false}">
+              <td>
+                <q-checkbox dense v-model="props.selected"/>
+              </td>
+              <template v-for="column in props.cols">
+                <q-td :key="column.name" v-if="column.name !== 'actions'" auto-width>
+                  <slot :name="'body-cell-' + column.name" v-bind:item="getItem(props.row, column.name)" v-if="column.name.indexOf('.') > -1">
+                    {{ column.name.indexOf('.') > -1 ? getItem(props.row, column.name) : props.value }}
+                  </slot>
+                  <slot :name="'body-cell-' + column.name" v-bind:item="props.row[column.field]" v-else>
+                    {{ getItem(props.row, column.name) }}
+                  </slot>
+                </q-td>
+                <q-td :key="column.name" v-else auto-width>
+                  <slot :name="'body-cell-' + column.name" v-bind:item="props.row"></slot>
+                </q-td>
+              </template>
+              <!-- <template v-for="column in columns" :slot="'body-cell-' + column.name" slot-scope="props" :props="props" >
+                <q-td :key="column.name" v-if="column.name !== 'actions'" auto-width>
+                  <slot :name="'body-cell-' + column.name" v-bind:item="getItem(props.row, column.name)" v-if="column.name.indexOf('.') > -1">
+                    {{ column.name.indexOf('.') > -1 ? getItem(props.row, column.name) : props.value }}
+                  </slot>
+                  <slot :name="'body-cell-' + column.name" v-bind:item="props.row[column.field]" v-else>
+                    {{ props.value }}
+                  </slot>
+                </q-td>
+                <q-td :key="column.name" v-else auto-width>
+                  <slot :name="'body-cell-' + column.name" v-bind:item="props.row"></slot>
+                </q-td>
+              </template> -->
+            </q-tr>
+          <!-- </template> -->
         </template>
         <template v-slot:item="props">
           <div
