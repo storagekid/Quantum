@@ -2,20 +2,20 @@
   <q-page class="q-pa-md">
     <model-table
       :sticky="true"
+      :virtualScroll="true"
       :modelName="modelName"
       :getModelView="true"
       :modelsNeeded="modelsNeeded"
       :editAferCreate="true"
       :dense="true"
-      rows="10"
       v-show="!show"
       v-on:show="toggleShow"
       v-if="modelsReady"
       startFilter="&&Activa!="
       >
-      <template slot="body-cell-nickname" slot-scope="item" :item="item">
+      <!-- <template slot="body-cell-nickname" slot-scope="item" :item="item">
             <span class="text-bold text-primary">{{ item.item ? item.item : '-' }}</span>
-      </template>
+      </template> -->
       <template slot="body-cell-open" slot-scope="item" :item="item">
         <q-icon name="check_circle" v-if="item.item" color="positive"></q-icon>
         <q-icon name="check_circle" v-else color="negative"></q-icon>

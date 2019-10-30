@@ -2,6 +2,7 @@
   <div padding v-if="model" :class="{'bg-white': true, 'sticky-table': sticky ? true : false}">
     <template v-if="!updateModel">
       <q-table
+        :virtual-scroll="virtualScroll"
         :class="wrapperClass ? wrapperClass : sticky === true ? 'custom-table-wrapper my-sticky-header-column-table' : 'custom-table-wrapper'"
         v-if="model"
         :table-class="tableClass ? tableClass : 'custom-table'"
@@ -192,7 +193,21 @@
                 <q-checkbox dense v-model="props.selected"/>
               </td>
               <template v-for="(column, index) in props.cols">
-                <q-td :key="column.name" v-if="column.name !== 'actions'" :class="[column.__tdClasses, {first: index === 0 ? true : false}]" auto-width>
+                <q-td :key="column.name" v-if="index === 0" :class="[column.__tdClasses, 'first']" auto-width>
+                  <slot :name="'body-cell-' + column.name" v-bind:item="getItem(props.row, column.name)" v-if="column.name.indexOf('.') > -1">
+                    {{ column.name.indexOf('.') > -1 ? getItem(props.row, column.name) : props.value }}
+                  </slot>
+                  <slot :name="'body-cell-' + column.name" v-bind:item="props.row[column.field]" v-else>
+                    <span class="text-bold text-primary" v-if="getItem(props.row, column.name).length < ($q.screen.lt.md ? 20 : 40)">{{ getItem(props.row, column.name) }}</span>
+                    <div class="text-bold text-primary ellipsis" style="max-width: 100px" v-else>
+                      {{ getItem(props.row, column.name) ? getItem(props.row, column.name) : '*' }}
+                      <q-tooltip content-style="font-size: 16px">
+                        <div style="max-width: 600px">{{ getItem(props.row, column.name) }}</div>
+                      </q-tooltip>
+                    </div>
+                  </slot>
+                </q-td>
+                <q-td :key="column.name" v-else-if="column.name !== 'actions'" auto-width>
                   <slot :name="'body-cell-' + column.name" v-bind:item="getItem(props.row, column.name)" v-if="column.name.indexOf('.') > -1">
                     {{ column.name.indexOf('.') > -1 ? getItem(props.row, column.name) : props.value }}
                   </slot>
@@ -442,7 +457,7 @@ import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
-  props: ['modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky'],
+  props: ['modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
   mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {
@@ -474,7 +489,7 @@ export default {
         sortBy: null,
         descending: false,
         page: 1,
-        rowsPerPage: this.rows ? this.rows : 15
+        rowsPerPage: this.rows ? this.rows : this.virtualScroll ? 0 : 15
       },
       names: [],
       showSearchHelp: false,
