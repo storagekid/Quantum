@@ -188,11 +188,11 @@
         <template v-slot:body="props">
           <!-- <template v-for="prop in props" slot-scope="props" :props="props" > -->
             <q-tr :class="{selected: props.selected ? true : false, deleted: props.row.deleted_at ? true : false}">
-              <td>
+              <td class="row-checkbox">
                 <q-checkbox dense v-model="props.selected"/>
               </td>
-              <template v-for="column in props.cols">
-                <q-td :key="column.name" v-if="column.name !== 'actions'" auto-width>
+              <template v-for="(column, index) in props.cols">
+                <q-td :key="column.name" v-if="column.name !== 'actions'" :class="[column.__tdClasses, {first: index === 0 ? true : false}]" auto-width>
                   <slot :name="'body-cell-' + column.name" v-bind:item="getItem(props.row, column.name)" v-if="column.name.indexOf('.') > -1">
                     {{ column.name.indexOf('.') > -1 ? getItem(props.row, column.name) : props.value }}
                   </slot>

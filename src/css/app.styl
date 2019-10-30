@@ -55,6 +55,17 @@
                 flex-wrap: nowrap;
             }
         }
+        td {
+            &.row-checkbox {
+                background: rgba($primary, .1);
+                .q-checkbox__bg {
+                    border-color: $primary
+                }
+            }
+            &.first {
+                background: rgba($secondary, .3);
+            }
+        }
         tr.deleted {
             background: rgb(255,230,230);
             td > * {
