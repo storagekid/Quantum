@@ -187,7 +187,7 @@
         </q-tr>
         <template v-slot:body="props">
           <!-- <template v-for="prop in props" slot-scope="props" :props="props" > -->
-            <q-tr :class="{selected: props.selected ? true : false, patata: true, deleted: props.row.deleted_at ? true : false}">
+            <q-tr :class="{selected: props.selected ? true : false, deleted: props.row.deleted_at ? true : false}">
               <td>
                 <q-checkbox dense v-model="props.selected"/>
               </td>
