@@ -39,13 +39,21 @@
 }
 .sticky-table {
     max-height: $stickyTableHeight
+    &.full {
+        max-height: 100vh;
+    }
 }
 .custom-table-wrapper {
     &.my-sticky-header-column-table {
+        &.full {
+            .q-table__middle {
+                max-height: 85%
+            } 
+        }
         /* specifying max-width so the example can
         highlight the sticky column on any browser window */
         // max-width: 600px
-        max-height: $stickyTableHeight
+        max-height: inherit
         /* max height is important */
         .q-table__middle {
             max-height: $stickyTableMiddle

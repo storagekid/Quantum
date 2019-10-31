@@ -2,7 +2,8 @@
   <q-page class="q-pa-md">
     <model-table
       :modelName="modelName"
-      :modelsNeeded="modelsNeeded"
+      :sticky="true"
+      :virtualScroll="true"
       :dense="true"
       :editAferCreate="true"
       :getModelView="true"

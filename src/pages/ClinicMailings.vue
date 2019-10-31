@@ -4,12 +4,13 @@
       :modelName="modelName"
       :dense="true"
       :getModelView="true"
-      :rows="20"
+      :sticky="true"
+      :virtualScroll="true"
       v-if="modelsReady"
       >
-      <template slot="body-cell-clinic.nickname" slot-scope="item" :item="item">
+      <!-- <template slot="body-cell-clinic.nickname" slot-scope="item" :item="item">
             <span class="text-bold text-primary">{{ item.item ? item.item : '-' }}</span>
-      </template>
+      </template> -->
       <template slot="body-cell-clinic_af.thumbnail" slot-scope="item" :item="item">
         <div v-if="item.item">
           <q-img style="max-height: 100px" contain :src="$store.state.App.publicSources + '/' + item.item">
@@ -24,7 +25,7 @@
         </div>
       </template>
       <template slot="body-cell-total_price" slot-scope="item" :item="item">
-            <span class="text-bold text-primary">{{ item.item ? item.item : '-' }}</span>
+            <span class="text-bold text-primary">{{ item.item ? item.item + ' €' : '-' }}</span>
       </template>
     </model-table>
   </q-page>

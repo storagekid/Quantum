@@ -1,9 +1,9 @@
 <template>
-  <div padding v-if="model" :class="{'bg-white': true, 'sticky-table': sticky ? true : false}">
+  <div padding v-if="model" :class="{'bg-white': true, 'sticky-table': sticky ? true : false, 'full': fullscreen ? true : false}">
     <template v-if="!updateModel">
       <q-table
         :virtual-scroll="virtualScroll"
-        :class="wrapperClass ? wrapperClass : sticky === true ? 'custom-table-wrapper my-sticky-header-column-table' : 'custom-table-wrapper'"
+        :class="[wrapperClass ? wrapperClass : sticky === true ? 'custom-table-wrapper my-sticky-header-column-table' : 'custom-table-wrapper', {'full': fullscreen ? true : false}]"
         v-if="model"
         :table-class="tableClass ? tableClass : 'custom-table'"
         :table-header-class="tableHeaderClass"
@@ -26,6 +26,7 @@
         :selected.sync="selectedItems"
         row-key="id"
         @request="onRequest"
+        @fullscreen="fullscreen = $event"
         >
         <template v-slot:top="props" class="dense">
           <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete)">
@@ -195,7 +196,13 @@
               <template v-for="(column, index) in props.cols">
                 <q-td :key="column.name" v-if="index === 0" :class="[column.__tdClasses, 'first']" auto-width>
                   <slot :name="'body-cell-' + column.name" v-bind:item="getItem(props.row, column.name)" v-if="column.name.indexOf('.') > -1">
-                    {{ column.name.indexOf('.') > -1 ? getItem(props.row, column.name) : props.value }}
+                    <span class="text-bold text-primary" v-if="getItem(props.row, column.name).length < ($q.screen.lt.md ? 20 : 40)">{{ getItem(props.row, column.name) }}</span>
+                    <div class="text-bold text-primary ellipsis" style="max-width: 100px" v-else>
+                      {{ getItem(props.row, column.name) ? getItem(props.row, column.name) : '*' }}
+                      <q-tooltip content-style="font-size: 16px">
+                        <div style="max-width: 600px">{{ getItem(props.row, column.name) }}</div>
+                      </q-tooltip>
+                    </div>
                   </slot>
                   <slot :name="'body-cell-' + column.name" v-bind:item="props.row[column.field]" v-else>
                     <span class="text-bold text-primary" v-if="getItem(props.row, column.name).length < ($q.screen.lt.md ? 20 : 40)">{{ getItem(props.row, column.name) }}</span>
@@ -463,6 +470,7 @@ export default {
   data () {
     return {
       visible: false,
+      fullscreen: false,
       downloadingExcel: false,
       confirm: {
         state: false,
