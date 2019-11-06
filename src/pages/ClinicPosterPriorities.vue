@@ -144,10 +144,12 @@ export default {
       let sizes = []
       let priorities = []
       let types = ['Office', 'Ext']
+      let offices = ['Office', 'Office Int']
       let counters = {}
       let createClicked = false
       for (let poster of this.filteredPosters) {
-        let type = poster.clinic_poster.type === 'Office' ? 'Office' : 'Ext'
+        let type = offices.includes(poster.clinic_poster.type) ? 'Office' : 'Ext'
+        // let type = poster.clinic_poster.type === 'Office' ? 'Office' : 'Ext'
         if (!Object.keys(this.clicked).length) createClicked = true
         else if (!this.clicked[poster.priority]) createClicked = true
         if (!grouped[poster.priority]) {
