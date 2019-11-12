@@ -867,14 +867,41 @@ export default {
       })
     },
     removeComposedFacade (fileId, designIndex) {
+      let times = 0
+      for (let design of this.designs) {
+        if (design.composed_facade_file_id === fileId) times++
+      }
+      console.log('Composed used: ' + times + ' times.')
+      console.log('Design: ' + designIndex)
+      if (times > 1) this.removeComposedFilefromDesign(designIndex)
+      else {
+        this.btnLoaders.compose = true
+        this.removeFile(fileId)
+          .then(() => {
+            this.designs[designIndex].composed_facade_file_id = null
+            this.btnLoaders.compose = false
+          }).catch(() => {
+            this.btnLoaders.compose = false
+          })
+      }
+    },
+    removeComposedFilefromDesign (designIndex) {
       this.btnLoaders.compose = true
-      this.removeFile(fileId)
-        .then(() => {
-          this.designs[designIndex].composed_facade_file_id = null
-          this.btnLoaders.compose = false
-        }).catch(() => {
-          this.btnLoaders.compose = false
-        })
+      let design = this.designs[designIndex]
+      let payload = { '_method': 'PATCH' }
+      payload.url = this.$store.state.App.dataWarehouse + 'poster_distributions/' + design.id
+      this.$axios({
+        url: this.$store.state.App.dataWarehouse + 'poster_distributions/' + design.id + '/removeComposedFacade',
+        method: 'POST',
+        data: payload
+      }).then((response) => {
+        this.designs[designIndex].composed_facade_file_id = null
+        this.btnLoaders.compose = false
+        this.$store.dispatch('Notify/displayMessage', { message: 'Distribution Updated', position: 'top', type: 'positive' })
+      }).catch((response) => {
+        this.btnLoaders.compose = false
+        this.$store.dispatch('Response/responseErrorManager', response)
+      })
     },
     dateOptions (date) {
       let newdate = date.replace(/\//g, '-')
@@ -1128,7 +1155,7 @@ export default {
           break
         }
       }
-      for (let design of this.designs) {
+      for (let design of this.designsInRange) {
         let model = {
           'clinic_id': this.clinicSelected.id,
           'address_id': design.address.id,
