@@ -151,7 +151,7 @@ export default {
     sendAction (payload) {
       // console.log('Send File')
       if (!payload.actionPayload.responseType) payload.actionPayload.responseType = 'json'
-      console.log(payload)
+      // console.log(payload)
       return new Promise((resolve, reject) => {
         this.$axios({
           url: payload.actionPayload.url,
@@ -162,7 +162,8 @@ export default {
           // if (this.relation) {
           //   this.$store.commit('Model/addRelationItems', { name: this.relatedTo, relation: this.relation, items: response.model, parentIndex: this.parentIndex })
           // }
-          console.log(payload.actionPayload.download)
+          // console.log(response)
+          // console.log(payload.actionPayload.download)
           if (payload.actionPayload.responseType) {
             if (payload.actionPayload.responseType === 'blob' || payload.actionPayload.download) {
               console.log('Expecting Blob')
