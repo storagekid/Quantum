@@ -99,8 +99,8 @@ export default {
     },
     checkChildren (e, id) {
       if (this.checked.includes(id)) return
-      console.log('CheckChildren')
-      console.log(e)
+      // console.log('CheckChildren')
+      // console.log(e)
       this.children = [...e, ...this.children]
       this.checked.push(id)
       // console.log(this.children)
