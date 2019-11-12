@@ -25,6 +25,8 @@ export default {
       modelsNeeded: {
         poster_models: {
           full: true
+        },
+        campaigns: {
         }
       }
     }
