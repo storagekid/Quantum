@@ -1,9 +1,14 @@
 import axios from 'axios'
 
 function formConstructor (source) {
+  // console.log(source)
   let payload = new FormData()
-  for (let key in source) {
-    if (typeof source[key] === 'object' && key !== 'file') {
+  for (let key of Object.keys(source)) {
+    if (source[key] === null) {
+      // console.log('Null')
+      // console.log(key)
+      payload.append(key, '')
+    } else if (typeof source[key] === 'object' && key !== 'file') {
       for (let item in source[key]) {
         if (Array.isArray(source[key][item])) {
           let jsonArr = JSON.stringify(source[key][item])
@@ -13,10 +18,14 @@ function formConstructor (source) {
         }
       }
     } else if (Array.isArray(source[key])) {
+      // console.log('Second')
+      // console.log(key)
       let jsonArr = JSON.stringify(source[key])
       payload.append(key, jsonArr)
     } else {
-      payload.append(key, source[key] ? source[key] : '')
+      // console.log('Third')
+      // console.log(key)
+      payload.append(key, source.hasOwnProperty(key) ? source[key] : '')
     }
   }
   return payload
@@ -125,11 +134,11 @@ export function getModel (context, { model, options }) {
   let params = {}
   if (options.scoped) {
     if (options.clinics) {
-      params['clinic_id'] = options.clinics
+      params['scope_clinic_id'] = options.clinics
     } else {
       params = context.rootState.Scope.mode === 'clinic'
-        ? { clinic_id: context.rootState.Scope.clinic.clinics.selected.map(i => { return i.id }) }
-        : { store_id: context.rootState.Scope.store.stores.selected.map(i => { return i.id }) }
+        ? { scope_clinic_id: context.rootState.Scope.clinic.clinics.selected.map(i => { return i.id }) }
+        : { scope_store_id: context.rootState.Scope.store.stores.selected.map(i => { return i.id }) }
     }
   }
   params.options = context.getters.availableOptions[model]
@@ -203,6 +212,7 @@ export function sendNewForm (context, { source }) { // CLEANED
   })
 }
 export function sendUpdateForm (context, { source }) { // CLEANED
+  // console.log(source.model)
   let payload = formConstructor(source.model)
   if (source.quasarInfo) payload.append('quasarData', JSON.stringify(source.quasarInfo))
   if (source.options) payload.append('options', JSON.stringify(source.options))
