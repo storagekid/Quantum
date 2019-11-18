@@ -320,10 +320,10 @@
                     <q-item>
                       <q-item-section>
                         <q-item-label caption>Campaña activa</q-item-label>
-                        <q-item-label class="text-h6 text-primary"><strong>{{ campaigns.open.length > 1 ? campaigns.open.length : campaigns.open[0].name }}</strong></q-item-label>
+                        <q-item-label class="text-h6 text-primary"><strong>{{ campaigns.open[0].name }}</strong></q-item-label>
                       </q-item-section>
                     </q-item>
-                    <q-item>
+                    <q-item v-if="campaigns.open[0].parent">
                       <q-item-section>
                         <q-item-label caption>Depende de</q-item-label>
                         <q-item-label class="text-h6 text-accent"><strong>{{ campaigns.open[0].parent.name }}</strong></q-item-label>
