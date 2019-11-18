@@ -9,12 +9,12 @@ export const ModelsFetcher = {
     modelsReady () {
       if (this.fetching) {
         if (Object.keys(this.modelsNeeded).length !== this.modelsFetched) {
-          console.log('Numbers don\'t match')
+          // console.log('Numbers don\'t match')
           return false
         } else {
           for (let model in this.modelsNeeded) {
             if (!this.compareOptions(model)) {
-              console.log('Options don\'t match')
+              // console.log('Options don\'t match')
               return false
             }
           }

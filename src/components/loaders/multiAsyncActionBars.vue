@@ -79,8 +79,8 @@ export default {
       for (let item of this.items) {
         this.$set(item, 'phase', 'waiting')
       }
-      console.log('Updating Model???')
-      console.log(this.mode)
+      // console.log('Updating Model???')
+      // console.log(this.mode)
       // this.multiAsyncAction.show = true
       let success = []
       let failed = []
@@ -109,13 +109,13 @@ export default {
             round++
           })
         } else if (this.mode === 'updateModel') {
-          console.log('Updating Model')
-          console.log(item)
+          // console.log('Updating Model')
+          // console.log(item)
           item.url = item.actionPayload.url
           await this.$store.dispatch('Model/sendUpdateForm', {
             'source': item
           }).then((response) => {
-            console.log(this.model)
+            // console.log(this.model)
             if (this.model.persist) this.$store.commit('Model/updateModelItems', { name: this.model.name, item: response.model })
             this.$store.dispatch('Notify/displayMessage', { message: 'Model Updated', position: 'top', type: 'positive' })
             this.$emit('multiUploadFileSuccess', { index: round })
@@ -166,7 +166,7 @@ export default {
           // console.log(payload.actionPayload.download)
           if (payload.actionPayload.responseType) {
             if (payload.actionPayload.responseType === 'blob' || payload.actionPayload.download) {
-              console.log('Expecting Blob')
+              // console.log('Expecting Blob')
               this.triggerDownload(response)
             }
           }

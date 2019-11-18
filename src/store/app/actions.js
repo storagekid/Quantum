@@ -13,7 +13,10 @@ export function bootApp (context) {
     context.commit('Scope/setScopeFromStorage', JSON.parse(localStorage.scope), { root: true })
   } else {
     context.dispatch('Auth/logOut', {}, { root: true })
-    this.$router.push({ name: 'login' }).catch(err => { console.log(err) })
+    this.$router.push({ name: 'login' }).catch(err => {
+      return err
+      // console.log(err)
+    })
   }
 }
 export function resetState (context) {

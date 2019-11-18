@@ -659,7 +659,7 @@ export default {
     },
     toggleTable (table, filter, object = false, tableModel = null) {
       if (this.showTable !== table) {
-        console.log('Destoying Table')
+        // console.log('Destoying Table')
         this.showTable = false
         if (!this.tables[table]) {
           this.$set(this.tables, table, {})

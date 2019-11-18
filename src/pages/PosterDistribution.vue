@@ -871,8 +871,8 @@ export default {
       for (let design of this.designs) {
         if (design.composed_facade_file_id === fileId) times++
       }
-      console.log('Composed used: ' + times + ' times.')
-      console.log('Design: ' + designIndex)
+      // console.log('Composed used: ' + times + ' times.')
+      // console.log('Design: ' + designIndex)
       if (times > 1) this.removeComposedFilefromDesign(designIndex)
       else {
         this.btnLoaders.compose = true

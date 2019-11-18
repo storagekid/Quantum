@@ -222,7 +222,7 @@ export default {
       this.confirm.state = true
     },
     generateClinicMailing () {
-      console.log('Creating Clinic Mailings')
+      // console.log('Creating Clinic Mailings')
       for (let mailingDesign of this.mailingDesignSelected) {
         let actionPayload = {}
         actionPayload.url = this.$store.state.App.dataWarehouse + 'mailing_designs/' + mailingDesign.id + '/clinicMailingGenerator'
@@ -246,7 +246,7 @@ export default {
       this.confirm.state = true
     },
     generateProductsAndServices () {
-      console.log('generateProductsAndServices')
+      // console.log('generateProductsAndServices')
       for (let mailingDesign of this.mailingDesignSelected) {
         let actionPayload = {}
         actionPayload.url = this.$store.state.App.dataWarehouse + 'mailing_designs/' + mailingDesign.id + '/ProductAndServicesGenerator'
@@ -271,7 +271,7 @@ export default {
       this.confirm.state = true
     },
     generateCSV () {
-      console.log('Generating Indesign CSV')
+      // console.log('Generating Indesign CSV')
       let defItems = []
       for (let mailingDesign of this.mailingDesignSelected) {
         let actionPayload = {}
@@ -325,10 +325,10 @@ export default {
       // this.$emit('filesAdded', { files: files, field: field })
     },
     sendFile (files) {
-      console.log('Here')
+      // console.log('Here')
       let url = this.$store.state.App.dataWarehouse + 'mailings/' + this.confirm.item.id + '/mailinigDataUploader'
-      console.log(url)
-      console.log(files)
+      // console.log(url)
+      // console.log(files)
       return new Promise((resolve, reject) => {
         resolve({
           url: url,
@@ -357,9 +357,9 @@ export default {
         if (clinic.siblings_count && !clinic.share_siblings) for (let sibling of clinic.siblings) clinicIds.push(sibling.id)
         for (let clinicId of clinicIds) {
           let object = {}
-          console.log(clinicId)
+          // console.log(clinicId)
           let clinicMailing = JSON.parse(JSON.stringify(this.confirm.item.clinic_mailings.filter((i) => { return i.clinic_id === clinicId })[0]))
-          console.log(clinicMailing)
+          // console.log(clinicMailing)
           let actionPayload = {}
           actionPayload.url = this.$store.state.App.dataWarehouse + 'clinic_mailings/' + clinicMailing.id + '/saveAF'
           actionPayload.method = 'POST'
@@ -385,7 +385,7 @@ export default {
       }
     },
     failedMethod () {
-      console.log('failedMethod')
+      // console.log('failedMethod')
       // this.sendMultiFiles()
       // this.closeRelationForm()
     },
@@ -395,7 +395,7 @@ export default {
       })
     },
     sendMultiFiles () {
-      console.log('Send Multi Files')
+      // console.log('Send Multi Files')
       this.multiAsyncAction.items.map(i => {
         let actionPayload = {}
         actionPayload.url = this.$store.state.App.dataWarehouse + this.relatedTo + '/' + this.model.id + '/' + this.relationData.name

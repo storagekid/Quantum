@@ -234,9 +234,9 @@ export default {
         } else {
           this.triggerDownload(response)
         }
-      }).catch((error) => {
+      }).catch(() => {
         this.btnLoaders.downloadTags = false
-        console.log(error)
+        // console.log(error)
       })
     }
   }

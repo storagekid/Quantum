@@ -884,7 +884,7 @@ export default {
               let item = row[names[0]]
               for (let i = 1; i < names.length; i++) {
                 if (!item) {
-                  console.log('Null on Table')
+                  // console.log('Null on Table')
                   continue
                 }
                 item = item[names[i]]
@@ -901,7 +901,7 @@ export default {
     }
   },
   created () {
-    console.log('Created on ModelTable')
+    // console.log('Created on ModelTable')
     this.getTable()
     if (this.relatedTo) {
       // console.log('Relation Table')
@@ -910,7 +910,7 @@ export default {
     }
   },
   mounted () {
-    console.log('Mounted on ModelTable')
+    // console.log('Mounted on ModelTable')
     if (this.startFilter) {
       this.filters['searchBar'].text = this.startFilter
     }

@@ -153,10 +153,16 @@ export default {
       if (localStorage.lastPage) {
         this.$router.push({
           name: localStorage.lastPage
-        }).catch(err => { console.log(err) })
+        }).catch(err => {
+          return err
+          // console.log(err)
+        })
       } else {
-        console.log('No Page')
-        this.$router.push({ name: this.$store.getters['App/homePage'] }).catch(err => { console.log(err) })
+        // console.log('No Page')
+        this.$router.push({ name: this.$store.getters['App/homePage'] }).catch(err => {
+          return err
+          // console.log(err)
+        })
       }
     }
   }

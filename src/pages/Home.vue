@@ -23,12 +23,15 @@ export default {
         let pageName = groupName + roleName + 'Home'
         homes.push(pageName)
       }
-      console.log(homes)
+      // console.log(homes)
       for (let home of homes) {
         let matches = vm.$router.resolve({ name: home })
-        console.log(matches.resolved.matched.length)
+        // console.log(matches.resolved.matched.length)
         if (matches.resolved.matched.length) {
-          vm.$router.push({ name: home }).catch(err => { console.log(err) })
+          vm.$router.push({ name: home }).catch(err => {
+            return err
+            // console.log(err)
+          })
         }
       }
     })
@@ -41,12 +44,15 @@ export default {
       let pageName = groupName + roleName + 'Home'
       homes.push(pageName)
     }
-    console.log(homes)
+    // console.log(homes)
     for (let home of homes) {
       let matches = this.$router.resolve({ name: home })
-      console.log(matches.resolved.matched.length)
+      // console.log(matches.resolved.matched.length)
       if (matches.resolved.matched.length) {
-        this.$router.push({ name: home }).catch(err => { console.log(err) })
+        this.$router.push({ name: home }).catch(err => {
+          return err
+          // console.log(err)
+        })
       }
     }
   }
