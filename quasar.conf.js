@@ -29,6 +29,7 @@ module.exports = function (ctx) {
 
       components: [
         'QBanner',
+        'QCircularProgress',
         'QScrollArea',
         'QAvatar',
         'QSeparator',
@@ -84,7 +85,8 @@ module.exports = function (ctx) {
         'QBadge',
         'QResizeObserver',
         'QSpace',
-        'QPopupProxy'
+        'QPopupProxy',
+        'QVirtualScroll'
       ],
 
       directives: [
