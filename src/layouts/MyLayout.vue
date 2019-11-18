@@ -36,6 +36,7 @@
 
     <q-drawer
       :width="200"
+      :breakpoint="1400"
       v-model="leftDrawerOpen"
       content-class="bg-accent text-accent shadow-5"
       >
@@ -63,7 +64,7 @@ export default {
   name: 'MyLayout',
   data () {
     return {
-      leftDrawerOpen: this.$q.platform.is.desktop
+      leftDrawerOpen: this.$q.platform.is.desktop && this.$q.screen.lt.lg
     }
   }
 }
