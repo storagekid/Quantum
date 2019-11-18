@@ -1,12 +1,13 @@
 <template>
   <q-page class="q-pa-md">
     <model-table
+      :sticky="true"
+      :virtualScroll="true"
       :modelName="modelName"
       :modelsNeeded="modelsNeeded"
       :dense="true"
       hideHeaderButtons
       tableView="PosterDistributionDashBoard"
-      rows="10"
       startFilter="&&Carteles!=&&Distribuciones!=&&Activa=="
       v-if="modelsReady"
       >
@@ -18,9 +19,9 @@
         <q-icon name="check_circle" v-if="!item.item" color="negative"></q-icon>
         <q-icon name="check_circle" v-else color="positive"></q-icon>
       </template>
-      <template slot="body-cell-clinic_posters" slot-scope="item" :item="item">
+      <!-- <template slot="body-cell-clinic_posters" slot-scope="item" :item="item">
         {{ item.item.filter((i) => { return !i.ends_at} ).length }}
-      </template>
+      </template> -->
       <template slot="body-cell-clinic_distributions_by_campaign" slot-scope="item" :item="item">
         <template v-if="item.item">
           <template v-if="Object.keys(item.item).length">
@@ -140,7 +141,7 @@ export default {
           refresh: true,
           withTrashed: true,
           with: ['clinic_posters', 'campaign_facades'],
-          appends: ['clinic_distributions_by_campaign', 'open']
+          appends: ['clinic_distributions_by_campaign', 'open', 'active_posters_count']
         },
         campaigns: {
           refresh: true,
