@@ -464,7 +464,7 @@ import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
-  props: ['modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
+  props: ['sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
   mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {
@@ -511,6 +511,11 @@ export default {
       if (value.indexOf('&&') > -1 && Object.keys(this.filters).length > 1) {
         this.buildFilters(value)
       }
+    },
+    startFilter () {
+      // console.log('StartFilter Changed')
+      this.clearFilters()
+      this.filters['searchBar'].text = this.startFilter
     }
   },
   computed: {
@@ -592,7 +597,8 @@ export default {
       return object
     },
     model () {
-      if (this.relatedTo) {
+      if (this.sourceModel) return this.sourceModel
+      else if (this.relatedTo) {
         return this.$store.state.Model.models[this.relatedTo.name].items[this.relatedTo.index][this.modelName]
       } else if (this.$store.state.Model.models[this.modelName]) {
         return this.$store.state.Model.models[this.modelName].items
@@ -710,14 +716,20 @@ export default {
     // },
     exports () {
       this.downloadingExcel = true
+      let ids = []
+      if (this.filterIds.length) ids = this.filterIds
+      else if (this.filterIds.length !== this.$store.state.Model.models[this.modelName].items.length) {
+        this.model.forEach((i) => { ids.push(i.id) })
+      }
       this.$axios({
         url: this.$store.state.App.dataWarehouse + 'exportExcel',
         method: 'POST',
         data: {
           model: this.modelName,
-          ids: this.filterIds,
+          ids: ids,
           blueprint: this.confirm.blueprint,
-          modelOptions: this.$store.state.Model.models[this.modelName].options
+          tableView: this.tableView,
+          options: this.$store.getters['Model/availableOptions'][this.modelName]
         },
         responseType: 'blob'
       }).then((response) => {
@@ -840,7 +852,7 @@ export default {
     getTable () {
       let params = {
         model: this.modelName,
-        table: this.tableView
+        tableView: this.tableView
       }
       this.$axios({
         url: this.$store.state.App.dataWarehouse + 'table',
@@ -889,6 +901,7 @@ export default {
     }
   },
   created () {
+    console.log('Created on ModelTable')
     this.getTable()
     if (this.relatedTo) {
       // console.log('Relation Table')
@@ -897,10 +910,16 @@ export default {
     }
   },
   mounted () {
+    console.log('Mounted on ModelTable')
     if (this.startFilter) {
       this.filters['searchBar'].text = this.startFilter
     }
     this.$emit('tableReady')
+  },
+  updated () {
+    // console.log('Updated on ModelTable')
+    // console.log(this.modelName)
+    // console.log(this.$props)
   }
 }
 </script>
