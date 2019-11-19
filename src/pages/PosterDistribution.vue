@@ -15,7 +15,7 @@
         :dense="true"
         :hide-bottom-space="true"
         :field="{name: 'dates', type: { model: 'dates', default: { text: 'Selecciona una Fecha'} }}"
-        :clearable="dates.length > 1"
+        :clearable="false"
         :sourceOptions="dates"
         :initValue="dateSelected"
         @updated="updateCustomSelect('dateSelected', $event)"
