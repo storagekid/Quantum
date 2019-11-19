@@ -2,7 +2,7 @@ import { LocalStorage } from 'quasar'
 
 export function bootApp (context) {
   context.commit('Model/cleanState', null, { root: true })
-  if (localStorage.settings) context.commit('App/setSettingsFromStorage', LocalStorage.getItem('settings'), { root: true })
+  if (LocalStorage.has('settings')) context.commit('App/setSettingsFromStorage', LocalStorage.getItem('settings'), { root: true })
   if (localStorage.token && localStorage.user && localStorage.scope && localStorage.menus && localStorage.routes) {
     context.commit('Auth/setToken', LocalStorage.getItem('token'), { root: true })
     context.commit('setMenus', LocalStorage.getItem('menus'))

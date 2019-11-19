@@ -9,7 +9,8 @@ export function setSetting (state, { name, value, persists = false }) {
   // localStorage.setItem('settings', JSON.stringify(state.settings))
 }
 export function setSettingsFromStorage (state, settings) {
-  console.log(settings)
+  // console.log(settings)
+  if (typeof settings === 'string') settings = JSON.parse(settings)
   state.settings = settings
   // console.log('Current Lang: ' + this.$i18n.locale)
   // if (state.settings.lang) this.$i18n.locale = state.settings.lang
