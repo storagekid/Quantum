@@ -14,7 +14,7 @@
           label="Clinicas"
           unelevated
           size="sm"
-          :disable="!item.item.mailing_designs_count"
+          :disable="!item.item.mailing_designs_count || !can('Marketing','create')"
           >
           <div class="column q-gutter-sm q-py-sm">
             <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar Listado Buzoneo" @click="showGenerateClinicMailing(item.item)"></q-btn>
@@ -173,6 +173,7 @@
 </template>
 
 <script>
+import { PageMixins } from '../mixins/pageMixins'
 import { ModelsFetcher } from '../mixins/modelMixin'
 import { customSelectMixins } from '../mixins/customSelectMixins'
 import CustomSelect from '../components/form/customSelect'
@@ -181,7 +182,7 @@ import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'mailings',
-  mixins: [ ModelsFetcher, multiAsyncActionBarsMixins, customSelectMixins ],
+  mixins: [ PageMixins, ModelsFetcher, multiAsyncActionBarsMixins, customSelectMixins ],
   components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {
