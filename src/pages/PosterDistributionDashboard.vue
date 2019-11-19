@@ -49,7 +49,7 @@
           @click="confirm.item = computedClinics[item.item.__index]"
           >
           <div class="column q-gutter-sm q-py-sm">
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="showPDFGenerator(item.item)"></q-btn>
+            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="showPDFGenerator(item.item)" v-if="can('Marketing','create')"></q-btn>
             <q-btn-dropdown
               color="primary"
               flat
@@ -122,6 +122,7 @@
 </template>
 
 <script>
+import { PageMixins } from '../mixins/pageMixins'
 import { ModelsFetcher } from '../mixins/modelMixin'
 import { FileMethods } from '../mixins/fileMixin'
 import { customSelectMixins } from '../mixins/customSelectMixins'
@@ -131,7 +132,7 @@ import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'PosterDistributionDashboard',
-  mixins: [ ModelsFetcher, FileMethods, customSelectMixins, multiAsyncActionBarsMixins ],
+  mixins: [ PageMixins, ModelsFetcher, FileMethods, customSelectMixins, multiAsyncActionBarsMixins ],
   components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {
