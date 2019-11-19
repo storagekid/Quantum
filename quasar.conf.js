@@ -98,7 +98,9 @@ module.exports = function (ctx) {
       plugins: [
         'Notify',
         'Loading',
-        'AppFullscreen'
+        'AppFullscreen',
+        'LocalStorage',
+        'SessionStorage'
       ],
       config: {
         loading: {
@@ -117,6 +119,17 @@ module.exports = function (ctx) {
 
     build: {
       scopeHoisting: true,
+      env: ctx.dev
+        ? { // so on dev we'll have
+          API: JSON.stringify('http://migabinete.test/api/rest/'),
+          PUBLIC_SRC: JSON.stringify('http://migabinete.test/storage'),
+          SERVER_ADDRESS: JSON.stringify('http://migabinete.test')
+        }
+        : { // and on build (production):
+          API: JSON.stringify('http://192.168.4.16:8100/api/rest/'),
+          PUBLIC_SRC: JSON.stringify('http://192.168.4.16:8100/storage'),
+          SERVER_ADDRESS: JSON.stringify('http://migabinete.test')
+        },
       // vueRouterMode: 'history',
       // vueCompiler: true,
       // gzip: true,
