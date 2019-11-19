@@ -6,14 +6,19 @@ export const ModelsFetcher = {
     }
   },
   computed: {
+    objectModelsName () {
+      return this.modelsNeeded ? 'modelsNeeded' : 'componentModels'
+    },
     modelsReady () {
       if (this.fetching) {
-        if (Object.keys(this.modelsNeeded).length !== this.modelsFetched) {
+        let object = this.modelsNeeded ? this.modelsNeeded : this.componentModels
+        // let objectName = this.modelsNeeded ? 'modelsNeeded' : 'componentModels'
+        if (Object.keys(object).length !== this.modelsFetched) {
           // console.log('Numbers don\'t match')
           return false
         } else {
-          for (let model in this.modelsNeeded) {
-            if (!this.compareOptions(model)) {
+          for (let model in object) {
+            if (!this.compareOptions(model, this.objectModelsName)) {
               // console.log('Options don\'t match')
               return false
             }
@@ -24,7 +29,7 @@ export const ModelsFetcher = {
     }
   },
   methods: {
-    getModelsNeeded (object = 'modelsNeeded') {
+    getModelsNeeded (object = this.objectModelsName) {
       return new Promise((resolve, reject) => {
         let counter = 0
         this.$q.loading.show()
@@ -42,7 +47,7 @@ export const ModelsFetcher = {
                 // console.log('Not found in STORE')
               } else if (!this.$store.state.Model.models[name].items.length) {
                 // console.log('No Items Yet in Model')
-              } else if (this.compareOptions(name)) {
+              } else if (this.compareOptions(name, object)) {
                 // console.log('Same  Options')
                 counter = counter + 1
                 if (counter === size) resolve(size)
@@ -84,13 +89,17 @@ export const ModelsFetcher = {
       })
     },
     compareOptions (model) {
+      // console.log('comparing')
+      // console.log(model)
+      // console.log(this.objectModelsName)
       let storeOptions = this.$store.getters['Model/availableOptions'][model]
-      for (let option in this.modelsNeeded[model]) {
+      if (!Object.keys(this[this.objectModelsName][model]).length) return true
+      for (let option in this[this.objectModelsName][model]) {
         if (!storeOptions[option]) return false
-        else if (typeof this.modelsNeeded[model][option] !== 'object') {
-          if (this.modelsNeeded[model][option] !== storeOptions[option]) return false
+        else if (typeof this[this.objectModelsName][model][option] !== 'object') {
+          if (this[this.objectModelsName][model][option] !== storeOptions[option]) return false
         } else {
-          if (JSON.stringify(this.modelsNeeded[model][option]) !== JSON.stringify(storeOptions[option])) return false
+          if (JSON.stringify(this[this.objectModelsName][model][option]) !== JSON.stringify(storeOptions[option])) return false
         }
       }
       return true
@@ -100,7 +109,7 @@ export const ModelsFetcher = {
     // console.log('created in ModelsFetcher')
     // vm.getModelsNeeded()
     this.fetching = true
-    this.getModelsNeeded('componentModels').then((size) => {
+    this.getModelsNeeded(this.objectModelsName).then((size) => {
       this.modelsFetched = size
       this.fetching = false
       this.$q.loading.hide()
@@ -109,10 +118,25 @@ export const ModelsFetcher = {
       this.$q.loading.hide()
     })
   },
+  // updated () {
+  //   if (this.componentModels) {
+  //     // console.log('created in ModelsFetcher')
+  //     this.fetching = true
+  //     this.getModelsNeeded('componentModels').then((size) => {
+  //       this.modelsFetched = size
+  //       this.fetching = false
+  //       this.$q.loading.hide()
+  //     }).catch((response) => {
+  //       this.fetching = false
+  //       this.$q.loading.hide()
+  //     })
+  //   }
+  // },
   beforeRouteEnter (to, from, next) {
     // console.log('beforeRouteEnter')
     next(vm => {
       // vm.getModelsNeeded()
+      vm.$q.loading.show()
       vm.fetching = true
       vm.getModelsNeeded().then((size) => {
         vm.modelsFetched = size
