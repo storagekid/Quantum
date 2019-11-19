@@ -152,7 +152,7 @@ export default {
       if (!this.$store.state.App.settings['home']) this.$store.commit('App/setSetting', { name: 'home', value: this.$store.state.App.routes[0] })
       if (localStorage.lastPage) {
         this.$router.push({
-          name: localStorage.lastPage
+          name: this.$q.localStorage.getItem('lastPage')
         }).catch(err => {
           return err
           // console.log(err)

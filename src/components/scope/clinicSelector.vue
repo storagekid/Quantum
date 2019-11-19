@@ -194,7 +194,7 @@ export default {
       // console.log('1 Clinic')
       if (localStorage.lastPage) {
         this.$router.push({
-          name: localStorage.lastPage
+          name: this.$q.localStorage.getItem('lastPage')
         })
       } else {
         this.$router.push({ name: this.$store.state.App.homePage })

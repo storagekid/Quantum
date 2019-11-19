@@ -1,3 +1,5 @@
+import { LocalStorage } from 'quasar'
+
 export function initScope (state, scope) {
   if (state.mode === 'clinic') {
     state.clinic.clinics.items = scope.clinics.length ? scope.clinics : state.clinic.clinics.items
@@ -20,7 +22,8 @@ export function setScope (state, scope) {
     state.store.countries.selected = scope.countries.length ? scope.countries : state.store.countries.items
   }
   state.setted = true
-  localStorage.setItem('scope', JSON.stringify(state))
+  LocalStorage.set('scope', state)
+  // localStorage.setItem('scope', JSON.stringify(state))
 }
 export function setScopeMode (state, mode) {
   state.mode = mode

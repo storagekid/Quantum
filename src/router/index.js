@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import { LocalStorage } from 'quasar'
 
 import routes from './routes'
 
@@ -36,7 +37,8 @@ export default function ({ store }) {
       else if (!store.state.App.routes.length) {
         // console.log('Router TO Included in LocalStorage')
         // console.log(JSON.parse(localStorage.routes).includes(to.name))
-        if (!JSON.parse(localStorage.routes).includes(to.name)) {
+        let routes = LocalStorage.getItem('routes')
+        if (!routes.includes(to.name)) {
           next({
             name: 'home'
           })
@@ -51,7 +53,7 @@ export default function ({ store }) {
           // console.log('WTF')
           let name
           if (localStorage.settings) {
-            name = JSON.parse(localStorage.settings)['home']
+            name = LocalStorage.getItem('settings')['home']
             if (!store.state.App.routes.includes(name)) name = store.state.App.routes[0]
           } else {
             name = store.state.App.routes[0]
@@ -62,7 +64,10 @@ export default function ({ store }) {
           })
         } else {
           // console.log('THERE')
-          if (to.matched[0].path !== '/auth') localStorage.setItem('lastPage', to.name)
+          if (to.matched[0].path !== '/auth') {
+            // localStorage.setItem('lastPage', to.name)
+            LocalStorage.set('lastPage', to.name)
+          }
           next()
         }
       }

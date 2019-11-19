@@ -72,7 +72,8 @@ export default {
         })
           .then(({ data }) => {
             // console.log(data)
-            localStorage.setItem('token', data.access_token)
+            this.$q.localStorage.set('token', data.access_token)
+            // localStorage.setItem('token', data.access_token)
             this.$store.commit('Auth/setToken', data.access_token)
             this.$emit('logged', data)
             this.visible = false

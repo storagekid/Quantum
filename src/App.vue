@@ -10,12 +10,16 @@ export default {
   created () {
     this.$store.dispatch('App/bootApp')
     if (localStorage.settings) {
-      let settings = JSON.parse(localStorage.settings)
+      // this.$q.localStorage.getItem(key)
+      let settings = this.$q.localStorage.getItem('settings')
+      // console.log(settings)
+      // console.log(settings['lang'])
+      // let settings = JSON.parse(localStorage.settings)
       if (settings.lang) this.$i18n.locale = settings.lang
       if (this.$q.lang.isoName !== settings.lang) {
         import(`quasar/lang/${settings.lang}`).then(lang => {
           this.$q.lang.set(lang.default)
-        })
+        }).catch((e) => { return e })
       }
     }
   }

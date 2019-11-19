@@ -242,14 +242,16 @@ export default {
           }
         }
       }
-      localStorage.setItem('clicked', JSON.stringify(this.clicked))
+      this.$q.localStorage.set('clicked', this.clicked)
+      // localStorage.setItem('clicked', JSON.stringify(this.clicked))
     },
     toggleClicked (priority, language, size, type) {
       if (!this.groupedForTable.posters[priority][size][language][type]) return
       this.clicked[priority][language][size][type] = !this.clicked[priority][language][size][type]
     },
     saveState () {
-      localStorage.setItem('clicked', JSON.stringify(this.clicked))
+      this.$q.localStorage.set('clicked', this.clicked)
+      // localStorage.setItem('clicked', JSON.stringify(this.clicked))
     },
     checkClicked (priority, language, size, type) {
       if (!this.clicked[priority]) return false
@@ -321,7 +323,8 @@ export default {
     }
   },
   created () {
-    if (localStorage.clicked) this.clicked = JSON.parse(localStorage.clicked)
+    // if (localStorage.clicked) this.clicked = JSON.parse(localStorage.clicked)
+    if (localStorage.clicked) this.clicked = this.$q.localStorage.getItem('clicked')
   }
 }
 </script>

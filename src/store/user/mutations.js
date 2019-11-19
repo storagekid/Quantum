@@ -1,3 +1,5 @@
+import { LocalStorage } from 'quasar'
+
 export function setUser (state, user) {
   state.name = user.name
   state.groups = user.groups
@@ -6,7 +8,8 @@ export function setUser (state, user) {
   state.permissions = user.permissions
   state.profile = user.profile
   state.setted = true
-  localStorage.setItem('user', JSON.stringify(state))
+  LocalStorage.set('user', state)
+  // localStorage.setItem('user', JSON.stringify(state))
 }
 export function clearUser (state) {
   state.name = null
