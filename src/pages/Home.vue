@@ -1,13 +1,14 @@
 <template>
-  <marketing-user-home></marketing-user-home>
+  <dir></dir>
+  <!-- <marketing-user-home></marketing-user-home> -->
 </template>
 
 <script>
-import MarketingUserHome from './Homes/MarketingUserHome'
+// import MarketingUserHome from './Homes/MarketingUserHome'
 
 export default {
   name: 'Home',
-  components: { MarketingUserHome },
+  // components: { MarketingUserHome },
   data () {
     return {
     }

@@ -391,9 +391,9 @@ export default {
   mixins: [ModelsFetcher],
   data () {
     return {
-      // modelName: 'clinics',
+      modelName: 'clinics',
       // show: null,
-      modelsNeeded: {
+      componentModels: {
         clinics: {
           refresh: true,
           withTrashed: true,
@@ -408,8 +408,10 @@ export default {
           orderDesc: true
         },
         clinic_posters: {
+          refresh: true
         },
         clinic_poster_priorities: {
+          refresh: true
         },
         posters: {
         }
@@ -527,7 +529,8 @@ export default {
         'translights_normal': 0,
         clinicByPosters: { clinics: {}, total: 0 }
       }
-      this.clinics.total.forEach(i => {
+      let clinics = JSON.parse(JSON.stringify(this.clinics))
+      clinics.total.forEach(i => {
         if (!i.active) return
         if (!i.clinic_posters) return
         i['clinic_posters_count'] = 0
@@ -638,7 +641,8 @@ export default {
         posters.translights[priority].total += posters.translights[priority].frosted.length
         posters.translights[priority].total += posters.translights[priority].normal.length
       }
-      for (let clinic of this.clinics.open) {
+      for (let clinic of clinics.total) {
+        if (!clinic.open || clinic.parent_id) continue
         if (!clinic.clinic_posters_count) continue
         if (!posters.clinicByPosters.clinics[clinic.clinic_posters_count]) this.$set(posters.clinicByPosters.clinics, clinic.clinic_posters_count, [])
         posters.clinicByPosters.clinics[clinic.clinic_posters_count].push(clinic)
@@ -681,18 +685,30 @@ export default {
       }
     }
   },
-  created () {
-    // console.log('created')
-    this.fetching = true
-    this.getModelsNeeded().then((size) => {
-      this.modelsFetched = size
-      this.fetching = false
-      this.$q.loading.hide()
-    }).catch((response) => {
-      this.fetching = false
-      this.$q.loading.hide()
-    })
+  beforeDestroy () {
+    // console.log('Before Destroy')
+    this.closeTable()
+  },
+  destroyed () {
+    // console.log('Destroyed')
+  },
+  beforeRouteLeave (to, from, next) {
+    // console.log('Before Route Leave')
+    this.closeTable()
+    next()
   }
+  // created () {
+  //   // console.log('created')
+  //   this.fetching = true
+  //   this.getModelsNeeded().then((size) => {
+  //     this.modelsFetched = size
+  //     this.fetching = false
+  //     this.$q.loading.hide()
+  //   }).catch((response) => {
+  //     this.fetching = false
+  //     this.$q.loading.hide()
+  //   })
+  // }
 }
 </script>
 <style lang="stylus" scoped>
