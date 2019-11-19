@@ -5,7 +5,7 @@
     </q-card-section>
     <q-card-section>
       <update-model-tabs
-        mode="update"
+        :mode="mode"
         :batchMode="batchMode"
         :modelName="modelName"
         :source="model"
@@ -31,7 +31,7 @@ import UpdateModelTabs from '../model/updateModelTabs'
 export default {
   name: 'UpdateModel',
   components: { UpdateModelTabs },
-  props: ['modelName', 'model', 'batchMode', 'quasarData', 'relation'],
+  props: ['modelName', 'model', 'batchMode', 'quasarData', 'relation', 'mode'],
   data () {
     return {
       visible: false

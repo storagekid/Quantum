@@ -22,6 +22,7 @@
             suffix=""
             v-model="model[field.name]"
             type="text"
+            :disable="viewMode"
             />
           <q-input
             v-if="field.type.name === 'password'"
@@ -35,6 +36,7 @@
             suffix=""
             v-model="model[field.name]"
             type="password"
+            :disable="viewMode"
             />
           <q-input
             v-if="field.type.name === 'number'"
@@ -48,6 +50,7 @@
             suffix=""
             v-model="model[field.name]"
             type="number"
+            :disable="viewMode"
             />
           <q-input
             v-if="field.type.name === 'date'"
@@ -60,6 +63,7 @@
             :label="field.label"
             stack-label
             v-model="model[field.name]"
+            :disable="viewMode"
             >
             <template v-slot:append>
               <q-icon name="event" class="cursor-pointer" color="primary">
@@ -78,6 +82,7 @@
             :error="$v.model[field.name].$error"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             @updated="updateCustomSelect('model.' + field.name, ...arguments)"
+            :disable="viewMode"
             >
           </custom-select>
           <q-select
@@ -91,6 +96,7 @@
             stack-label
             v-model="model[field.name]"
             :options="field.type.array"
+            :disable="viewMode"
           />
           <q-select
             v-if="field.type.name === 'array'"
@@ -116,6 +122,7 @@
             :hide-upload-progress="true"
             @added="uploadFilesAdded($event, field.name)"
             @uploaded="finishUploading(field, ...arguments)"
+            :disable="viewMode"
             >
             <template v-slot:header="scope" v-if="model[field.name] && typeof model[field.name] !== 'object'">
               <div class="row no-wrap items-center q-pa-sm q-gutter-xs">
@@ -185,6 +192,11 @@ export default {
   watch: {
     '$v.model.$anyError' () {
       this.$emit('dirtiness', { step: this.step.title, dirty: this.$v.model.$anyError })
+    }
+  },
+  computed: {
+    viewMode () {
+      return this.mode === 'display'
     }
   },
   methods: {

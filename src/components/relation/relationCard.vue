@@ -5,6 +5,7 @@
       <q-btn dense rounded class="q-ml-md" color="primary" icon="add"
         @click="openRelation = relationData.name"
         v-if="openRelation !== relationData.name && relationData.quasarData.listFields.mode !== 'table'"
+        :disable="viewMode"
       />
       <q-btn-group rounded class="q-ml-md" v-if="openRelation === relationData.name">
         <q-btn rounded color="primary" icon="check"
@@ -34,7 +35,7 @@
                 v-if="field.type.name === 'multiFile'"
                 >
                 <div class="q-pa-md">
-                  <q-btn icon="cloud_upload" :label="!showMultiuploader ? 'Use Multiuploader' : 'Close Multiuploader'" color="primary" @click="showMultiuploader = !showMultiuploader"></q-btn>
+                  <q-btn icon="cloud_upload" :label="!showMultiuploader ? 'Use Multiuploader' : 'Close Multiuploader'" color="primary" @click="showMultiuploader = !showMultiuploader" :disable="viewMode"></q-btn>
                 </div>
                 <q-uploader
                   v-if="showMultiuploader"
@@ -48,6 +49,7 @@
                   @uploading="sendMultiFiles"
                   @factory-failed="failedMethod"
                   @removed="removeFiles"
+                  :disable="viewMode"
                 />
               </div>
             </template>
@@ -179,7 +181,7 @@
             v-for="(item, index) in model[relationData.name]"
             :key="relationData.name+'Item'+index"
             >
-            <q-item-section avatar>
+            <q-item-section avatar v-if="!viewMode">
               <div class="row">
                 <q-btn-group flat class="q-gutter-sm">
                   <q-btn size="md" flat dense color="negative" icon="delete" @click="startRemoveRelation(relationData.name, index, item.id, item)"/>
@@ -272,6 +274,7 @@
           class="text-center"
           >
           <model-table
+            :mode="mode"
             tableHeaderClass="custom-table"
             :grid="true"
             :gridHeader="true"
@@ -356,6 +359,11 @@ export default {
       relationLoader: false,
       gridItemLoading: false,
       selectedItems: []
+    }
+  },
+  computed: {
+    viewMode () {
+      return this.mode === 'display'
     }
   },
   methods: {

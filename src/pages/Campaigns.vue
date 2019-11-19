@@ -22,7 +22,7 @@
           label="Distribución"
           unelevated
           size="sm"
-          :disable="!item.item.campaign_posters_count"
+          :disable="!item.item.campaign_posters_count || !can('Marketing','create')"
           >
           <div class="column q-gutter-sm q-py-sm">
             <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="showGenerateClinicDistributionPDF(item.item)"></q-btn>
@@ -88,6 +88,7 @@
 </template>
 
 <script>
+import { PageMixins } from '../mixins/pageMixins'
 import { ModelsFetcher } from '../mixins/modelMixin'
 import { customSelectMixins } from '../mixins/customSelectMixins'
 import CustomSelect from '../components/form/customSelect'
@@ -96,7 +97,7 @@ import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'CampaignsPage',
-  mixins: [ ModelsFetcher, customSelectMixins, multiAsyncActionBarsMixins ],
+  mixins: [ PageMixins, ModelsFetcher, customSelectMixins, multiAsyncActionBarsMixins ],
   components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {

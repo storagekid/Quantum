@@ -29,10 +29,11 @@
         @fullscreen="fullscreen = $event"
         >
         <template v-slot:top="props" class="dense">
-          <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete)">
+          <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete || can.show)">
             <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="newModel = !newModel" v-if="can.create && (!grid)"/>
+            <q-btn dense size="md" rounded color="primary" icon="visibility" @click="showUpdate('display')" :disabled="!selectedItems.length || selectedItems.length > 1"/>
             <q-btn-group flat rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
-              <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
+              <!-- <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/> -->
               <q-btn dense flat size="sm" rounded color="primary" icon="edit" @click="showUpdate" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="file_copy" @click="cloneModel = true" :disabled="!selectedItems.length || selectedItems.length  > 1 || true" v-if="can.create"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="find_replace" :label="!$q.screen.lt.md ? 'Multi Edit' : ''" @click="showUpdateBatch" :disabled="selectedItems.length < 2 || !batchForm" v-if="can.edit"/>
@@ -280,17 +281,18 @@
                               </template>
                             </q-img>
                             <div class="full-width text-subtitle1 text-center q-pa-xs" v-if="showActions === props.row.id" >
-                              <q-card-actions class="justify-between q-pa-none">
+                              <q-card-actions class="justify-between q-pa-none justify-center">
                                 <q-btn
                                   dense
                                   size="md"
                                   color="warning"
                                   @click="$emit('editRelation', {name: modelName, index: props.row.__index, row: props.row})"
                                   icon="edit"
+                                  v-if="!viewMode"
                                   >
                                 </q-btn>
                                 <q-btn dense size="md" color="positive"  @click="downloadFile(getObject(props.row, col.name).id)" icon="cloud_download"></q-btn>
-                                <q-btn dense size="md" color="negative"  @click="removeRelation({'relation': relationData.name, 'index': props.row.__index, 'id': props.row.id}, 'update')" icon="remove"></q-btn>
+                                <q-btn dense size="md" color="negative"  @click="removeRelation({'relation': relationData.name, 'index': props.row.__index, 'id': props.row.id}, 'update')" icon="remove" v-if="!viewMode"></q-btn>
                               </q-card-actions>
                             </div>
                           </div>
@@ -324,6 +326,7 @@
         :modelName="modelName"
         :batchMode="batchMode"
         :model="batchMode ? selectedItems : selectedItems[0]"
+        :mode="updateMode"
         :relation="relatedTo"
         :quasarData="quasarData"
         v-on:modelUpdated="endUpdating"
@@ -464,7 +467,7 @@ import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
-  props: ['sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
+  props: ['mode', 'sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
   mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {
@@ -480,6 +483,7 @@ export default {
       },
       newModel: false,
       cloneModel: false,
+      updateMode: 'update',
       updateModel: false,
       updateModelBatch: false,
       removeModel: false,
@@ -519,8 +523,11 @@ export default {
     }
   },
   computed: {
+    viewMode () {
+      return this.mode === 'display'
+    },
     showRestore () {
-      return this.quasarData.fields.includes('deleted_at')
+      return this.quasarData.fields.includes('deleted_at') && this.$store.getters['User/isRoot']
     },
     shouldRestore () {
       if (!this.selectedItems.length || !this.can.delete) return false
@@ -755,7 +762,8 @@ export default {
         this.$store.dispatch('Response/responseErrorManager', response)
       })
     },
-    showUpdate () {
+    showUpdate (mode = 'update') {
+      this.updateMode = mode
       if (!this.getModelView) this.updateModel = true
       else if (this.$store.state.Model.models[this.modelName].viewsFetched.includes(this.selectedItems[0].id)) this.updateModel = true
       else {
@@ -834,6 +842,7 @@ export default {
       }
     },
     endUpdating () {
+      this.updateMode = 'update'
       this.updateModel = false
       this.selectedItems = []
     },
