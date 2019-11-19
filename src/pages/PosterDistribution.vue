@@ -21,19 +21,21 @@
         @updated="updateCustomSelect('dateSelected', $event)"
         >
       </custom-select>
-      <q-btn
-        v-if="clinicSelected"
-        size="sm"
-        icon="add"
-        color="primary"
-        class="full-width q-mt-md"
-        @click="startUploader"
-        :disable="!clinicHasPosters"
-        >
-        Añade un plano
-      </q-btn>
-      <q-btn size="sm" icon="save" color="info" class="full-width q-my-md" label="Guardar" :disable="!modelReady" @click="save"></q-btn>
-      <q-btn size="sm" icon="file_copy" color="info" class="full-width q-mb-md" label="Clonar" :disable="!designsInRange.length" @click="cloneDialog.state = true"></q-btn>
+      <template v-if="can('Marketing','create')">
+        <q-btn
+          v-if="clinicSelected"
+          size="sm"
+          icon="add"
+          color="primary"
+          class="full-width q-mt-md"
+          @click="startUploader"
+          :disable="!clinicHasPosters"
+          >
+          Añade un plano
+        </q-btn>
+        <q-btn size="sm" icon="save" color="info" class="full-width q-my-md" label="Guardar" :disable="!modelReady" @click="save"></q-btn>
+        <q-btn size="sm" icon="file_copy" color="info" class="full-width q-mb-md" label="Clonar" :disable="!designsInRange.length" @click="cloneDialog.state = true"></q-btn>
+      </template>
       <q-uploader
         class="full-width hidden"
         ref="uploader"
@@ -46,7 +48,7 @@
         :hide-upload-progress="true"
         @added="uploadFilesAdded($event)"
       />
-      <template v-if="clinicPosters">
+      <template v-if="clinicPosters && can('Marketing','create')">
         <div class="row justify-center items-start q-col-gutter-md">
           <div v-for="(clinicPoster, posterIndex) in clinicPosters" :key="posterIndex + 'poster'" class="col-xs-3">
             <q-card :class="{ghost: postersInDesigns.includes(clinicPoster.id)}" :disabled="postersInDesigns.includes(clinicPoster.id)">
@@ -156,6 +158,7 @@
                           label="Fecha Inicio"
                           stack-label
                           v-model="design.starts_at"
+                          :disable="!can('Marketing','create')"
                           >
                           <template v-slot:append>
                             <q-icon name="event" class="cursor-pointer" color="primary">
@@ -191,6 +194,7 @@
                           label="Fecha Fin"
                           stack-label
                           v-model="design.ends_at"
+                          :disable="!can('Marketing','create')"
                           >
                           <template v-slot:append>
                             <q-icon name="event" class="cursor-pointer" color="primary">
@@ -216,6 +220,7 @@
                           stack-label
                           :error="design.address === null"
                           error-message="Debes seleccionar una calle"
+                          :disable="!can('Marketing','create')"
                         />
                       </div>
                       <div class="col-xs-12 col-sm-4 bg-white text-primary">
@@ -230,6 +235,7 @@
                             :step="0.1"
                             label
                             color="warning"
+                            :disable="!can('Marketing','create')"
                           />
                         </div>
                       </div>
@@ -284,7 +290,7 @@
                       >
                       <div class="holder-header" :style="{'top': '-' + (design.distributions.postersScale < 1 ? design.distributions.postersScale * 30 : design.distributions.postersScale * 27) + 'px'}">
                         <q-btn v-if="poster.ext && poster.int" color="info" dense size="md" icon="flip" class="q-pa-none" @click.stop="flipHolder(poster)" style="position: absolute; top: -20px; right: -20px"></q-btn>
-                        <q-btn v-if="poster.ext || poster.int" color="negative" dense size="md" icon="delete" class="q-pa-none" @click.stop="removePosterFromHolder(design.__index, index, poster.showing, poster[poster.showing].id)" style="position: absolute; top: -20px; left: -20px"></q-btn>
+                        <q-btn v-if="(poster.ext || poster.int) && can('Marketing', 'create')" color="negative" dense size="md" icon="delete" class="q-pa-none" @click.stop="removePosterFromHolder(design.__index, index, poster.showing, poster[poster.showing].id)" style="position: absolute; top: -20px; left: -20px"></q-btn>
                         <p
                           :style="{'margin': 0, 'line-height': .6, 'font-weight': 'bold', 'font-size': design.distributions.postersScale > 1 ? (design.distributions.postersScale + 0.2) + 'em' : (design.distributions.postersScale + 0.2) + 'em'}"
                           class="text-caption"
@@ -314,6 +320,7 @@
                             v-model="poster[poster.showing].priority"
                             :options="[1,2,3,4,5,6,7,8]"
                             options-dense
+                            :disable="!can('Marketing', 'create')"
                           />
                           <p
                             :style="{
@@ -386,7 +393,7 @@
               </q-card-section>
               <q-card-actions class="justify-between">
                 <div class="q-gutter-xs">
-                  <q-btn flat size="sm" icon="shuffle" color="primary" label="Cambiar Fachada" @click="updateFacadeFile(design.__index)"></q-btn>
+                  <q-btn flat size="sm" icon="shuffle" color="primary" label="Cambiar Fachada" @click="updateFacadeFile(design.__index)" v-if="can('Marketing', 'create')"></q-btn>
                   <q-btn-dropdown
                     icon="insert_photo"
                     color="primary"
@@ -397,17 +404,17 @@
                     :loading="btnLoaders.compose"
                     >
                     <div class="column q-gutter-sm q-py-sm">
-                      <q-btn flat v-close-popup size="sm" icon="gesture" color="primary" label="Generar Composición" @click="composeFacade(design.__index)" v-if="!design.composed_facade_file_id"></q-btn>
-                      <q-btn flat v-close-popup size="sm" icon="redo" color="primary" label="Rehacer Composición" @click="composeFacade(design.__index, true)" v-else></q-btn>
+                      <q-btn flat v-close-popup size="sm" icon="gesture" color="primary" label="Generar Composición" @click="composeFacade(design.__index)" v-if="!design.composed_facade_file_id && can('Marketing', 'create')"></q-btn>
+                      <q-btn flat v-close-popup size="sm" icon="redo" color="primary" label="Rehacer Composición" @click="composeFacade(design.__index, true)" v-else-if="can('Marketing', 'create')"></q-btn>
                       <q-btn flat v-close-popup size="sm" icon="get_app" color="primary" label="Descargar Composición" @click="downloadFile(design.composed_facade_file_id)" v-if="design.composed_facade_file_id"></q-btn>
-                      <q-btn flat v-close-popup size="sm" icon="delete_forever" color="primary" label="Eliminar Composición" @click="removeComposedFacade(design.composed_facade_file_id, design.__index)" v-if="design.composed_facade_file_id"></q-btn>
+                      <q-btn flat v-close-popup size="sm" icon="delete_forever" color="primary" label="Eliminar Composición" @click="removeComposedFacade(design.composed_facade_file_id, design.__index)" v-if="design.composed_facade_file_id && can('Marketing', 'create')"></q-btn>
                     </div>
                   </q-btn-dropdown>
                   <q-btn-dropdown
                     icon="table_chart"
                     color="primary"
                     flat
-                    :label="'PDFs-' + design.complete_facades.length"
+                    :label="'PDFs (' + design.complete_facades.length + ')'"
                     unelevated
                     size="sm"
                     :loading="btnLoaders.facadePdf"
@@ -420,6 +427,7 @@
                         label="Generate"
                         unelevated
                         size="sm"
+                        v-if="can('Marketing', 'create')"
                         >
                         <div class="column q-gutter-sm q-py-sm">
                           <template v-for="campaign in campaignOptionsByDistribution(design)">
@@ -442,6 +450,7 @@
                         label="Remade"
                         unelevated
                         size="sm"
+                        v-if="can('Marketing', 'create')"
                         >
                         <div class="column q-gutter-sm q-py-sm">
                           <template v-for="facade in design.complete_facades">
@@ -468,6 +477,7 @@
                         label="Remove PDF"
                         unelevated
                         size="sm"
+                        v-if="can('Marketing', 'create')"
                         >
                         <div class="column q-gutter-sm q-py-sm">
                           <template v-for="(facade, facadeIndex) in design.complete_facades">
@@ -480,7 +490,7 @@
                 </div>
               </q-card-actions>
               <q-card-actions class="justify-between">
-                <q-btn unelevated size="sm" icon="get_app" color="primary" label="Rename Holders" @click="renameHolders(design.__index)"></q-btn>
+                <q-btn unelevated size="sm" icon="get_app" color="primary" label="Rename Holders" @click="renameHolders(design.__index)" v-if="can('Marketing', 'create')"></q-btn>
                 <q-btn-dropdown
                   split
                   icon="border_clear"
@@ -492,6 +502,7 @@
                   unelevated
                   content-class="bg-transparent no-shadow"
                   size="sm"
+                  v-if="can('Marketing', 'create')"
                   >
                   <div class="column q-gutter-sm q-py-sm items-end">
                     <q-btn round size="sm" icon="border_top" color="primary" @click="align('top')"></q-btn>
@@ -500,14 +511,14 @@
                     <q-btn round size="sm" icon="border_right" color="primary" @click="align('right')"></q-btn>
                   </div>
                 </q-btn-dropdown>
-                <q-btn unelevated size="sm" icon="select_all" color="primary" label="Select All" @click="selectAllHoldersInDesign(design.__index)"></q-btn>
+                <q-btn unelevated size="sm" icon="select_all" color="primary" label="Select All" @click="selectAllHoldersInDesign(design.__index)" v-if="can('Marketing', 'create')"></q-btn>
                 <q-space />
                 <q-btn-group rounded outline>
                   <q-btn rounded size="sm" icon="flip" color="info" @click="flipPosters(design.__index, false)"></q-btn>
                   <q-btn rounded outline size="sm" color="info" label="Exteriores" @click="flipPosters(design.__index, 'ext')"></q-btn>
                   <q-btn rounded outline size="sm" color="info" label="Interiores" @click="flipPosters(design.__index, 'int')"></q-btn>
                 </q-btn-group>
-                <q-btn size="sm" flat color="negative" icon="delete" label="Eliminar" @click="showConfirm(design.__index)"></q-btn>
+                <q-btn size="sm" flat color="negative" icon="delete" label="Eliminar" @click="showConfirm(design.__index)" v-if="can('Marketing', 'create')"></q-btn>
               </q-card-actions>
             </q-card>
           </div>
@@ -572,6 +583,7 @@
 </template>
 
 <script>
+import { PageMixins } from '../mixins/pageMixins'
 import { ModelsFetcher, ModelController } from '../mixins/modelMixin'
 import { FileMethods } from '../mixins/fileMixin'
 import CustomSelect from '../components/form/customSelect'
@@ -579,7 +591,7 @@ import { customSelectMixins } from '../mixins/customSelectMixins'
 
 export default {
   name: 'PosterDistribution',
-  mixins: [ModelsFetcher, ModelController, FileMethods, customSelectMixins],
+  mixins: [PageMixins, ModelsFetcher, ModelController, FileMethods, customSelectMixins],
   components: { CustomSelect },
   data () {
     return {
@@ -1434,6 +1446,11 @@ export default {
       }
     },
     toggleSelectDesign (designIndex) {
+      // console.log('Here')
+      if (this.can('Marketing', 'create') === false) {
+        // console.log('No permissions')
+        return false
+      }
       // console.log('Design Selected Togle')
       this.designSelected = designIndex
     },
@@ -1450,12 +1467,17 @@ export default {
       this.board.clicked = false
     },
     selectElement (e, index, designIndex) {
-      // console.log('selecting HOlder')
+      // console.log('selectElement')
       this.board.clicked = index
       if (this.designSelected !== designIndex) this.designSelected = designIndex
       this.selectDesignPoster(index, designIndex)
     },
     selectDesignPoster (e, posterIndex, designIndex) {
+      // console.log('selectDesignPoster')
+      if (this.can('Marketing', 'create') === false) {
+        // console.log('No permissions')
+        return false
+      }
       e.preventDefault()
       e.stopPropagation()
       this.designs[designIndex].distributions.holders[posterIndex].lastX = e.clientX
