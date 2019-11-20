@@ -56,11 +56,11 @@
               label="Download"
               unelevated
               size="sm"
-              v-if="computedClinics[item.item.__index].campaign_facades.length"
+              v-if="computedClinics[computedClinics.indexOf(item.item)].campaign_facades.length"
               >
               <div class="column q-gutter-sm q-py-sm">
-                <template v-for="pdf of computedClinics[item.item.__index].campaign_facades">
-                  <q-btn flat v-close-popup size="sm" icon="get_app" color="primary" :label="$store.state.Model.models.campaigns.items.filter((i) => { return i.id === pdf.campaign_id })[0].name" :key="'df-' + pdf.id" @click="downloadPDF(pdf.facades_file_id)"></q-btn>
+                <template v-for="pdf of computedClinics[computedClinics.indexOf(item.item)].campaign_facades">
+                  <q-btn flat v-close-popup size="sm" icon="get_app" color="primary" :label="$store.state.Model.models.campaigns.items.filter((i) => { return i.id === pdf.campaign_id })[0].name" :key="'df-' + pdf.id" @click="downloadPDF(pdf.facades_file_id, item.item)"></q-btn>
                 </template>
               </div>
             </q-btn-dropdown>
@@ -194,8 +194,9 @@ export default {
     }
   },
   methods: {
-    downloadPDF (fileId) {
-      this.confirm.loading = this.confirm.item.id
+    downloadPDF (fileId, clinic) {
+      // this.confirm.item = clinic
+      this.confirm.loading = clinic.id
       // console.log(this.confirm)
       this.downloadFile(fileId)
         .then(() => {
