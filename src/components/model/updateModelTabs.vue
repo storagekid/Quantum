@@ -32,7 +32,7 @@
           >
         </model-form>
         <div class="row">
-          <q-btn color="primary" label="Save Changes" class="q-mt-md full-width" @click="startUpdate" v-if="step.fields.length" :disable="steps[step.title].errors"/>
+          <q-btn color="primary" :label="$t('forms.actions.save')" class="q-mt-md full-width" @click="startUpdate" v-if="step.fields.length" :disable="steps[step.title].errors"/>
         </div>
       </q-tab-panel>
     </q-tab-panels>

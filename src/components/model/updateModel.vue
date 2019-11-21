@@ -1,7 +1,7 @@
 <template>
   <q-card :id="'update-' + modelName" class="bg-white relative-position">
     <q-card-section class="text-subtitle1 text-center bg-primary text-white q-py-xs">
-      Update Model <span class="text-bold">{{ model.label }}</span>
+      {{ $t('forms.actions.update') + ' ' + $tc('models.' + modelName + '.name', 1) }} <span class="text-bold">{{ model.label }}</span>
     </q-card-section>
     <q-card-section>
       <update-model-tabs

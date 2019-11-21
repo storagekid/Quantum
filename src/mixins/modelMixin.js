@@ -485,7 +485,13 @@ export const ModelController = {
           'source': payload
         }).then((response) => {
           this.$store.commit('Model/updateModelItems', { name: payload.name, item: response.model })
-          this.$store.dispatch('Notify/displayMessage', { message: 'Profile updated', position: 'top', type: 'positive' })
+          this.$store.dispatch('Notify/displayMessage', {
+            message: this.$t('forms.messages.successAction', {
+              model: this.$tc('models.' + payload.name + '.name', 1),
+              action: this.$tc('forms.actions.updated', 1)
+            }),
+            position: 'top',
+            type: 'positive' })
           resolve(response)
         }).catch((response) => {
           this.$store.dispatch('Response/responseErrorManager', response)
@@ -503,7 +509,7 @@ export const ModelController = {
         }).then((response) => {
           this.$store.commit('Model/addModelItems', { name: payload.name, items: response.model })
           this.$store.dispatch('Notify/displayMessage', {
-            message: this.$t('forms.messages.successCreate', {
+            message: this.$t('forms.messages.successAction', {
               model: this.$tc('models.' + payload.name + '.name', 1),
               action: this.$tc('forms.actions.saved', 1)
             }),

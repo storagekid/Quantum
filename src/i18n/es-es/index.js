@@ -209,8 +209,155 @@ export default {
     password: 'Contraseña'
   },
   models: {
+    addresses: {
+      name: 'Dirección | Direcciones'
+    },
     campaigns: {
       name: 'Campaña | Campañas'
+    },
+    campaign_posters: {
+      name: 'Poster de Campaña | Posters de Campaña'
+    },
+    campaign_posters_priorities: {
+      name: 'Prioridad de Poster de Campaña | Prioridades de Posters de Campaña'
+    },
+    claims: {
+      name: 'Reclamo | Reclamos'
+    },
+    clinics: {
+      name: 'Clínica | Clínicas'
+    },
+    clinic_campaign_facades: {
+      name: 'Fachada de Campaña (Clínica) | Fachadas de Campaña (Clínica)'
+    },
+    clinic_mailings: {
+      name: 'Buzoneo de Clínica | Buzoneo de Clínica'
+    },
+    clinic_posters: {
+      name: 'Cartel de Clínica | Carteles de Clínica'
+    },
+    clinic_poster_distributions: {
+      name: 'Distribución de Cartelería | Distribuciones de Cartelería'
+    },
+    clinic_poster_distribution_facades: {
+      name: 'Fachada de Distribución de Cartelería | Fachadas de Distribución de Cartelería'
+    },
+    clinic_posters_priorities: {
+      name: 'Prioridad de Poster de Clínica | Prioridades de Posters de Clínica'
+    },
+    clinic_profiles: {
+      name: 'Perfil de Clínica | Perfiles de Clínica'
+    },
+    clinic_schedules: {
+      name: 'Puesto en Clínica | Puestos en Clínica'
+    },
+    clinic_siblings: {
+      name: 'Clínica Hermana | Clínicas Hermanas'
+    },
+    companies: {
+      name: 'Empresa | Empresas'
+    },
+    cost_centers: {
+      name: 'Centro de Coste | Centros de Coste'
+    },
+    countries: {
+      name: 'País | Países'
+    },
+    counties: {
+      name: 'Provincia | Provincias'
+    },
+    currencies: {
+      name: 'Divisa | Divisas'
+    },
+    emails: {
+      name: 'Correo Electrónico | Correos Electrónicos'
+    },
+    files: {
+      name: 'Archivo | Archivos'
+    },
+    groups: {
+      name: 'Grupo | Grupos'
+    },
+    group_users: {
+      name: 'Usuario del Grupo | Usuarios del Grupo'
+    },
+    jobs: {
+      name: 'Puesto | Puesto'
+    },
+    job_types: {
+      name: 'Especialidad | Especialidades'
+    },
+    languages: {
+      name: 'Idioma | Idiomas'
+    },
+    legals: {
+      name: 'Texto Legal | Textos Legales'
+    },
+    mailings: {
+      name: 'Campaña de Buzoneo | Campañas de Buzoneo'
+    },
+    mailing_designs: {
+      name: 'Diseño de Buzoneo | Diseños de Buzoneo'
+    },
+    menus: {
+      name: 'Menú | Menús'
+    },
+    menu_items: {
+      name: 'Item de Menú | Items de Menú'
+    },
+    menu_item_groups: {
+      name: 'Grupo de Item de Menú | Grupos de Item de Menú'
+    },
+    phones: {
+      name: 'Teléfono | Teléfonos'
+    },
+    posters: {
+      name: 'Soporte (Cartelería) | Soportes (Cartelería)'
+    },
+    poster_models: {
+      name: 'Modelo de Cartel | Modelos de Cartel'
+    },
+    products: {
+      name: 'Producto | Productos'
+    },
+    product_providers: {
+      name: 'Proveedor (Producto) | Proveedores (Producto)'
+    },
+    profiles: {
+      name: 'Perfil | Perfiles'
+    },
+    promotions: {
+      name: 'Promocion | Promociones'
+    },
+    providers: {
+      name: 'Proveedor | Proveedores'
+    },
+    sanitary_codes: {
+      name: 'Código Sanitario | Códigos Sanitarios'
+    },
+    services: {
+      name: 'Servicio | Servicios'
+    },
+    service_providers: {
+      name: 'Proveedor (Servicio) | Proveedores (Servicio)'
+    },
+    stands: {
+      name: 'Stand | Stands'
+    },
+    states: {
+      name: 'Comunidad Autónoma | CCAA'
+    },
+    stores: {
+      name: 'Oficina | Oficinas'
+    },
+    store_profiles: {
+      name: 'Perfil de Oficina | Perfiles de Oficina'
+    },
+    store_schedules: {
+      name: 'Puesto en Oficina | Puestos en Oficina'
+    },
+    users: {
+      name: 'Usuario | Usuarios'
     }
   },
   forms: {
@@ -230,7 +377,12 @@ export default {
       deleted: 'Eliminado | Eliminados'
     },
     messages: {
-      successCreate: '{model} {action} con éxito.'
+      successAction: '{model} {action} con éxito.'
     }
+  },
+  navigation: {
+    next: 'Siguiente',
+    previous: 'Anterior',
+    return: 'Volver'
   }
 }

@@ -208,12 +208,181 @@ export default {
     user: 'Email',
     password: 'Password'
   },
+  models: {
+    addresses: {
+      name: 'Address | Addresses'
+    },
+    campaigns: {
+      name: 'Campaign | Campaigns'
+    },
+    campaign_posters: {
+      name: 'Campaign Poster | Campaign Posters'
+    },
+    campaign_posters_priorities: {
+      name: 'Campaign Poster Priority | Campaign Poster Priorities'
+    },
+    claims: {
+      name: 'Claim | Claims'
+    },
+    clinics: {
+      name: 'Clinic | Clinics'
+    },
+    clinic_campaign_facades: {
+      name: 'Campaign Facade (Clinic) | Campaign Facades (Clinic)'
+    },
+    clinic_mailings: {
+      name: 'Clinic Mailing | Clinic Mailings'
+    },
+    clinic_posters: {
+      name: 'Clinic Poster | Clinic Posters'
+    },
+    clinic_poster_distributions: {
+      name: 'Poster Distribution (Clinic) | Poster Distributions (Clinic)'
+    },
+    clinic_poster_distribution_facades: {
+      name: 'Poster Distribution Facade | Poster Distribution Facades'
+    },
+    clinic_posters_priorities: {
+      name: 'Clinic Poster Priority | Clinic Poster Priorities'
+    },
+    clinic_profiles: {
+      name: 'Clinic Profile | Clinic Profiles'
+    },
+    clinic_schedules: {
+      name: 'Clinic Schedule (Profile) | Clinic Schedules (Profile)'
+    },
+    clinic_siblings: {
+      name: 'Clinic Sibling | Clinic Siblings'
+    },
+    companies: {
+      name: 'Company | Companies'
+    },
+    cost_centers: {
+      name: 'Cost Center | Cost Centers'
+    },
+    countries: {
+      name: 'Country | Countries'
+    },
+    counties: {
+      name: 'County | Counties'
+    },
+    currencies: {
+      name: 'Currency | Currencies'
+    },
+    emails: {
+      name: 'Email | Emails'
+    },
+    files: {
+      name: 'File | Files'
+    },
+    groups: {
+      name: 'Group | Groups'
+    },
+    group_users: {
+      name: 'Group User | Group Users'
+    },
+    jobs: {
+      name: 'Job | Jobs'
+    },
+    job_types: {
+      name: 'Especialty | Especialties'
+    },
+    languages: {
+      name: 'Language | Languages'
+    },
+    legals: {
+      name: 'Legal Text | Legal Texts'
+    },
+    mailings: {
+      name: 'Mailing Campaign | Mailing Campaigns'
+    },
+    mailing_designs: {
+      name: 'Mailing Design | Mailing Designs'
+    },
+    menus: {
+      name: 'Menu | Menus'
+    },
+    menu_items: {
+      name: 'Menu Item | Menu Items'
+    },
+    menu_item_groups: {
+      name: 'Menu Item Group | Menu Item Groups'
+    },
+    phones: {
+      name: 'Phone | Phones'
+    },
+    posters: {
+      name: 'Poster (Holder) | Posters (Holder)'
+    },
+    poster_models: {
+      name: 'Poster Model | Poster Models'
+    },
+    products: {
+      name: 'Product | Products'
+    },
+    product_providers: {
+      name: 'Provider (Product) | Providers (Product)'
+    },
+    profiles: {
+      name: 'Profile | Profiles'
+    },
+    promotions: {
+      name: 'Promotion | Promotions'
+    },
+    providers: {
+      name: 'Provider | Providers'
+    },
+    sanitary_codes: {
+      name: 'Sanitary Code | Sanitary Codes'
+    },
+    services: {
+      name: 'Service | Services'
+    },
+    service_providers: {
+      name: 'Provider (Service) | Providers (Service)'
+    },
+    stands: {
+      name: 'Stand | Stands'
+    },
+    states: {
+      name: 'State | states'
+    },
+    stores: {
+      name: 'Store | Stores'
+    },
+    store_profiles: {
+      name: 'Store Profile | Store Profiles'
+    },
+    store_schedules: {
+      name: 'Store Schedule | Store Schedules'
+    },
+    users: {
+      name: 'User | Users'
+    }
+  },
   forms: {
     errors: {
-      required: 'El campo es obligatorio',
-      email: 'Debes escribir un email válido',
-      minLength: 'Debe tener una longitud mínima de {min} caracteres',
-      maxLength: 'Debe tener una longitud mínima de {max} caracteres'
+      required: 'This field is required',
+      email: 'You must type a valid email',
+      minLength: 'At least {min} characters are required',
+      maxLength: 'It must be shorter than {max} characters'
+    },
+    actions: {
+      create: 'Create',
+      save: 'Save',
+      saved: 'Saved',
+      update: 'Update',
+      updated: 'Updated',
+      delete: 'Delete',
+      deleted: 'Deleted'
+    },
+    messages: {
+      successAction: '{model} {action} successfully.'
     }
+  },
+  navigation: {
+    next: 'Next',
+    previous: 'Previous',
+    return: 'Return'
   }
 }

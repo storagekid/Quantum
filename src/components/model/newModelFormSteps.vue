@@ -23,8 +23,8 @@
         >
         </model-form>
         <q-stepper-navigation>
-          <q-btn color="primary" @click="$refs.stepper.next()" label="Siguiente" :disable="!cleanForm"/>
-          <q-btn v-if="index > 0" color="primary" flat @click="$refs.stepper.previous()" label="Volver" />
+          <q-btn color="primary" @click="$refs.stepper.next()" :label="$t('navigation.next')" :disable="!cleanForm"/>
+          <q-btn v-if="index > 0" color="primary" flat @click="$refs.stepper.previous()" :label="$t('navigation.previous')" />
         </q-stepper-navigation>
       </q-step>
 

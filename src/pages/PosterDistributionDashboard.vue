@@ -225,7 +225,7 @@ export default {
         method: payload.method,
         params: payload.params
       }).then((response) => {
-        let index = String(this.confirm.item.__index)
+        let index = this.$store.state.Model.models.items.findIndex((i) => { return i.id === this.confirm.item.id })
         if (this.confirm.options.download) this.downloadPDF(response.data.model.facades_file_id)
         else this.resetDialog()
         this.$store.commit('Model/addRelationItems', { name: 'clinics', relation: 'campaign_facades', items: response.data.model, parentIndex: index })

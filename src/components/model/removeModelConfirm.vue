@@ -59,6 +59,13 @@ export default {
       }
       action.then((data) => {
         this.$store.dispatch('Notify/displayMessage', { message: this.modelQty + ' ' + this.name + ' removed', position: 'top', type: 'positive' })
+        this.$store.dispatch('Notify/displayMessage', {
+          message: this.modelQty + this.$t('forms.messages.successAction', {
+            model: this.$tc('models.' + this.name + '.name', this.modelQty),
+            action: this.$tc('forms.actions.deleted', this.modelQty)
+          }),
+          position: 'top',
+          type: 'positive' })
         if (data.message) {
           this.$store.dispatch('Notify/displayMessage', { message: data.message, position: 'top', type: 'positive' })
         }
