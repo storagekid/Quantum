@@ -34,7 +34,7 @@
             <q-btn dense size="md" rounded color="primary" icon="visibility" @click="showUpdate('display')" :disabled="!selectedItems.length || selectedItems.length > 1"/>
             <q-btn-group flat rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
               <!-- <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/> -->
-              <q-btn dense flat size="sm" rounded color="primary" icon="edit" @click="showUpdate" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
+              <q-btn dense flat size="sm" rounded color="primary" icon="edit" @click="showUpdate('update')" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="file_copy" @click="cloneModel = true" :disabled="!selectedItems.length || selectedItems.length  > 1 || true" v-if="can.create"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="find_replace" :label="!$q.screen.lt.md ? 'Multi Edit' : ''" @click="showUpdateBatch" :disabled="selectedItems.length < 2 || !batchForm" v-if="can.edit"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="delete" @click="removeModel = true" :disabled="!shouldRemove" v-if="can.delete"/>
@@ -286,13 +286,13 @@
                                   dense
                                   size="md"
                                   color="warning"
-                                  @click="$emit('editRelation', {name: modelName, index: props.row.__index, row: props.row})"
+                                  @click="$emit('editRelation', {name: modelName, index: model.indexOf(props.row), row: props.row})"
                                   icon="edit"
                                   v-if="!viewMode"
                                   >
                                 </q-btn>
                                 <q-btn dense size="md" color="positive"  @click="downloadFile(getObject(props.row, col.name).id)" icon="cloud_download"></q-btn>
-                                <q-btn dense size="md" color="negative"  @click="removeRelation({'relation': relationData.name, 'index': props.row.__index, 'id': props.row.id}, 'update')" icon="remove" v-if="!viewMode"></q-btn>
+                                <q-btn dense size="md" color="negative"  @click="removeRelation({'relation': relationData.name, 'index': model.indexOf(props.row), 'id': props.row.id}, 'update')" icon="remove" v-if="!viewMode"></q-btn>
                               </q-card-actions>
                             </div>
                           </div>
@@ -505,7 +505,8 @@ export default {
       },
       names: [],
       showSearchHelp: false,
-      showActions: null
+      showActions: null,
+      fetchingTable: false
     }
   },
   watch: {
@@ -617,6 +618,7 @@ export default {
     },
     quasarData () {
       if (this.relatedTo) {
+        console.log('Relation')
         return this.$store.state.Model.models[this.relatedTo.name].quasarData.relations[this.modelName].quasarData
       } else return this.$store.state.Model.models[this.modelName].quasarData
     },
@@ -859,6 +861,9 @@ export default {
       this.removeModel = false
     },
     getTable () {
+      if (this.fetchingTable) return
+      this.fetchingTable = true
+      // console.log('Getting Table')
       let params = {
         model: this.modelName,
         tableView: this.tableView
@@ -906,6 +911,9 @@ export default {
         if (this.filters['searchBar'].text) {
           this.buildFilters(this.filters['searchBar'].text)
         }
+        this.fetchingTable = false
+      }).catch((e) => {
+        return e
       })
     }
   },

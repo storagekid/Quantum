@@ -84,12 +84,15 @@ export function addModelItems (state, { name, items }) {
   state.models[name].items.unshift(items)
 }
 export function addRelationItems ({ models }, { name, relation, items, parentIndex, arrayPosition = false }) {
-  // console.log(name)
-  // console.log(relation)
-  // console.log(items)
-  // console.log(parentIndex)
+  console.log('addRelationItems')
+  console.log(name)
+  console.log(relation)
+  console.log(items)
+  console.log(parentIndex)
   if (!arrayPosition) models[name].items[parentIndex][relation].unshift(items)
   else if (arrayPosition === 'end') models[name].items[parentIndex][relation].push(items)
+  let countItem = relation + '_count'
+  if (models[name].items[parentIndex][countItem]) models[name].items[parentIndex][countItem]++
   // console.log('After')
   // console.log(models[name].items[parentIndex][relation])
 }
@@ -105,14 +108,16 @@ export function removeRelationItemsById (state, { name, relation, items, parentI
         index = i
         state.models[name].items[parentIndex][relation].splice(index, 1)
         // console.log('DONE')
+        let countItem = relation + '_count'
+        if (state.models[name].items[parentIndex][countItem]) state.models[name].items[parentIndex][countItem]--
         break
       }
     }
   }
 }
-export function removeRelationItems (state, { name, relation, index, parentIndex }) {
-  state.models[name].items[parentIndex][relation].splice(index, 1)
-}
+// export function removeRelationItems (state, { name, relation, index, parentIndex }) {
+//   state.models[name].items[parentIndex][relation].splice(index, 1)
+// }
 export function removeRelationById (state, { name, relation, id, parentIndex }) {
   for (let i = state.models[name].items[parentIndex][relation].length - 1; i >= 0; i--) {
     if (state.models[name].items[parentIndex][relation][i].id === id) {

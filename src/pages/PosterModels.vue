@@ -24,6 +24,7 @@ export default {
       modelName: 'poster_models',
       modelsNeeded: {
         poster_models: {
+          refresh: true,
           full: true
         },
         campaigns: {

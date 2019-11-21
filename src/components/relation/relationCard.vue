@@ -281,7 +281,7 @@
             v-on:editRelation="editRelation"
             dense
             :modelName="relationData.name"
-            :relatedTo="{name: relatedTo, index: model.__index, id: model.id}"
+            :relatedTo="{name: relatedTo, index: parentIndex, id: model.id}"
             >
           </model-table>
         </div>
@@ -294,7 +294,7 @@
             tableClass="no-shadow custom-table"
             dense
             :modelName="relationData.name"
-            :relatedTo="{name: relatedTo, index: model.__index, id: model.id}"
+            :relatedTo="{name: relatedTo, index: parentIndex, id: model.id}"
             >
           </model-table>
         </div>
@@ -306,7 +306,7 @@
         :name="relationData.name"
         :models="selectedItems"
         :relatedTo="relatedTo"
-        :parentIndex="model.__index"
+        :parentIndex="parentIndex"
         v-on:confirmed="hideRemoveRelation"
         v-on:finished="finishRemoveRelation"
         >
@@ -321,7 +321,7 @@
       :items="multiAsyncAction.items"
       :relation="relationData.name"
       :relatedTo="relatedTo"
-      :parentIndex="model.__index"
+      :parentIndex="parentIndex"
       :headerText="'Creando nuevo ' + relationData.name"
       keyField="nickname"
       v-on:Finished="clearMultiUpload"
@@ -364,6 +364,9 @@ export default {
   computed: {
     viewMode () {
       return this.mode === 'display'
+    },
+    parentIndex () {
+      return this.$store.state.Model.models[this.relatedTo].items.findIndex((i) => { return i.id === this.model.id })
     }
   },
   methods: {
@@ -381,13 +384,13 @@ export default {
         index: this.editing,
         parentName: this.relatedTo,
         parentNameSpace: this.modelData.nameSpace,
-        parentIndex: this.model.__index,
+        parentIndex: this.parentIndex,
         parentId: this.model.id,
         id: this.relation['id'],
         quasarData: this.relationData
       })
       if (this.batchMode) {
-        this.batchRelation(payload, this.batchSource, this.mode).then(() => {
+        this.batchRelation(payload, this.batchSource, this.mode, this.parentIndex).then(() => {
           this.relationLoader = false
           this.closeRelationForm()
         })
@@ -586,7 +589,7 @@ export default {
       // this.multiUploadFiles({
       //   relation: this.openRelation,
       //   items: this.multiUpload.items,
-      //   parentIndex: this.model.__index
+      //   parentIndex: this.parentIndex
       // })
       // this.closeRelationForm()
     },

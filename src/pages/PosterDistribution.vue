@@ -597,15 +597,8 @@ export default {
     return {
       modelsNeeded: {
         clinics: {
-          scoped: false,
-          full: false,
-          refresh: false,
-          cache: false,
-          where: false
         },
         campaigns: {
-          scoped: false,
-          refresh: false,
           withCount: ['campaign_posters'],
           orderBy: 'starts_at',
           orderDesc: true

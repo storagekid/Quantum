@@ -56,6 +56,9 @@ export default {
     }
   },
   computed: {
+    modelIndex () {
+      return this.$store.state.Model.models[this.modelName].items.findIndex((i) => { return i.id === this.model.id })
+    },
     cleanForm () {
       for (let step in this.steps) {
         if (this.steps[step].errors) return false
@@ -89,7 +92,7 @@ export default {
           relatedToID: this.model.id,
           relation: this.modelName,
           model: this.model,
-          index: this.model.__index,
+          index: this.modelIndex,
           parentName: this.relation.name,
           parentNameSpace: this.$store.state.Model.models[this.relation.name].quasarData.nameSpace,
           parentIndex: this.relation.index,

@@ -24,17 +24,9 @@ export default {
       modelName: 'sanitary_codes',
       modelsNeeded: {
         sanitary_codes: {
-          scoped: false,
-          refresh: false,
-          cache: false,
-          where: false,
           full: true
         },
         campaigns: {
-          scoped: false,
-          refresh: false,
-          cache: false,
-          where: false,
           full: true
         }
       },

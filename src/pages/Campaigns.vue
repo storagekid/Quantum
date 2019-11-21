@@ -108,37 +108,23 @@ export default {
           refresh: true,
           withCount: ['campaign_posters', 'campaign_poster_priorities', 'sanitary_codes', 'campaign_facades'],
           orderBy: 'starts_at',
-          orderDesc: true,
-          cache: false,
-          where: false
+          orderDesc: true
         },
         clinics: {
-          scoped: false,
           refresh: true,
-          cache: false,
           withTrashed: true,
           with: ['poster_distributions', 'campaign_facades'],
           appends: ['clinic_distributions_by_campaign']
         },
         clinic_posters: {
-          scoped: false,
           refresh: true,
           with: ['clinic_poster_priorities']
         },
         poster_models: {
-          scoped: false,
-          refresh: false,
-          cache: false
         },
         posters: {
-          scoped: false,
-          refresh: false,
-          cache: false
         },
         languages: {
-          scoped: false,
-          refresh: false,
-          cache: false
         }
       },
       modelSelected: null,

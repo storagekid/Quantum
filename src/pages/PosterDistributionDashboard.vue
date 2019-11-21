@@ -46,10 +46,10 @@
           size="sm"
           :disable="!item.item.clinic_distributions_by_campaign['']"
           :loading="confirm.loading === item.item.id"
-          @click="confirm.item = computedClinics[item.item.__index]"
+          @click="computedClinics[computedClinics.indexOf(item.item)]"
           >
           <div class="column q-gutter-sm q-py-sm">
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="showPDFGenerator(item.item)" v-if="can('Marketing','create')"></q-btn>
+            <!-- <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="showPDFGenerator(item.item)" v-if="can('Marketing','create')"></q-btn> -->
             <q-btn-dropdown
               color="primary"
               flat

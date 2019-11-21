@@ -127,8 +127,8 @@ export function getModel (context, { model, options }) {
     context.commit('setModel', { name: model, options: options })
   } else {
     // console.log('Updating Model Options')
-    context.commit('updateModelOptions', { name: model, options: options })
-    options = context.state.models[model].options
+    // context.commit('updateModelOptions', { name: model, options: options })
+    // options = context.state.models[model].options
   }
   // console.log(options)
   let params = {}
@@ -141,7 +141,10 @@ export function getModel (context, { model, options }) {
         : { scope_store_id: context.rootState.Scope.store.stores.selected.map(i => { return i.id }) }
     }
   }
-  params.options = context.getters.availableOptions[model]
+  params.options = {}
+  for (let option in options) {
+    if (options[option] !== false) params.options[option] = options[option]
+  }
   return new Promise((resolve, reject) => {
     axios({
       url: context.rootState.App.dataWarehouse + model,
@@ -149,6 +152,7 @@ export function getModel (context, { model, options }) {
       params: params
     }).then((response) => {
       context.commit('setModelItems', { name: model, items: response.data.model })
+      context.commit('updateModelOptions', { name: model, options: options })
       // console.log(params)
       if (params['paginate']) context.commit('setModelPagination', { name: model, data: response.data.model })
       context.commit('setModelQuasarData', { name: model, data: response.data.quasarData })

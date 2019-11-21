@@ -2,37 +2,63 @@ export const ModelsFetcher = {
   data () {
     return {
       modelsFetched: 0,
-      fetching: false
+      fetching: false,
+      fetchingTime: null
     }
   },
   computed: {
+    computedFecthing () {
+      let object = this.modelsNeeded ? this.modelsNeeded : this.componentModels
+      if (Object.keys(object).length !== this.modelsFetched) return true
+      else {
+        for (let model in object) {
+          console.log(model)
+          if (!object[model].refresh) return false
+          else if (!this.$store.state.Model.models[model].refreshed) {
+            console.log('Not Fetched yed')
+            return true
+          } else if (this.$store.state.Model.models[model].refreshed < this.fetchingTime) {
+            if (!this.compareOptions(model, this.objectModelsName)) {
+              console.log('Options don\'t match')
+              return true
+            }
+            return false
+          }
+          if (!this.compareOptions(model, this.objectModelsName)) {
+            console.log('Options don\'t match')
+            return true
+          }
+        }
+      }
+      return false
+    },
     objectModelsName () {
       return this.modelsNeeded ? 'modelsNeeded' : 'componentModels'
     },
     modelsReady () {
-      if (this.fetching) {
-        let object = this.modelsNeeded ? this.modelsNeeded : this.componentModels
-        // let objectName = this.modelsNeeded ? 'modelsNeeded' : 'componentModels'
-        if (Object.keys(object).length !== this.modelsFetched) {
-          // console.log('Numbers don\'t match')
-          return false
-        } else {
-          for (let model in object) {
-            if (!this.compareOptions(model, this.objectModelsName)) {
-              // console.log('Options don\'t match')
-              return false
-            }
-          }
-        }
-      }
+      if (this.computedFecthing) return false
       return true
+    },
+    comparedOptions () {
+      let options = {}
+      let object = this.modelsNeeded ? this.modelsNeeded : this.componentModels
+      if (!Object.keys(object).length) return options
+      for (let model in object) {
+        options[model] = this.compareOptions(model)
+      }
+      return options
     }
   },
   methods: {
     getModelsNeeded (object = this.objectModelsName) {
+      this.$q.loading.show()
+      // console.log('getModelsNeeded')
       return new Promise((resolve, reject) => {
         let counter = 0
-        this.$q.loading.show()
+        this.fetchingTime = Date.now()
+        // console.log('Fetching Time Set')
+        // console.log(object)
+        // console.log(this[object])
         if (this[object]) {
           // console.log('getModelsNeeded')
           // console.log(object)
@@ -53,6 +79,7 @@ export const ModelsFetcher = {
                 if (counter === size) resolve(size)
                 continue
               }
+              // console.log('Fetching: ' + name)
               this.$store.dispatch('Model/getModel', {
                 'model': name,
                 'options': model
@@ -106,46 +133,37 @@ export const ModelsFetcher = {
     }
   },
   created () {
-    // console.log('created in ModelsFetcher')
-    // vm.getModelsNeeded()
-    this.fetching = true
-    this.getModelsNeeded(this.objectModelsName).then((size) => {
-      this.modelsFetched = size
-      this.fetching = false
-      this.$q.loading.hide()
-    }).catch((response) => {
-      this.fetching = false
-      this.$q.loading.hide()
-    })
+    if (!this.fetching) {
+      // console.log('created in ModelsFetcher')
+      // vm.getModelsNeeded()
+      this.fetching = true
+      this.getModelsNeeded(this.objectModelsName).then((size) => {
+        this.modelsFetched = size
+        this.fetching = false
+        this.$q.loading.hide()
+      }).catch((response) => {
+        this.fetching = false
+        this.$q.loading.hide()
+      })
+    }
   },
-  // updated () {
-  //   if (this.componentModels) {
-  //     // console.log('created in ModelsFetcher')
-  //     this.fetching = true
-  //     this.getModelsNeeded('componentModels').then((size) => {
-  //       this.modelsFetched = size
-  //       this.fetching = false
-  //       this.$q.loading.hide()
-  //     }).catch((response) => {
-  //       this.fetching = false
-  //       this.$q.loading.hide()
-  //     })
-  //   }
-  // },
   beforeRouteEnter (to, from, next) {
     // console.log('beforeRouteEnter')
     next(vm => {
-      // vm.getModelsNeeded()
-      vm.$q.loading.show()
-      vm.fetching = true
-      vm.getModelsNeeded().then((size) => {
-        vm.modelsFetched = size
-        vm.fetching = false
-        vm.$q.loading.hide()
-      }).catch((response) => {
-        vm.fetching = false
-        vm.$q.loading.hide()
-      })
+      // console.log('Next on beforeRouteEnter')
+      if (!vm.fetching) {
+        // console.log('Fetching False')
+        vm.fetching = true
+        let object = vm.modelsNeeded ? 'modelsNeeded' : 'componentModels'
+        vm.getModelsNeeded(object).then((size) => {
+          vm.modelsFetched = size
+          vm.fetching = false
+          vm.$q.loading.hide()
+        }).catch((response) => {
+          vm.fetching = false
+          vm.$q.loading.hide()
+        })
+      }
     })
   }
 }
@@ -154,7 +172,6 @@ export const ModelBuilder = {
     buildModel (source = null) {
       if (source) {
         this.$set(this.model, 'id', source.id)
-        this.$set(this.model, '__index', source.__index)
       }
       for (let step of this.quasarData.newLayout) {
         for (let row of step.fields) {
@@ -195,7 +212,6 @@ export const ModelUpdaterBuilder = {
       // console.log('Single Mode')
       // console.log('ModelUpdaterBuilder')
       this.$set(this.model, 'id', source.id)
-      this.$set(this.model, '__index', source.__index)
       for (let step of this.quasarData.updateLayout) {
         for (let row of step.fields) {
           for (let field in row) {
@@ -419,7 +435,6 @@ export const ModelController = {
       let payload = JSON.parse(JSON.stringify(data))
       while ((failed.length + succeeded.length) < (batchSource.length)) {
         payload.model['id'] = batchSource[batchRound].id
-        payload.model['__index'] = batchSource[batchRound].__index
         await this.saveModel(payload, 'update')
           .then((response) => {
             batchRound++
@@ -550,7 +565,7 @@ export const RelationController = {
         this.$store.dispatch('Model/sendNewForm', {
           'source': payload
         }).then((response) => {
-          this.$store.commit('Model/addRelationItems', { name: this.relatedTo, relation: payload.relation, items: response.model, parentIndex: this.model.__index })
+          this.$store.commit('Model/addRelationItems', { name: this.relatedTo, relation: payload.relation, items: response.model, parentIndex: this.parentIndex })
           this.$store.dispatch('Notify/displayMessage', { message: 'Relation Saved', position: 'top', type: 'positive' })
           resolve(response)
         }).catch((response) => {
@@ -579,13 +594,13 @@ export const RelationController = {
       }
       return copy
     },
-    async batchRelation (payload, batchSource, mode) {
+    async batchRelation (payload, batchSource, mode, parentIndex) {
       let batchRound = 0
       let failed = []
       let succeeded = []
       while ((failed.length + succeeded.length) < (batchSource.length)) {
         payload.parentId = batchSource[batchRound].id
-        payload.parentIndex = batchSource[batchRound].__index
+        payload.parentIndex = parentIndex
         let action = mode === 'update' ? 'updateRelation' : 'saveRelation'
         await this[action](payload)
           .then((response) => {
@@ -885,7 +900,7 @@ export const SortingRelation = {
             relation: relation,
             model: item,
             index: this.editing,
-            parentIndex: this.model.__index,
+            parentIndex: this.parentIndex,
             parentName: this.relatedTo,
             parentId: this.model.id,
             id: item.id,
@@ -915,7 +930,7 @@ export const SortingRelation = {
     revertOrder () {
       this.$store.commit('Model/revertRelationItemsOrder', {
         name: this.relatedTo,
-        parentIndex: this.model.__index,
+        parentIndex: this.parentIndex,
         relation: this.relationData.name,
         lastOrder: this.lastItemOrder
       })
@@ -926,7 +941,7 @@ export const SortingRelation = {
         if (this.model[this.relationData.name][i][this.relationData.quasarData.listFields.draggable] !== i + 1) {
           this.$store.commit('Model/setRelationItemFieldValue', {
             name: this.relatedTo,
-            parentIndex: this.model.__index,
+            parentIndex: this.parentIndex,
             relation: this.relationData.name,
             index: i,
             field: this.relationData.quasarData.listFields.draggable,
@@ -949,7 +964,7 @@ export const SortingRelation = {
     moveRelation (relation, index, positions) {
       this.$store.commit('Model/moveRelationItemInArray', {
         name: this.relatedTo,
-        parentIndex: this.model.__index,
+        parentIndex: this.parentIndex,
         relation: this.relationData.name,
         index: index,
         positions: positions
@@ -968,7 +983,7 @@ export const SortingRelation = {
         if (this.model[this.relationData.name][i][this.relationData.quasarData.listFields.draggable] !== i + 1) {
           this.$store.commit('Model/setRelationItemFieldValue', {
             name: this.relatedTo,
-            parentIndex: this.model.__index,
+            parentIndex: this.parentIndex,
             relation: this.relationData.name,
             index: i,
             field: this.relationData.quasarData.listFields.draggable,
@@ -982,7 +997,7 @@ export const SortingRelation = {
   },
   created () {
     if (this.relationData.quasarData.listFields.draggable) {
-      this.$store.commit('Model/sortRelationItems', { name: this.relatedTo, index: this.model.__index, relation: this.relationData.name, field: this.relationData.quasarData.listFields.draggable })
+      this.$store.commit('Model/sortRelationItems', { name: this.relatedTo, index: this.parentIndex, relation: this.relationData.name, field: this.relationData.quasarData.listFields.draggable })
       this.buildLastItemOrder()
       this.correctFieldOrderValue()
     }

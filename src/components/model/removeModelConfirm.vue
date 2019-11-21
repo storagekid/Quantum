@@ -53,7 +53,7 @@ export default {
       // console.log('Removing Items')
       let action
       if (this.relatedTo) {
-        action = this.$store.dispatch('Model/removeRelations', { name: this.name, items: this.models.map(model => { return { id: model.id, index: model.__index } }), relatedTo: this.relatedTo, parentIndex: this.parentIndex })
+        action = this.$store.dispatch('Model/removeRelations', { name: this.name, items: this.models.map(model => { return { id: model.id } }), relatedTo: this.relatedTo, parentIndex: this.parentIndex })
       } else {
         action = this.$store.dispatch('Model/removeModels', { name: this.name, items: this.models.map(model => { return model.id }), softDeleting: this.softDeleting, forceDeleting: this.forceDeleting })
       }

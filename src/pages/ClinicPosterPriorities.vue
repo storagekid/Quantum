@@ -115,10 +115,7 @@ export default {
           full: true
         },
         campaigns: {
-          scoped: false,
           refresh: true,
-          cache: false,
-          where: false,
           full: true
         }
       },
