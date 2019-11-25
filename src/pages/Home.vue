@@ -1,61 +1,42 @@
 <template>
-  <dir></dir>
-  <!-- <marketing-user-home></marketing-user-home> -->
+  <div></div>
 </template>
 
 <script>
-// import MarketingUserHome from './Homes/MarketingUserHome'
 
 export default {
   name: 'Home',
-  // components: { MarketingUserHome },
   data () {
     return {
     }
   },
-  beforeRouteEnter (to, from, next) {
-    // console.log('beforeRouteEnter')
-    next(vm => {
-      // vm.getModelsNeeded()
+  methods: {
+    redirect (object) {
       let homes = []
-      for (let group of vm.$store.state.User.groups) {
+      for (let group of object.$store.state.User.groups) {
         let groupName = group.name.charAt(0).toUpperCase() + group.name.slice(1)
         let roleName = group.role.role.charAt(0).toUpperCase() + group.role.role.slice(1)
         let pageName = groupName + roleName + 'Home'
         homes.push(pageName)
       }
-      // console.log(homes)
       for (let home of homes) {
-        let matches = vm.$router.resolve({ name: home })
-        // console.log(matches.resolved.matched.length)
+        let matches = object.$router.resolve({ name: home })
         if (matches.resolved.matched.length) {
-          vm.$router.push({ name: home }).catch(err => {
+          object.$router.push({ name: home }).catch(err => {
             return err
-            // console.log(err)
           })
         }
       }
+      object.$router.push({ name: 'ProfileHome' }).catch(err => { return err })
+    }
+  },
+  beforeRouteEnter (to, from, next) {
+    next(vm => {
+      vm.redirect(vm)
     })
   },
   updated () {
-    let homes = []
-    for (let group of this.$store.state.User.groups) {
-      let groupName = group.name.charAt(0).toUpperCase() + group.name.slice(1)
-      let roleName = group.role.role.charAt(0).toUpperCase() + group.role.role.slice(1)
-      let pageName = groupName + roleName + 'Home'
-      homes.push(pageName)
-    }
-    // console.log(homes)
-    for (let home of homes) {
-      let matches = this.$router.resolve({ name: home })
-      // console.log(matches.resolved.matched.length)
-      if (matches.resolved.matched.length) {
-        this.$router.push({ name: home }).catch(err => {
-          return err
-          // console.log(err)
-        })
-      }
-    }
+    this.redirect(this)
   }
 }
 </script>
