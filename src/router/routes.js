@@ -13,6 +13,12 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/profile-home',
+        name: 'ProfileHome',
+        component: () => import('pages/Homes/ProfileHome.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/marketing-user-home',
         name: 'MarketingUserHome',
         component: () => import('pages/Homes/MarketingUserHome.vue'),
