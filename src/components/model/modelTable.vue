@@ -31,7 +31,7 @@
         <template v-slot:top="props" class="dense">
           <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete || can.show)">
             <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="newModel = !newModel" v-if="can.create && (!grid)"/>
-            <q-btn dense size="md" rounded color="primary" icon="visibility" @click="showUpdate('display')" :disabled="!selectedItems.length || selectedItems.length > 1"/>
+            <q-btn dense flat size="lg" color="info" icon="visibility" @click="showUpdate('display')" :disabled="!selectedItems.length || selectedItems.length > 1"/>
             <q-btn-group flat rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
               <!-- <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/> -->
               <q-btn dense flat size="sm" rounded color="primary" icon="edit" @click="showUpdate('update')" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
