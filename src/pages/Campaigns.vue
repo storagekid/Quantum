@@ -206,7 +206,7 @@ export default {
           return true
         }
       })
-      console.log(items.length)
+      // console.log(items.length)
       this.clinicOptions = items
       this.confirm.state = true
     },
