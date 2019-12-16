@@ -169,7 +169,6 @@ export default {
         } else {
           this.$store.dispatch('Model/getModelView', { model: 'campaigns', id: item.value })
             .then((data) => {
-              // console.log(data.model)
               viewsReady++
               if (viewsReady === this.campaign.length) {
                 this.ready = true
@@ -209,7 +208,6 @@ export default {
         return this.model.posters
         // let posters = {}
         // for (let poster of this.model.posters['']) {
-        //   console.log(poster)
         //   let item = {}
         //   item['width'] = poster.clinic_poster.poster.width
         //   item['height'] = poster.clinic_poster.poster.height
@@ -247,7 +245,6 @@ export default {
       type === 'Int' ? type = [type, 'Ext'] : type = [type]
       // type = [type]
       // let options = []
-      // console.log(campaignId)
       let levelFound = 5
       for (let item of this.$store.state.Model.models.campaigns.items) {
         if (item.id === campaignId) {

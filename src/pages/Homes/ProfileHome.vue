@@ -118,7 +118,7 @@ export default {
     },
     uploadFile (file, updateProgress) {
       return new Promise((resolve, reject) => {
-        console.log('Cambiando Imagen...')
+        // console.log('Cambiando Imagen...')
         resolve(file)
       })
     },

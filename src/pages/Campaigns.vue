@@ -326,7 +326,7 @@ export default {
       items.map(i => {
         this.clinicOptionsIds.push(i.id)
         let actionPayload = {}
-        console.log('HERE')
+        // console.log('HERE')
         actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/posterDistributionByCampaing'
         actionPayload.method = 'POST'
         actionPayload.params = {

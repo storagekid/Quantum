@@ -84,7 +84,7 @@ export const searchMethods = {
                   }
                 }
                 if (i[0] === '"') {
-                  console.log(i.substring(1))
+                  // console.log(i.substring(1))
                   if (value.toLowerCase() === i.substring(1)) {
                     return true
                   }

@@ -591,7 +591,7 @@ export default {
       let campaign = this.campaignToShow ? this.campaignToShow : this.campaigns.open.length ? this.campaigns.open[0] : this.campaigns.total[0]
       let campaignStartDate = campaign.starts_at
       let campaignEndDate = campaign.ends_at
-      console.log(campaign)
+      // console.log(campaign)
       if (campaign.parent_id) campaignStartDate = campaign.parent.starts_at
       clinics.total.forEach(i => {
         if (!i.active) return

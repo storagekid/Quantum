@@ -1465,7 +1465,7 @@ export default {
           items.map(i => {
             i['dates'] = []
             for (let distribution of i.poster_distributions_active) if (!i.dates.includes(distribution.starts_at)) i.dates.push(distribution.starts_at)
-            if (i.dates.length > 1) console.log(i.nickname)
+            // if (i.dates.length > 1) console.log(i.nickname)
             let actionPayload = {}
             actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/newDistributionCriterion'
             actionPayload.method = 'POST'

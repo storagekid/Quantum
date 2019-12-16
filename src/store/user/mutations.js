@@ -29,6 +29,6 @@ export function setUserFromStorage (state, user) {
 }
 
 export function UpdateProfile (state, { profile }) {
-  console.log('Updating Profile')
+  // console.log('Updating Profile')
   for (let field in profile) if (field !== 'id') state.profile[field] = profile[field]
 }

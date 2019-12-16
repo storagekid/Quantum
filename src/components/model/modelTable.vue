@@ -618,7 +618,7 @@ export default {
     },
     quasarData () {
       if (this.relatedTo) {
-        console.log('Relation')
+        // console.log('Relation')
         return this.$store.state.Model.models[this.relatedTo.name].quasarData.relations[this.modelName].quasarData
       } else return this.$store.state.Model.models[this.modelName].quasarData
     },

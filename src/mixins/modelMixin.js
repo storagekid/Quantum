@@ -12,20 +12,20 @@ export const ModelsFetcher = {
       if (Object.keys(object).length !== this.modelsFetched) return true
       else {
         for (let model in object) {
-          console.log(model)
+          // console.log(model)
           if (!object[model].refresh) return false
           else if (!this.$store.state.Model.models[model].refreshed) {
-            console.log('Not Fetched yed')
+            // console.log('Not Fetched yed')
             return true
           } else if (this.$store.state.Model.models[model].refreshed < this.fetchingTime) {
             if (!this.compareOptions(model, this.objectModelsName)) {
-              console.log('Options don\'t match')
+              // console.log('Options don\'t match')
               return true
             }
             return false
           }
           if (!this.compareOptions(model, this.objectModelsName)) {
-            console.log('Options don\'t match')
+            // console.log('Options don\'t match')
             return true
           }
         }
