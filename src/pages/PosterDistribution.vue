@@ -1791,8 +1791,8 @@ export default {
         baseDesign['starts_at'] = design['starts_at']
         baseDesign['ends_at'] = design['ends_at']
 
-        baseDesign['file'] = design.original_facade.url
-        baseDesign['name'] = design.original_facade.name
+        baseDesign['file'] = design.original_facade ? design.original_facade.url : null
+        baseDesign['name'] = design.original_facade ? design.original_facade.name : ''
         this.log('XHere')
 
         baseDesign.distributions['scale'] = data['scale']
