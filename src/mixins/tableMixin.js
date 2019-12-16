@@ -56,6 +56,12 @@ export const searchMethods = {
                 if (i.indexOf('==') > -1) {
                   let columnName = i.split('==')
                   if (col.label.toLowerCase() === columnName[0]) {
+                    if (columnName[1][0] === '"') {
+                      // console.log(columnName[1].substring(1))
+                      if (value.toLowerCase() === columnName[1].substring(1)) {
+                        return true
+                      }
+                    }
                     if (!columnName[1]) return (value === null || value === '' || value === 'false')
                     return value.toLowerCase().indexOf(columnName[1]) !== -1
                   }
@@ -78,6 +84,7 @@ export const searchMethods = {
                   }
                 }
                 if (i[0] === '"') {
+                  console.log(i.substring(1))
                   if (value.toLowerCase() === i.substring(1)) {
                     return true
                   }
