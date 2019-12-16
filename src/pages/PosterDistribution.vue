@@ -1770,11 +1770,12 @@ export default {
     },
     buildModelDesigns (designs) {
       // console.log('Building Designs')
+      this.log('Building Designs')
       this.designs = []
       for (let design of designs) {
         let baseDesign = this.createDesign()
         let data = JSON.parse(design.distributions)
-        // console.log(data)
+        this.log(data)
         baseDesign['id'] = design['id']
         baseDesign['clinic_id'] = design['clinic_id']
         baseDesign['address_id'] = design['address_id']
@@ -1796,7 +1797,7 @@ export default {
         baseDesign.distributions['height'] = data['height']
         baseDesign.distributions['holders'] = []
         baseDesign.distributions['posterIds'] = data['posterIds'] ? data['posterIds'] : []
-        // console.log('There')
+        this.log('There')
         if (data['holders'].length) {
           for (let holder of data['holders']) {
             if (!holder.lastX) holder['lastX'] = 0
@@ -1810,14 +1811,14 @@ export default {
         }
         if (baseDesign.distributions.holders.length) {
           let campaignId = baseDesign.campaign_id ? baseDesign.campaign_id : ''
-          // console.log('Beyond')
+          this.log('Beyond')
           // console.log('Campaign: ' + campaignId)
           for (let holder of baseDesign.distributions.holders) {
             holder.ext = this.model.posters[campaignId].filter(i => { return i.id === holder.ext })[0]
             holder.int = this.model.posters[campaignId].filter(i => { return i.id === holder.int })[0]
           }
         }
-        // console.log('Finish ' + design.id)
+        this.log('Finish ' + design.id)
         this.designs.push(baseDesign)
       }
     },

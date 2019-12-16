@@ -21,7 +21,15 @@
         </q-btn>
 
         <scope-top-bar></scope-top-bar>
-
+        <q-btn
+          flat
+          dense
+          round
+          v-if="$store.getters['User/isRoot']"
+          @click="downloadLog"
+        >
+          <q-icon name="cloud_download" />
+        </q-btn>
         <q-btn
           flat
           dense
@@ -58,13 +66,26 @@ import ScopeTopBar from '../components/scope/scopeTopBar'
 import ProfileCard from '../components/profile/profileCard'
 import MainMenu from '../components/menu/mainMenu'
 import LanguageMenu from '../components/menu/languageMenu'
+import { FileMethods } from '../mixins/fileMixin'
 
 export default {
   components: { ScopeTopBar, ProfileCard, MainMenu, LanguageMenu },
+  mixins: [FileMethods],
   name: 'MyLayout',
   data () {
     return {
       leftDrawerOpen: this.$q.platform.is.desktop && this.$q.screen.lt.lg
+    }
+  },
+  methods: {
+    downloadLog () {
+      const url = window.URL.createObjectURL(new Blob([this.$store.state.App.logs.dev]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'log.json') // or any other extension
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     }
   }
 }

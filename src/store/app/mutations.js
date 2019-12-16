@@ -26,3 +26,17 @@ export function setRoutes (state, routes) {
   LocalStorage.set('routes', state.routes)
   // localStorage.setItem('routes', JSON.stringify(state.routes))
 }
+
+export function log ({ logs }, params) {
+  if (typeof params === 'string') logs.dev += params + '\n'
+  else if (typeof params === 'object') {
+    if (!params.file && !params.text) {
+      logs.dev += JSON.stringify(params, undefined, 4) + '\n'
+      // for (let prop in params) {
+      //   if (typeof params[prop] === 'string') logs.dev += params[prop] + '\n'
+      //   else logs.dev += JSON.stringify(params[prop]) + '\n'
+      // }
+    }
+    // logs[params.file] += params.text + '\n'
+  }
+}

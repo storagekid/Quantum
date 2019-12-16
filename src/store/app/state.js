@@ -17,5 +17,8 @@ export default {
     home: null
   },
   menus: {},
-  routes: []
+  routes: [],
+  logs: {
+    dev: ''
+  }
 }

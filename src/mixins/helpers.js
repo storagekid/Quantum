@@ -5,6 +5,9 @@ export const Helpers = {
         (rv[x[key]] = rv[x[key]] || []).push(x)
         return rv
       }, {})
+    },
+    log (params) {
+      this.$store.commit('App/log', params)
     }
   }
 }
