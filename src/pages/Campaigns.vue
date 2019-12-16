@@ -29,7 +29,8 @@
               <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Rehacer Fachadas" @click="showGenerateCLinicDistributionFacades(item.item)" :disable="false"></q-btn>
               <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Lanzar Distribución" @click="showCampaignDistributionLauncher(item.item)"></q-btn>
             </template>
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Descargar legales" @click="showDownloadLegals(item.item)"></q-btn>
+            <q-btn flat v-close-popup size="sm" icon="cloud_download" color="primary" label="Descargar Fachadas" @click="showDownloadCampaignPDFs(item.item)"></q-btn>
+            <q-btn flat v-close-popup size="sm" icon="cloud_download" color="primary" label="Descargar legales" @click="showDownloadLegals(item.item)"></q-btn>
           </div>
         </q-btn-dropdown>
       </template>
@@ -79,7 +80,7 @@
           </div>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn label="Cancel" color="primary" v-close-popup />
+          <q-btn label="Cancel" color="primary" v-close-popup @click="clearConfirm"/>
           <q-btn label="Confirmar" color="positive" v-close-popup @click="startAction" :disable="!clinicsSelected.length"/>
         </q-card-actions>
       </q-card>
@@ -192,6 +193,32 @@ export default {
   methods: {
     updateScopeSelected (e) {
       this.clinicsSelected = this.clinicOptions.filter(i => e.clinicsIDs.includes(i.id))
+    },
+    showDownloadCampaignPDFs (campaign) {
+      this.confirm.item = campaign
+      this.confirm.action = 'downloadCampaignPDFs'
+      this.clinicOptions = []
+      let items = JSON.parse(JSON.stringify(this.$store.state.Model.models.clinics.items))
+      items = items.filter(i => {
+        let index = i.campaign_facades.findIndex(o => o.campaign_id === campaign.id)
+        if (index > -1) {
+          this.clinicOptionsIds.push(i.id)
+          return true
+        }
+      })
+      console.log(items.length)
+      this.clinicOptions = items
+      this.confirm.state = true
+    },
+    downloadCampaignPDFs () {
+      let fileIds = []
+      this.clinicsSelected.map(i => {
+        i.campaign_facades.forEach(o => {
+          if (o.campaign_id === this.confirm.item.id) fileIds.push(o.facades_file_id)
+        })
+      })
+      this.downloadFile(fileIds)
+      this.clearConfirm()
     },
     showDownloadLegals (campaign) {
       this.confirm.item = campaign
@@ -359,7 +386,7 @@ export default {
         fake: true,
         action: null
       }
-      this.clinicsSelectedIds = []
+      this.clinicOptionsIds = []
       this.clinicsSelected = []
     }
   }
