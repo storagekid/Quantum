@@ -1779,6 +1779,7 @@ export default {
         baseDesign['id'] = design['id']
         baseDesign['clinic_id'] = design['clinic_id']
         baseDesign['address_id'] = design['address_id']
+        this.log('MHere')
         baseDesign['address'] = this.model.addresses.filter(i => { return i.id === design.address_id })[0]
         this.log('Here')
         baseDesign['campaign_id'] = design['campaign_id']
