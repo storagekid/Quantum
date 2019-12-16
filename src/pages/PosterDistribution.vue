@@ -1,6 +1,44 @@
 <template>
   <div class="row justify-center items-stretch flex col" style="overflow: auto;" ref="mainWindow">
     <div class="col-sm-3 q-pa-md" style="position: relative; min-width: 300px" v-show="selectorOpen">
+      <q-btn
+        v-if="$store.getters['User/isRoot'] && !clinicSelected"
+        size="md"
+        color="primary"
+        class="full-width q-mt-md"
+        @click="showNewCriterion"
+        >
+        Nuevo Criterio General
+      </q-btn>
+      <q-btn
+        v-if="$store.getters['User/isRoot'] && !clinicSelected"
+        size="md"
+        color="warning"
+        class="full-width q-mt-md"
+        @click="showPPIDsFixer"
+        >
+        Fix PP-IDs in distributions
+      </q-btn>
+      <q-btn
+        v-if="$store.getters['User/isRoot'] && !clinicSelected"
+        size="md"
+        color="positive"
+        icon="grid_on"
+        label="Exportar Para TPA (Janire)"
+        class="full-width q-mt-md"
+        :loading="btnLoaders.downloadingExcel"
+        @click="showTpaExport"
+        >
+      </q-btn>
+      <q-btn
+        v-if="$store.getters['User/isRoot'] && clinicSelected"
+        size="md"
+        color="warning"
+        class="full-width q-mt-md"
+        @click="setAsDefault"
+        >
+        Seleccionar como Predeterminada
+      </q-btn>
       <custom-select
         :dense="true"
         :hide-bottom-space="true"
@@ -19,6 +57,27 @@
         :sourceOptions="dates"
         :initValue="dateSelected"
         @updated="updateCustomSelect('dateSelected', $event)"
+        >
+      </custom-select>
+      <custom-select
+        v-show="dateSelected && clinicSelected && designsCampaign.length > 1"
+        :dense="true"
+        :hide-bottom-space="true"
+        :field="{name: 'campaigns', type: { model: 'campaigns', default: { text: 'Campaña'} }}"
+        :sourceOptions="designsCampaign"
+        :initValue="designCampaignSelected"
+        @updated="updateCustomSelect('designCampaignSelected', $event)"
+        >
+      </custom-select>
+      <custom-select
+        v-show="dateSelected && clinicSelected"
+        :dense="true"
+        :hide-bottom-space="true"
+        :field="{name: 'campaigns', type: { model: 'campaigns', default: { text: 'Campaña a Mostrar'} }}"
+        :clearable='true'
+        :sourceOptions="designCampaignSelected.value ? campaignOptions.filter(i => i.id === designCampaignSelected.id) : campaignOptions"
+        :initValue="campaignToShow"
+        @updated="updateCustomSelect('campaignToShow', $event)"
         >
       </custom-select>
       <template v-if="can('Marketing','create')">
@@ -109,6 +168,66 @@
           </div>
         </div>
       </template>
+      <q-card class="q-mt-md" v-if="holderToShow">
+        <q-card-section class="bg-primary text-h6 text-white q-pa-sm">
+          <div class="text-center">{{ holderToShow.name }}</div>
+        </q-card-section>
+        <q-card-section class="">
+          <q-list dense>
+            <q-item class="q-px-none" v-for="side in ['ext', 'int']" :key="side">
+              <div class="row align-center justify-between q-col-gutter-md full-width">
+                <div class="col-xs-2 self-center text-h6">
+                  <span v-if="side === 'ext'">Ext:</span>
+                  <span v-else>Int:</span>
+                </div>
+                <template v-if="holderToShow[side]">
+                  <div class="col-xs-4">
+                    <q-select
+                      :options="posterOptions"
+                      dense
+                      v-model="holderToShow[side].clinic_poster.poster"
+                      >
+                    </q-select>
+                  </div>
+                  <div class="col-xs-4">
+                    <q-select
+                      :options="side === 'ext' ? ['Ext', 'Office'] : ['Int', 'Office Int']"
+                      dense
+                      v-model="holderToShow[side].clinic_poster.type"
+                      >
+                    </q-select>
+                  </div>
+                  <div class="col-xs-2">
+                    <q-select
+                      :options="posterPriorityOptions"
+                      emit-value
+                      map-options
+                      dense
+                      v-model="holderToShow[side].priority"
+                      >
+                    </q-select>
+                  </div>
+                </template>
+                <div class="col-xs-10" v-else>
+                  <q-btn
+                    dense
+                    color="positive"
+                    icon="add"
+                    label="Crear Prioridad"
+                    >
+                  </q-btn>
+                </div>
+              </div>
+            </q-item>
+          </q-list>
+        </q-card-section>
+        <q-card-section>
+          <q-card-actions class="q-pa-none">
+            <q-btn size="sm" color="info" @click="restoreHolderToShow">Restore</q-btn>
+            <q-btn size="sm" color="primary" :disable="!canSaveHolder" @click="saveHolder">Save</q-btn>
+          </q-card-actions>
+        </q-card-section>
+      </q-card>
     </div>
     <div class="col">
       <q-page class="q-pa-md col-xs-12" style="max-height: calc(100vh - 70px); overflow: auto; min-width: 800px; background-color: rgba(200,200,200, .3)">
@@ -170,24 +289,26 @@
                         </q-input>
                       </div>
                       <div class="col-xs-12 col-sm-4 bg-white text-primary">
-                        <custom-select
-                          v-if="dateSelected"
-                          :dense="true"
-                          :disable="true"
-                          :hide-bottom-space="true"
-                          :field="{name: 'campaigns', type: { model: 'campaigns', default: { text: 'Selecciona una campaña'} }}"
-                          :clearable='true'
-                          :sourceOptions="campaignOptions"
-                          :initValue="campaignSelected"
-                          @updated="updateCustomSelect('campaignSelected', $event)"
-                          >
-                        </custom-select>
+                        <div class="">
+                          <q-badge color="primary">
+                            Escala: {{ design.distributions.postersScale }} (1 to 3)
+                          </q-badge>
+                          <q-slider
+                            v-model="design.distributions.postersScale"
+                            :min="0.5"
+                            :max="2"
+                            :step="0.1"
+                            label
+                            color="warning"
+                            :disable="!can('Marketing','create')"
+                          />
+                        </div>
                       </div>
                       <div class="col-xs-12 col-sm-4 bg-white text-primary">
                         <q-input
                           dense
+                          clearable
                           mask="####-##-##"
-                          fill-mask="#"
                           :rules="[]"
                           bottom-slots
                           :hide-bottom-space="true"
@@ -209,7 +330,7 @@
                   </div>
                   <div class="col-xs-12">
                     <div class="text-center row q-col-gutter-sm">
-                      <div class="col-xs-12 col-sm-8 bg-white text-primary">
+                      <div class="col-xs-12 col-sm-s bg-white text-primary">
                         <q-select
                           v-model="design.address"
                           :options="clinicSelected.addresses"
@@ -222,22 +343,6 @@
                           error-message="Debes seleccionar una calle"
                           :disable="!can('Marketing','create')"
                         />
-                      </div>
-                      <div class="col-xs-12 col-sm-4 bg-white text-primary">
-                        <div class="q-pa-md">
-                          <q-badge color="primary">
-                            Escala: {{ design.distributions.postersScale }} (1 to 3)
-                          </q-badge>
-                          <q-slider
-                            v-model="design.distributions.postersScale"
-                            :min="0.5"
-                            :max="2"
-                            :step="0.1"
-                            label
-                            color="warning"
-                            :disable="!can('Marketing','create')"
-                          />
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -311,14 +416,16 @@
                               'min-height': '40%',
                               'flex': 1,
                               'font-weight': 'bold',
-                              'font-size': design.distributions.postersScale > 1 ? (design.distributions.postersScale + 0.9) + 'em' : (design.distributions.postersScale + 0.5) + 'em'
+                              'font-size': ppScale(design)
                             }"
                             dense
                             borderless
                             standout
                             dark
+                            map-options
+                            emit-value
                             v-model="poster[poster.showing].priority"
-                            :options="[1,2,3,4,5,6,7,8,9,10,11,12]"
+                            :options="posterPriorityOptions"
                             options-dense
                             :disable="!can('Marketing', 'create')"
                           />
@@ -570,12 +677,218 @@
             </template>
           </q-input>
         </q-card-section>
+        <q-card-section>
+          <div class="q-pa-md">
+            <q-toggle
+              v-model="cloneDialog.placePriorities"
+              label="Colocar Prioridades"
+              color="info"
+              keep-color
+            />
+          </div>
+        </q-card-section>
         <q-card-actions align="right">
           <q-btn label="Cancel" color="primary" v-close-popup />
           <q-btn label="Confirmar" color="negative" v-close-popup @click="cloneDistributions"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="newCriterion.state" persistent>
+      <q-card style="min-width: 600px">
+        <q-card-section class="bg-primary text-white text-center">
+          <span class="text-h6">Selecciona las clínicas</span>
+        </q-card-section>
+        <q-card-section>
+          <div class="q-mt-md text-subtitle2 text-center">Total: {{ newCriterion.clinicsSelected.length }} </div>
+        </q-card-section>
+        <q-card-section>
+          <q-btn class="full-width" outline color="info" @click="newCriterion.clinicsSelected = newCriterion.clinicOptions" :disable="newCriterion.clinicsSelected === newCriterion.clinicOptions" label="Todas"></q-btn>
+        </q-card-section>
+        <q-card-section class="row items-center">
+          <div class="full-width">
+            <custom-select
+              :all="newCriterion.clinicsSelected.length === newCriterion.clinicOptions.length"
+              v-if="newCriterion.clinicOptions.length"
+              :dense="true"
+              multiple
+              counter
+              :hide-bottom-space="true"
+              :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona las clínicas'} }}"
+              :sourceOptions="newCriterion.clinicOptions"
+              :clearable='true'
+              :initValue="newCriterion.clinicsSelected"
+              @updated="updateCustomSelect('newCriterion.clinicsSelected', $event)"
+              >
+            </custom-select>
+            <q-input
+              mask="####-##-##"
+              :rules="[]"
+              bottom-slots
+              label="Empieza el"
+              stack-label
+              v-model="newCriterion.starts_at"
+              >
+              <template v-slot:append>
+                <q-icon name="event" class="cursor-pointer" color="primary">
+                  <q-popup-proxy ref="qDateProxy-NCSA" transition-show="scale" transition-hide="scale">
+                    <q-date color="primary" v-model="newCriterion.starts_at" @input="hideDatePicker('NCSA')" mask="YYYY-MM-DD"/>
+                  </q-popup-proxy>
+                </q-icon>
+              </template>
+            </q-input>
+            <q-toggle
+              v-model="newCriterion.placePriorities"
+              label="Colocar Prioridades"
+              color="info"
+              keep-color
+            />
+          </div>
+        </q-card-section>
+        <q-card-section>
+          <div class="full-width text-center q-mb-sm">
+            <span class="text-h6 text-primary">Nuevas Prioridades</span>
+          </div>
+          <div class="row q-mb-sm justify-center">
+            <q-list dense separator>
+              <q-item v-for="(newPriority, index) in newCriterion.newPriorities" :key="'NP' + index">
+                <q-item-section avatar>
+                  <q-btn size="sm" flat color="negative" icon="delete" @click="removeNewPriority(index)"></q-btn>
+                </q-item-section>
+                <q-item-section>
+                  <p class="q-ma-none self-center">
+                    {{ newPriority.oldTypeA }}
+                    <span class="text-info">{{ ' (' + newPriority.oldPriorityA + ') &&' }}</span>
+                    {{ newPriority.oldTypeB }}
+                    <span class="text-info">{{ ' (' + newPriority.oldPriorityB + ')' }}</span>
+                    =>
+                    {{ newPriority.newType }}
+                    <span class="text-positive">{{ ' (' + newPriority.newPriority + ')' }}</span>
+                  </p>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <!-- <div class="col-xs-12" v-for="(newPriority, index) in newCriterion.newPriorities" :key="'NP' + index">
+              <div class="row justify-around">
+                <q-btn size="sm" flat color="negative" icon="delete" @click="removeNewPriority(index)"></q-btn>
+                <p class="q-ma-none self-center">{{ newPriority.oldType }}<span class="text-info">{{ ' (' + newPriority.oldPriority + ')' }}</span> => <span class="text-positive">{{ ' (' + newPriority.newPriority + ')' }}</span></p>
+              </div>
+            </div> -->
+          </div>
+          <div class="row q-col-gutter-sm">
+            <div class="col-xs-2">
+              <q-btn dense flat size="lg" icon="library_add" color="primary" @click="addNewPriority" :disable="!newPriorityCheck"/>
+            </div>
+            <div class="col-xs-10">
+              <div class="row q-col-gutter-sm">
+                <div class="col-2">
+                  <q-select label="Cara Ext." dense v-model="newCriterion.newPriority.oldTypeA" :options="['Ext', 'Office']"></q-select>
+                </div>
+                <div class="col-2">
+                  <q-select label="P. Anterior" dense v-model="newCriterion.newPriority.oldPriorityA" :options="['1','2','3','4','5','6','7','8','9','10','11','12']"></q-select>
+                </div>
+                <div class="col-2">
+                  <q-select label="Cara Int." dense v-model="newCriterion.newPriority.oldTypeB" :options="['Int', 'Office Int']"></q-select>
+                </div>
+                <div class="col-2">
+                  <q-select label="P. Anterior" dense v-model="newCriterion.newPriority.oldPriorityB" :options="['1','2','3','4','5','6','7','8','9','10','11','12']"></q-select>
+                </div>
+                <div class="col-2">
+                  <q-select label="Cara Nueva." dense v-model="newCriterion.newPriority.newType" :options="newTypes"></q-select>
+                </div>
+                <div class="col-2">
+                  <q-select label="P. Nueva" dense v-model="newCriterion.newPriority.newPriority" :options="['1','2','3','4','5','6','7','8','9','10','11','12']"></q-select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Save Criterion" color="info" @click="saveCriterion" :disable="!newCriterion.newPriorities.length"/>
+          <q-btn label="Load Criterion" color="info" @click="loadCriterion" v-if="saveCriterions"/>
+          <q-btn label="Cancel" color="primary" v-close-popup />
+          <q-btn label="Confirmar" color="positive" v-close-popup @click="cloneDistributionsBatch" :disable="!newCriterion.clinicsSelected.length"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="exportTpa.state" persistent>
+      <q-card style="min-width: 600px">
+        <q-card-section class="bg-primary text-white text-center">
+          <span class="text-h6">Selecciona las clínicas</span>
+        </q-card-section>
+        <q-card-section>
+          <div class="q-mt-md text-subtitle2 text-center">Total: {{ exportTpa.clinicsSelected.length }} </div>
+        </q-card-section>
+        <q-card-section>
+          <q-btn class="full-width" outline color="info" @click="exportTpa.clinicsSelected = exportTpa.clinicOptions" :disable="exportTpa.clinicsSelected === exportTpa.clinicOptions" label="Todas"></q-btn>
+        </q-card-section>
+        <q-card-section class="row items-center">
+          <div class="full-width">
+            <custom-select
+              :all="exportTpa.clinicsSelected.length === exportTpa.clinicOptions.length"
+              v-if="exportTpa.clinicOptions.length"
+              :dense="true"
+              multiple
+              counter
+              :hide-bottom-space="true"
+              :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona las clínicas'} }}"
+              :sourceOptions="exportTpa.clinicOptions"
+              :clearable='true'
+              :initValue="exportTpa.clinicsSelected"
+              @updated="updateCustomSelect('exportTpa.clinicsSelected', $event)"
+              >
+            </custom-select>
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Cancel" color="primary" v-close-popup />
+          <q-btn label="Exportar" color="positive" v-close-popup @click="exportTpaJanire" :disable="!exportTpa.clinicsSelected.length"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="ppFixer.state" persistent>
+      <q-card style="min-width: 600px">
+        <q-card-section class="bg-primary text-white text-center">
+          <span class="text-h6">Selecciona las clínicas</span>
+        </q-card-section>
+        <q-card-section>
+          <div class="q-mt-md text-subtitle2 text-center">Total: {{ ppFixer.clinicsSelected.length }} </div>
+        </q-card-section>
+        <q-card-section>
+          <q-btn class="full-width" outline color="info" @click="ppFixer.clinicsSelected = ppFixer.clinicOptions" :disable="ppFixer.clinicsSelected === ppFixer.clinicOptions" label="Todas"></q-btn>
+        </q-card-section>
+        <q-card-section class="row items-center">
+          <div class="full-width">
+            <custom-select
+              :all="ppFixer.clinicsSelected.length === ppFixer.clinicOptions.length"
+              v-if="ppFixer.clinicOptions.length"
+              :dense="true"
+              multiple
+              counter
+              :hide-bottom-space="true"
+              :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona las clínicas'} }}"
+              :sourceOptions="ppFixer.clinicOptions"
+              :clearable='true'
+              :initValue="ppFixer.clinicsSelected"
+              @updated="updateCustomSelect('ppFixer.clinicsSelected', $event)"
+              >
+            </custom-select>
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Cancel" color="primary" v-close-popup />
+          <q-btn label="Exportar" color="positive" v-close-popup @click="ppFixerLauncher" :disable="!ppFixer.clinicsSelected.length"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <multi-async-action-bars
+      v-if="multiAsyncAction.show"
+      :opened="multiAsyncAction.show"
+      :items="multiAsyncAction.items"
+      :headerText="multiAsyncAction.headerText"
+      :keyField="multiAsyncAction.keyField"
+      v-on:Finished="clearMultiUpload"
+      >
+    </multi-async-action-bars>
     <q-inner-loading :showing="visible" style="z-index: 1000">
       <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
     </q-inner-loading>
@@ -588,21 +901,25 @@ import { ModelsFetcher, ModelController } from '../mixins/modelMixin'
 import { FileMethods } from '../mixins/fileMixin'
 import CustomSelect from '../components/form/customSelect'
 import { customSelectMixins } from '../mixins/customSelectMixins'
+import { multiAsyncActionBarsMixins } from '../mixins/multiAsyncActionBarsMixins'
+import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'PosterDistribution',
-  mixins: [PageMixins, ModelsFetcher, ModelController, FileMethods, customSelectMixins],
-  components: { CustomSelect },
+  mixins: [PageMixins, ModelsFetcher, ModelController, FileMethods, customSelectMixins, multiAsyncActionBarsMixins],
+  components: { CustomSelect, MultiAsyncActionBars },
   data () {
     return {
       modelsNeeded: {
         clinics: {
         },
         campaigns: {
+          with: ['campaign_poster_priorities'],
           withCount: ['campaign_posters'],
           orderBy: 'starts_at',
           orderDesc: true
-        }
+        },
+        posters: {}
       },
       name: 'poster_distributions',
       designs: [],
@@ -611,9 +928,15 @@ export default {
       holderSelected: [],
       designTargeted: null,
       holderTargeted: null,
+      holderBackUp: null,
       clinicSelected: null,
       dateSelected: null,
       campaignSelected: '',
+      designCampaignSelected: {
+        label: 'No Campaign',
+        value: null
+      },
+      campaignToShow: null,
       model: null,
       board: {
         minWidth: 800,
@@ -634,18 +957,126 @@ export default {
         state: false,
         campaign: null,
         starts_at: null,
-        ends_at: null
+        ends_at: null,
+        placePriorities: false
+      },
+      newCriterion: {
+        state: false,
+        id: null,
+        index: null,
+        item: null,
+        fake: true,
+        action: null,
+        starts_at: null,
+        placePriorities: true,
+        newPriority: {
+          oldTypeA: 'Ext',
+          oldTypeB: 'Int',
+          oldPriorityA: 1,
+          oldPriorityB: 1,
+          newType: null,
+          newPriority: 1
+        },
+        newPriorities: [],
+        clinicOptions: [],
+        clinicsSelected: []
+      },
+      exportTpa: {
+        state: false,
+        id: null,
+        index: null,
+        item: null,
+        action: null,
+        clinicOptions: [],
+        clinicsSelected: []
+      },
+      ppFixer: {
+        state: false,
+        id: null,
+        index: null,
+        item: null,
+        action: null,
+        clinicOptions: [],
+        clinicsSelected: []
       },
       btnLoaders: {
         compose: false,
-        facadePdf: false
+        facadePdf: false,
+        downloadingExcel: false
       },
       visible: false
     }
   },
   computed: {
+    posterOptions () {
+      return this.$store.state.Model.models.posters.items
+    },
+    canSaveHolder () {
+      if (JSON.stringify(this.holderToShow) === this.holderBackUp) {
+        console.log('Holders are the same')
+        return false
+      } else {
+        if (this.holderToShow.ext && this.holderToShow.int) {
+          if (this.holderToShow.ext.clinic_poster && this.holderToShow.int.clinic_poster) {
+            if (this.holderToShow.ext.clinic_poster.poster && this.holderToShow.int.clinic_poster.poster) {
+              if (this.holderToShow.ext.clinic_poster.poster.name !== this.holderToShow.int.clinic_poster.poster.name) {
+                console.log('Different Sizes')
+                return false
+              }
+            }
+          }
+        }
+        // let old = JSON.parse(this.holderBackUp)
+      }
+      return true
+    },
+    holderToShow () {
+      if (this.holderSelected.length === 1 && this.clinicSelected) {
+        return this.designs[this.designSelected].distributions.holders[this.holderSelected[0]]
+      }
+      return null
+    },
+    posterPriorityOptions () {
+      let options = []
+      for (let i = 1; i <= 12; i++) {
+        let option = {
+          'label': this.campaignPriorities[i] ? this.campaignPriorities[i] : i,
+          'value': i
+        }
+        options.push(option)
+      }
+      return options
+    },
+    saveCriterions () {
+      return this.$q.localStorage.getItem('newCriterion')
+    },
+    newTypes () {
+      return [this.newCriterion.newPriority.oldTypeA, this.newCriterion.newPriority.oldTypeB]
+    },
+    newPriorityCheck () {
+      // if (this.newCriterion.newPriority.oldPriorityA === this.newCriterion.newPriority.newPriorityA && this.newCriterion.newPriority.oldPriorityB === this.newCriterion.newPriority.newPriorityB) return false
+      for (let newPriority of this.newCriterion.newPriorities) {
+        if (newPriority.oldTypeA === this.newCriterion.newPriority.oldTypeA) {
+          if (newPriority.oldTypeB === this.newCriterion.newPriority.oldTypeB) {
+            if (parseInt(newPriority.oldPriorityA) === parseInt(this.newCriterion.newPriority.oldPriorityA)) {
+              if (parseInt(newPriority.oldPriorityB) === parseInt(this.newCriterion.newPriority.oldPriorityB)) return false
+            }
+          }
+        }
+      }
+      return true
+    },
     campaignOptions () {
       return this.$store.state.Model.models.campaigns.items
+    },
+    campaignPriorities () {
+      let priorities = {}
+      if (this.campaignToShow) {
+        for (let cp of this.campaignToShow.campaign_poster_priorities) {
+          priorities[cp.priority] = cp.poster_model_name
+        }
+      }
+      return priorities
     },
     dates () {
       let dates = []
@@ -661,6 +1092,23 @@ export default {
         }
       }
       return dateObjects.length ? dateObjects : null
+    },
+    designsCampaign () {
+      let campaignIds = []
+      let campaignObjects = []
+      let noCampaign = {
+        label: 'No Campaign',
+        value: null
+      }
+      campaignObjects.push(noCampaign)
+      for (let design of this.designs) {
+        if (!design.campaign_id || this.dateSelected.value !== design.starts_at) continue
+        if (!campaignIds.includes(design.campaign_id)) {
+          campaignIds.push(design.campaign_id)
+          campaignObjects.push(this.campaignOptions.filter(i => i.id === design.campaign_id)[0])
+        }
+      }
+      return campaignObjects.length ? campaignObjects : null
     },
     clinicIndex () {
       let index = null
@@ -716,9 +1164,12 @@ export default {
     },
     designsInRange () {
       let designs = []
+      let campaignId = this.designCampaignSelected.value ? this.designCampaignSelected.id : null
+      console.log(this.designCampaignSelected)
+      console.log(campaignId)
       if (this.designs.length && this.dateSelected) {
         for (let i = 0; i < this.designs.length; i++) {
-          if (this.designs[i].starts_at === this.dateSelected.value) {
+          if (this.designs[i].starts_at === this.dateSelected.value && this.designs[i].campaign_id === campaignId) {
             let design = this.designs[i]
             design['__index'] = i
             designs.push(design)
@@ -743,6 +1194,21 @@ export default {
     }
   },
   watch: {
+    holderToShow () {
+      console.log('Watcher in holder to show')
+      if (this.holderToShow) {
+        if (!this.holderBackUp) {
+          console.log('Saving')
+          this.holderBackUp = JSON.stringify(this.holderToShow)
+        } else {
+          let old = JSON.parse(this.holderBackUp)
+          if (old.name !== this.designs[this.designSelected].distributions.holders[this.holderSelected[0]].name) {
+            console.log('Different Holder Selected')
+            this.holderBackUp = JSON.stringify(this.holderToShow)
+          }
+        }
+      } else this.holderBackUp = null
+    },
     dates () {
       // console.log('Watching dates')
       // console.log(this.dates)
@@ -760,6 +1226,10 @@ export default {
     clinicSelected () {
       this.model = null
       this.campaignSelected = ''
+      this.designCampaignSelected = {
+        label: 'No Campaign',
+        value: null
+      }
       this.dateSelected = null
       this.designs = []
       if (this.clinicSelected) {
@@ -777,31 +1247,273 @@ export default {
             this.$store.dispatch('Response/responseErrorManager', response)
             this.visible = false
           })
+      } else {
+        this.cleanSelectedState()
       }
     },
-    campaignSelected () {
-      if (!this.model) return
-      if (!this.model.posters[this.campaignSelectedId]) {
-        // console.log('No Priorities Yet For This Campaign')
-        this.visible = true
-        this.duplicatePosterPriorities(this.campaignSelectedId).then(() => {
-          for (let design of this.designs) {
-            this.$set(design.posterIds, this.campaignSelectedId, [])
-            for (let holder of design.distributions.holders) {
-              this.$set(holder.ext, this.campaignSelectedId, null)
-              this.$set(holder.int, this.campaignSelectedId, null)
-            }
-          }
-          this.visible = false
-        })
-        // this.model.posters[this.campaignSelectedId] = JSON.parse(JSON.stringify(this.model.posters['']))
-        // for (let poster of this.model.posters[this.campaignSelectedId]) {
-        //   poster.campaign_id = this.campaignSelectedId
-        // }
+    dateSelected () {
+      this.designSelected = null
+      this.designCampaignSelected = {
+        label: 'No Campaign',
+        value: null
       }
+      this.designPressed = null
+      this.holderSelected = []
+      this.designTargeted = null
+      this.holderTargeted = null
+      this.board.clicked = false
+      this.board.selected = false
     }
   },
   methods: {
+    saveHolder () {
+      let design = this.designs[this.designSelected]
+      let designId = design.id
+      let params = {
+        designId: designId
+      }
+      this.$axios({
+        url: this.$store.state.App.dataWarehouse + 'poster_distributions/' + design.id + '/saveHolder',
+        method: 'POST',
+        params: params
+      }).then((response) => {
+        this.$q.loading.hide()
+        this.$store.commit('Model/updateRelationItems', { name: 'clinics', relation: 'poster_distributions', item: response.data.model, parentIndex: this.clinicIndex })
+        this.$store.dispatch('Notify/displayMessage', { message: 'Holder Saved', position: 'top', type: 'positive' })
+      }).catch((response) => {
+        this.$q.loading.hide()
+        this.$store.dispatch('Notify/displayMessage', { message: 'Action Failed', position: 'top', type: 'negative' })
+      })
+      return true
+    },
+    restoreHolderToShow () {
+      let old = JSON.parse(this.holderBackUp)
+      let holder = this.designs[this.designSelected].distributions.holders[this.holderSelected[0]]
+      for (let side of ['ext', 'int']) {
+        if (old[side]) {
+          if (!holder[side]) {
+            this.$set(holder, side, {})
+            for (let prop in old[side]) this.$set(holder[side], prop, old[side][prop])
+            if (!this.designs[this.designSelected].distributions.posterIds.includes(holder[side].id)) this.designs[this.designSelected].distributions.posterIds.push(holder[side].id)
+          } else {
+            holder[side].priority = old[side].priority
+            holder[side].clinic_poster = old[side].clinic_poster
+          }
+        } else holder[side] = null
+      }
+      this.holderBackUp = JSON.stringify(this.holderToShow)
+    },
+    cleanSelectedState () {
+      this.designs = []
+      this.designSelected = null
+      this.designPressed = null
+      this.holderSelected = []
+      this.designTargeted = null
+      this.holderTargeted = null
+      this.clinicSelected = null
+      this.dateSelected = null
+      this.campaignSelected = ''
+      this.campaignToShow = null
+      this.model = null
+      this.board.clicked = false
+      this.board.selected = false
+    },
+    ppScale (design) {
+      let scale = design.distributions.postersScale > 1 ? (design.distributions.postersScale + 0.9) : (design.distributions.postersScale + 0.5)
+      if (this.campaignToShow) scale = scale * 0.8
+      return scale + 'em'
+    },
+    showTpaExport () {
+      this.$q.loading.show()
+      this.exportTpa.action = 'exportTpaJanire'
+      this.$store.dispatch('Model/getModel', { model: 'clinics', options: { with: ['poster_distributions_active'] } })
+        .then((data) => {
+          this.exportTpa.clinicOptions = []
+          let items = JSON.parse(JSON.stringify(this.$store.state.Model.models.clinics.items))
+          items = items.filter(i => {
+            if (!i.poster_distributions_active.length) return false
+            return true
+          })
+          items.map(i => {
+            i['dates'] = []
+            for (let distribution of i.poster_distributions_active) if (!i.dates.includes(distribution.starts_at)) i.dates.push(distribution.starts_at)
+            if (i.dates.length > 1) console.log(i.nickname)
+            let actionPayload = {}
+            actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/newDistributionCriterion'
+            actionPayload.method = 'POST'
+            i.actionPayload = actionPayload
+          })
+          this.exportTpa.clinicOptions = items
+          this.exportTpa.state = true
+          this.$q.loading.hide()
+        }).catch((response) => {
+          this.$store.dispatch('Response/responseErrorManager', response)
+          this.$q.loading.show()
+          return false
+        })
+    },
+    showPPIDsFixer () {
+      this.$q.loading.show()
+      this.ppFixer.action = 'ppFixer'
+      this.$store.dispatch('Model/getModel', { model: 'clinics', options: { with: ['poster_distributions_active'] } })
+        .then((data) => {
+          this.ppFixer.clinicOptions = []
+          let items = JSON.parse(JSON.stringify(this.$store.state.Model.models.clinics.items))
+          items = items.filter(i => {
+            if (!i.poster_distributions_active.length) return false
+            return true
+          })
+          items.map(i => {
+            i['dates'] = []
+            for (let distribution of i.poster_distributions_active) if (!i.dates.includes(distribution.starts_at)) i.dates.push(distribution.starts_at)
+            if (i.dates.length > 1) console.log(i.nickname)
+            let actionPayload = {}
+            actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/posterPrioritiesFixer'
+            actionPayload.method = 'POST'
+            i.actionPayload = actionPayload
+          })
+          this.ppFixer.clinicOptions = items
+          this.ppFixer.state = true
+          this.$q.loading.hide()
+        }).catch((response) => {
+          this.$store.dispatch('Response/responseErrorManager', response)
+          this.$q.loading.show()
+          return false
+        })
+    },
+    ppFixerLauncher () {
+      let clinicsCount = this.ppFixer.clinicsSelected.length
+      this.$store.dispatch('Notify/displayMessage', { message: 'Fixing PP IDs', position: 'top', type: 'positive' })
+      this.multiAsyncAction.items = this.ppFixer.clinicsSelected
+      this.multiAsyncAction.headerText = 'New Criterion for ' + clinicsCount + ' Clinics'
+      this.multiAsyncAction.show = true
+      this.clearPPFixer()
+    },
+    exportTpaJanire () {
+      this.btnLoaders.downloadingExcel = true
+      let ids = []
+      this.exportTpa.clinicsSelected.forEach((i) => {
+        for (let distribution of i.poster_distributions_active) ids.push(distribution.id)
+      })
+      this.$store.dispatch('Notify/displayMessage', { message: 'Exporting TPA', position: 'top', type: 'positive' })
+      this.$axios({
+        url: this.$store.state.App.dataWarehouse + 'exportExcel',
+        method: 'POST',
+        data: {
+          model: 'clinic_poster_priorities',
+          ids: ids,
+          blueprint: 'TPA (Janire)'
+        },
+        responseType: 'blob'
+      }).then((response) => {
+        // console.log(response.data)
+        let headers = response.headers['content-disposition'].split(';')
+        let badname = headers[1].split('=')
+        let name = badname[1]
+        if (headers[2]) {
+          let badname2 = headers[2].split('\'\'')
+          // console.log(decodeURIComponent(badname2[1]))
+          name = decodeURIComponent(badname2[1])
+        }
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', name) // or any other extension
+        document.body.appendChild(link)
+        link.click()
+        this.btnLoaders.downloadingExcel = false
+        this.clearExportTpa()
+        this.$store.dispatch('Notify/displayMessage', { message: 'Downloaded', position: 'top', type: 'positive' })
+      }).catch(({ response }) => {
+        this.btnLoaders.downloadingExcel = false
+        this.clearExportTpa()
+        this.$store.dispatch('Response/responseErrorManager', response)
+      })
+    },
+    loadCriterion () {
+      this.newCriterion.newPriorities = this.$q.localStorage.getItem('newCriterion')
+    },
+    saveCriterion () {
+      this.$q.localStorage.set('newCriterion', this.newCriterion.newPriorities)
+    },
+    addNewPriority () {
+      this.newCriterion.newPriorities.push(JSON.parse(JSON.stringify(this.newCriterion.newPriority)))
+    },
+    removeNewPriority (index) {
+      this.newCriterion.newPriorities.splice(index, 1)
+    },
+    startAction () {
+      this[this.confirm.action]()
+    },
+    showNewCriterion () {
+      // this.confirm.item = campaign
+      this.$q.loading.show()
+      this.newCriterion.action = 'cloneDistributionsBatch'
+      this.$store.dispatch('Model/getModel', { model: 'clinics', options: { with: ['poster_distributions_active'] } })
+        .then((data) => {
+          // this.model = data.model
+          // console.log('HERE')
+          // console.log(data.model)
+          // if (this.model.poster_distributions.length) this.buildModelDesigns(this.model.poster_distributions)
+          // this.model['originalPosterPriorities'] = JSON.parse(JSON.stringify(this.model.posters))
+          this.newCriterion.clinicOptions = []
+          let items = JSON.parse(JSON.stringify(this.$store.state.Model.models.clinics.items))
+          items = items.filter(i => {
+            if (!i.poster_distributions_active.length) return false
+            return true
+          })
+          items.map(i => {
+            i['dates'] = []
+            for (let distribution of i.poster_distributions_active) if (!i.dates.includes(distribution.starts_at)) i.dates.push(distribution.starts_at)
+            if (i.dates.length > 1) console.log(i.nickname)
+            let actionPayload = {}
+            actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/newDistributionCriterion'
+            actionPayload.method = 'POST'
+            // actionPayload.params = {
+            //   'starts_at': this.newCriterion.starts_at,
+            //   'newPriorities': this.newCriterion.newPriorities
+            // }
+            i.actionPayload = actionPayload
+          })
+          this.newCriterion.clinicOptions = items
+          this.newCriterion.state = true
+          this.$q.loading.hide()
+          // this.visible = false
+        }).catch((response) => {
+          // console.log('THERE')
+          this.$store.dispatch('Response/responseErrorManager', response)
+          this.$q.loading.show()
+          return false
+        })
+    },
+    setAsDefault () {
+      this.$store.dispatch('Notify/displayMessage', { message: 'Set As Default', position: 'top', type: 'positive' })
+      this.$q.loading.show()
+      let designIds = []
+      for (let design of this.designsInRange) {
+        designIds.push(design.id)
+      }
+      let actionPayload = {}
+      actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + this.clinicSelected.id + '/setDefaultDistributions'
+      actionPayload.method = 'POST'
+      actionPayload.params = {
+        'designs': designIds
+      }
+      this.$axios({
+        url: actionPayload.url,
+        method: actionPayload.method,
+        params: actionPayload.params
+      }).then((response) => {
+        this.$q.loading.hide()
+        this.$store.commit('Model/updateModelItems', { name: 'clinics', item: response.data.model })
+        this.clinicSelected = response.data.model
+        this.$store.dispatch('Notify/displayMessage', { message: 'Default Distributions Updated', position: 'top', type: 'positive' })
+      }).catch((response) => {
+        this.$q.loading.hide()
+        this.$store.dispatch('Notify/displayMessage', { message: 'Action Failed', position: 'top', type: 'negative' })
+      })
+      return true
+    },
     campaignOptionsByDistribution (dist) {
       let items = this.$store.state.Model.models.campaigns.items.filter(i => {
         let cStarts = new Date(i.starts_at)
@@ -812,6 +1524,60 @@ export default {
         else return i.id === dist.campaign_id || (cStarts >= dStarts && cEnds <= dEnds)
       })
       return items
+    },
+    cloneDistributionsBatch () {
+      let clinicsCount = this.newCriterion.clinicsSelected.length
+      this.$store.dispatch('Notify/displayMessage', { message: 'New Criterion Build Successfully', position: 'top', type: 'positive' })
+      // let campaign = this.confirm.item
+      this.newCriterion.clinicsSelected.map((i) => {
+        i.actionPayload.params = {
+          'starts_at': this.newCriterion.starts_at,
+          'placePriorities': this.newCriterion.placePriorities,
+          'newPriorities': this.newCriterion.newPriorities
+        }
+      })
+      this.multiAsyncAction.items = this.newCriterion.clinicsSelected
+      this.multiAsyncAction.headerText = 'New Criterion for ' + clinicsCount + ' Clinics'
+      this.multiAsyncAction.show = true
+      this.clearNewCriterion()
+    },
+    clearNewCriterion () {
+      this.newCriterion.state = false
+      this.newCriterion.id = null
+      this.newCriterion.index = null
+      this.newCriterion.item = null
+      this.newCriterion.fake = true
+      this.newCriterion.action = null
+      this.newCriterion.starts_at = null
+      this.newCriterion.placePriorities = true
+      this.newCriterion.newPriority = {
+        oldType: 'Ext',
+        oldPriority: 1,
+        newPriority: 1
+      }
+      this.newCriterion.newPriorities = []
+      this.newCriterion.clinicOptions = []
+      this.newCriterion.clinicsSelected = []
+    },
+    clearExportTpa () {
+      this.exportTpa.state = false
+      this.exportTpa.id = null
+      this.exportTpa.index = null
+      this.exportTpa.item = null
+      this.exportTpa.fake = true
+      this.exportTpa.action = null
+      this.exportTpa.clinicOptions = []
+      this.exportTpa.clinicsSelected = []
+    },
+    clearPPFixer () {
+      this.ppFixer.state = false
+      this.ppFixer.id = null
+      this.ppFixer.index = null
+      this.ppFixer.item = null
+      this.ppFixer.fake = true
+      this.ppFixer.action = null
+      this.ppFixer.clinicOptions = []
+      this.ppFixer.clinicsSelected = []
     },
     cloneDistributions () {
       this.$q.loading.show()
@@ -825,7 +1591,8 @@ export default {
       actionPayload.params = {
         'designs': designIds,
         'starts_at': this.cloneDialog.starts_at || '',
-        'campaign': this.cloneDialog.campaign || ''
+        'campaign': this.cloneDialog.campaign || '',
+        'placePriorities': this.cloneDialog.placePriorities || ''
       }
       this.$axios({
         url: actionPayload.url,
@@ -1055,7 +1822,8 @@ export default {
       }
     },
     save () {
-      this.savePosterPriorities().then(() => { this.saveDistribution() })
+      this.visible = true
+      this.savePosterPriorities().then(() => { this.saveDistribution() }).catch(() => { this.visible = false })
     },
     savePosterPriorities () {
       return new Promise((resolve, reject) => {
@@ -1152,7 +1920,7 @@ export default {
       })
     },
     saveDistribution () {
-      this.visible = true
+      // this.visible = true
       let parentIndex = null
       for (let i = 0; i < this.$store.state.Model.models.clinics.items.length; i++) {
         if (this.$store.state.Model.models.clinics.items[i].id === this.clinicSelected.id) {
