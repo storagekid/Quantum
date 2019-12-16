@@ -1786,18 +1786,21 @@ export default {
         baseDesign['original_facade_file_id'] = design.original_facade_file_id
         baseDesign['composed_facade_file_id'] = design.composed_facade_file_id
         // baseDesign['complete_facade_file_id'] = design.complete_facade_file_id
+        this.log('YHere')
         baseDesign['complete_facades'] = design.complete_facades
         baseDesign['starts_at'] = design['starts_at']
         baseDesign['ends_at'] = design['ends_at']
 
         baseDesign['file'] = design.original_facade.url
         baseDesign['name'] = design.original_facade.name
+        this.log('XHere')
 
         baseDesign.distributions['scale'] = data['scale']
         baseDesign.distributions['postersScale'] = data['postersScale']
         baseDesign.distributions['width'] = data['width']
         baseDesign.distributions['height'] = data['height']
         baseDesign.distributions['holders'] = []
+        this.log('ZHere')
         baseDesign.distributions['posterIds'] = data['posterIds'] ? data['posterIds'] : []
         this.log('There')
         if (data['holders'].length) {
