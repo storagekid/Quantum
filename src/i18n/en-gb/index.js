@@ -73,6 +73,10 @@ export default {
         title: 'Marketing',
         subtitle: ''
       },
+      'marketing-user-home': {
+        title: 'Marketing User Dashboard',
+        subtitle: ''
+      },
       legals: {
         title: 'Legals',
         subtitle: ''
