@@ -310,12 +310,54 @@
             </q-card-section>
 
             <q-list separator>
-              <q-item clickable @click="toggleTable('campaigns', 'open')">
+              <q-item>
                 <q-item-section avatar>
-                  <q-icon color="positive" name="lock_open" />
+                  <q-icon color="positive" name="visibility" />
                 </q-item-section>
 
-                <q-item-section v-if="campaigns.open.length === 1">
+                <q-item-section>
+                  <q-item-label caption>Campaña a Mostrar</q-item-label>
+                  <q-item-label class="text-h4 text-primary">
+                    <q-select
+                      dense
+                      :options="campaigns.total"
+                      v-model="campaignToShow">
+                    </q-select>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item clickable @click="toggleTable('campaigns', 'open')">
+                <q-item-section avatar>
+                  <q-icon color="primary" name="lock_open" />
+                </q-item-section>
+                <q-item-section v-if="campaignToShow">
+                  <q-list separator>
+                    <q-item>
+                      <q-item-section>
+                        <q-item-label caption v-if="campaignToShow.open">Campaña activa</q-item-label>
+                        <q-item-label class="text-h6 text-primary"><strong>{{ campaignToShow.name }}</strong></q-item-label>
+                      </q-item-section>
+                    </q-item>
+                    <q-item v-if="campaignToShow.parent">
+                      <q-item-section>
+                        <q-item-label caption>Depende de</q-item-label>
+                        <q-item-label class="text-h6 text-accent"><strong>{{ campaignToShow.parent.name }}</strong></q-item-label>
+                      </q-item-section>
+                    </q-item>
+                    <q-item>
+                      <q-item-section>
+                        <q-item-label class="text-h6 text-accent"><strong>Prioridades Cartelería</strong></q-item-label>
+                        <template v-for="(priority, index) in campaignToShow.campaign_poster_priorities">
+                            <q-chip square class="bg-grey-3" :key="index">
+                              <q-avatar :color="'primary-dark-' + (10 - parseInt(priority.priority))" text-color="white">{{ priority.priority }}</q-avatar>
+                              <strong>{{ priority.poster_model_name }}</strong>
+                            </q-chip>
+                        </template>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-item-section>
+                <q-item-section v-else-if="campaigns.open.length === 1">
                   <q-list separator>
                     <q-item>
                       <q-item-section>
@@ -387,11 +429,12 @@
 import { ModelsFetcher } from '../../mixins/modelMixin'
 
 export default {
-  name: 'MarketingUserHome',
+  name: 'marketing-user-home',
   mixins: [ModelsFetcher],
   data () {
     return {
       modelName: 'clinics',
+      campaignToShow: null,
       // show: null,
       componentModels: {
         clinics: {
@@ -483,9 +526,15 @@ export default {
       return this.$store.state.Model.models.posters.items
     },
     clinic_poster_priorities () {
-      let priorities = { active: [], '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [], '8': [] }
+      let priorities = { active: [], '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': [], '8': [], '9': [], '10': [], '11': [], '12': [], '0': [] }
+      let campaign = this.campaignToShow ? this.campaignToShow : this.campaigns.open.length ? this.campaigns.open[0] : this.campaigns.total[0]
+      let campaignStartDate = campaign.starts_at
+      let campaignEndDate = campaign.ends_at
+      if (campaign.parent_id) campaignStartDate = campaign.parent.starts_at
       this.$store.state.Model.models.clinic_poster_priorities.items.forEach((i) => {
-        if (!i.ends_at) {
+        if (campaignEndDate && i.starts_at > campaignEndDate) return false
+        else if (i.ends_at && i.ends_at < campaignStartDate) return false
+        else if (i.starts_at <= campaignStartDate) {
           priorities.active.push(i)
           if (i.priority === 1) priorities['1'].push(i)
           else if (i.priority === 2) priorities['2'].push(i)
@@ -495,12 +544,17 @@ export default {
           else if (i.priority === 6) priorities['6'].push(i)
           else if (i.priority === 7) priorities['7'].push(i)
           else if (i.priority === 8) priorities['8'].push(i)
+          else if (i.priority === 9) priorities['9'].push(i)
+          else if (i.priority === 10) priorities['10'].push(i)
+          else if (i.priority === 11) priorities['11'].push(i)
+          else if (i.priority === 12) priorities['12'].push(i)
+          else if (!i.priority) priorities['0'].push(i)
         }
       })
       return priorities
     },
     clinic_posters () {
-      if (!this.clinics.total.length) return []
+      if (!this.clinics.total.length || !this.campaigns.total.length) return []
       let translightIds = []
       this.posters.forEach((i) => { if (i.material === 'Translight') translightIds.push(i.id) })
       let priorities = {
@@ -512,6 +566,10 @@ export default {
         '6': { frosted: [], normal: [], total: 0 },
         '7': { frosted: [], normal: [], total: 0 },
         '8': { frosted: [], normal: [], total: 0 },
+        '9': { frosted: [], normal: [], total: 0 },
+        '10': { frosted: [], normal: [], total: 0 },
+        '11': { frosted: [], normal: [], total: 0 },
+        '12': { frosted: [], normal: [], total: 0 },
         '0': { frosted: [], normal: [], total: 0 }
       }
       let posters = {
@@ -530,6 +588,11 @@ export default {
         clinicByPosters: { clinics: {}, total: 0 }
       }
       let clinics = JSON.parse(JSON.stringify(this.clinics))
+      let campaign = this.campaignToShow ? this.campaignToShow : this.campaigns.open.length ? this.campaigns.open[0] : this.campaigns.total[0]
+      let campaignStartDate = campaign.starts_at
+      let campaignEndDate = campaign.ends_at
+      console.log(campaign)
+      if (campaign.parent_id) campaignStartDate = campaign.parent.starts_at
       clinics.total.forEach(i => {
         if (!i.active) return
         if (!i.clinic_posters) return
@@ -537,7 +600,9 @@ export default {
         i.clinic_posters.forEach(o => {
           // let odd = i.clinic_posters.length % 2
           // i['clinic_posters_count'] = odd ? i.clinic_posters.length : i.clinic_posters.length / 2
-          if (!o.ends_at) {
+          if (campaignEndDate && o.starts_at > campaignEndDate) return false
+          else if (o.ends_at && o.ends_at < campaignStartDate) return false
+          else if (o.starts_at <= campaignStartDate) {
             i['clinic_posters_count']++
             o['clinic'] = i
             let clinicPosterPriority = this.clinic_poster_priorities.active.filter((u) => { return u.clinic_poster_id === o.id })
@@ -545,74 +610,7 @@ export default {
             // o['default_priority'] = this.clinic_poster_priorities.active.filter((u) => { return u.clinic_poster_id === o.id })[0].priority
             let frosted = o.type.indexOf('O') > -1
             // console.log(o['priority'])
-            switch (o.default_priority) {
-              case 1:
-                if (frosted) posters.faces['1'].frosted.push(o)
-                else posters.faces['1'].normal.push(o)
-                if (translightIds.includes(o.poster_id)) {
-                  frosted ? posters.translights['1'].frosted.push(o) : posters.translights['1'].normal.push(o)
-                } else frosted ? posters.foams['1'].frosted.push(o) : posters.foams['1'].normal.push(o)
-                break
-              case 2:
-                if (frosted) posters.faces['2'].frosted.push(o)
-                else posters.faces['2'].normal.push(o)
-                if (translightIds.includes(o.poster_id)) {
-                  frosted ? posters.translights['2'].frosted.push(o) : posters.translights['2'].normal.push(o)
-                } else frosted ? posters.foams['2'].frosted.push(o) : posters.foams['2'].normal.push(o)
-                break
-              case 3:
-                if (frosted) posters.faces['3'].frosted.push(o)
-                else posters.faces['3'].normal.push(o)
-                if (translightIds.includes(o.poster_id)) {
-                  frosted ? posters.translights['3'].frosted.push(o) : posters.translights['3'].normal.push(o)
-                } else frosted ? posters.foams['3'].frosted.push(o) : posters.foams['3'].normal.push(o)
-                break
-              case 4:
-                if (frosted) posters.faces['4'].frosted.push(o)
-                else posters.faces['4'].normal.push(o)
-                if (translightIds.includes(o.poster_id)) {
-                  frosted ? posters.translights['4'].frosted.push(o) : posters.translights['4'].normal.push(o)
-                } else frosted ? posters.foams['4'].frosted.push(o) : posters.foams['4'].normal.push(o)
-                break
-              case 5:
-                if (frosted) posters.faces['5'].frosted.push(o)
-                else posters.faces['5'].normal.push(o)
-                if (translightIds.includes(o.poster_id)) {
-                  frosted ? posters.translights['5'].frosted.push(o) : posters.translights['5'].normal.push(o)
-                } else frosted ? posters.foams['5'].frosted.push(o) : posters.foams['5'].normal.push(o)
-                break
-              case 6:
-                if (frosted) posters.faces['6'].frosted.push(o)
-                else posters.faces['6'].normal.push(o)
-                if (translightIds.includes(o.poster_id)) {
-                  frosted ? posters.translights['6'].frosted.push(o) : posters.translights['6'].normal.push(o)
-                } else frosted ? posters.foams['6'].frosted.push(o) : posters.foams['6'].normal.push(o)
-                break
-              case 7:
-                if (frosted) posters.faces['7'].frosted.push(o)
-                else posters.faces['7'].normal.push(o)
-                if (translightIds.includes(o.poster_id)) {
-                  frosted ? posters.translights['7'].frosted.push(o) : posters.translights['7'].normal.push(o)
-                } else frosted ? posters.foams['7'].frosted.push(o) : posters.foams['7'].normal.push(o)
-                break
-              case 8:
-                if (frosted) posters.faces['8'].frosted.push(o)
-                else posters.faces['8'].normal.push(o)
-                if (translightIds.includes(o.poster_id)) {
-                  frosted ? posters.translights['8'].frosted.push(o) : posters.translights['8'].normal.push(o)
-                } else frosted ? posters.foams['8'].frosted.push(o) : posters.foams['8'].normal.push(o)
-                break
-              case '0':
-                if (frosted) posters.faces['0'].frosted.push(o)
-                else posters.faces['0'].normal.push(o)
-                if (translightIds.includes(o.poster_id)) {
-                  frosted ? posters.translights['0'].frosted.push(o) : posters.translights['0'].normal.push(o)
-                } else frosted ? posters.foams['0'].frosted.push(o) : posters.foams['0'].normal.push(o)
-                break
-            }
-            // posters.faces.push(o)
-            // if (translightIds.includes(o.poster_id)) posters.translights.push(o)
-            // else posters.foams.push(o)
+            posters = this.assignClinicPosterPriority(posters, o, frosted, translightIds)
           }
         })
         // console.log(i.clinic_posters_count)
@@ -658,6 +656,14 @@ export default {
     }
   },
   methods: {
+    assignClinicPosterPriority (posters, model, frosted, translightIds) {
+      if (frosted) posters.faces[model.default_priority].frosted.push(model)
+      else posters.faces[model.default_priority].normal.push(model)
+      if (translightIds.includes(model.poster_id)) {
+        frosted ? posters.translights[model.default_priority].frosted.push(model) : posters.translights[model.default_priority].normal.push(model)
+      } else frosted ? posters.foams[model.default_priority].frosted.push(model) : posters.foams[model.default_priority].normal.push(model)
+      return posters
+    },
     closeTable () {
       this.showTable = false
     },
@@ -696,19 +702,12 @@ export default {
     // console.log('Before Route Leave')
     this.closeTable()
     next()
+  },
+  updated () {
+    if (!this.campaignToShow) {
+      if (this.campaigns.total.length) this.campaignToShow = this.campaigns.open.length ? this.campaigns.open[0] : this.campaigns.active.length ? this.campaigns.active[0] : this.campaigns.total[0]
+    }
   }
-  // created () {
-  //   // console.log('created')
-  //   this.fetching = true
-  //   this.getModelsNeeded().then((size) => {
-  //     this.modelsFetched = size
-  //     this.fetching = false
-  //     this.$q.loading.hide()
-  //   }).catch((response) => {
-  //     this.fetching = false
-  //     this.$q.loading.hide()
-  //   })
-  // }
 }
 </script>
 <style lang="stylus" scoped>
