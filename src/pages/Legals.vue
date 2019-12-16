@@ -1,10 +1,11 @@
 <template>
   <q-page class="q-pa-md">
     <model-table
+      :sticky="true"
+      :virtualScroll="true"
       :modelName="modelName"
       :dense="true"
       :getModelView="true"
-      :rows="20"
       v-if="modelsReady"
       >
       <template slot="body-cell-text" slot-scope="item" :item="item">
