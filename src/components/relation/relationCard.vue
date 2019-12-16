@@ -482,7 +482,15 @@ export default {
         let multistate = []
         // let langs = ['eu', 'ca', 'en', 'fr', 'it', 'es']
         for (let word of words) {
-          if (word.includes('x')) {
+          // console.log(word)
+          // console.log(models[word])
+          if (word === 'Generic') {
+            object.poster_model_id = models['Recalls']
+            continue
+          } else if (models[word]) {
+            object.poster_model_id = models[word]
+            continue
+          } else if (word.includes('x')) {
             if (word.indexOf('(') > 0) {
               word = word.substring(0, word.indexOf('('))
               object.poster_id = posters[word]
@@ -504,12 +512,6 @@ export default {
             }
           } else if (word === 'Interior') {
             object.type = 'Office Int'
-            continue
-          } else if (word === 'Generic') {
-            object.poster_model_id = models['Recalls']
-            continue
-          } else if (models[word]) {
-            object.poster_model_id = models[word]
             continue
           } else if (word === 'CAT') {
             object.language_id = langs['ca']
