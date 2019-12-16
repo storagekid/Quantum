@@ -22,6 +22,9 @@
     <template slot="prepend">
       <q-icon name="subject"></q-icon>
     </template>
+    <template v-slot:append v-if="multiple">
+      <q-btn size="md" color="primary" icon="select_all" flat dense @click="selectAll"></q-btn>
+    </template>
     <template v-slot:no-option>
       <q-item>
         <q-item-section class="text-grey">
@@ -29,13 +32,19 @@
         </q-item-section>
       </q-item>
     </template>
+    <template v-slot:selected v-if="customDisplay && value.length">
+      <q-chip square color="secondary" class="full-width">
+        <q-avatar icon="bookmark" color="primary" text-color="white" />
+        {{ customDisplay }}
+      </q-chip>
+    </template>
   </q-select>
 </template>
 
 <script>
 export default {
   name: 'CustomSelect',
-  props: ['field', 'initValue', 'model', 'relation', 'error', 'errorMessage', 'relationType', 'clearable', 'dense', 'hideBottomSpace', 'multiple', 'sourceOptions', 'all', 'counter', 'max', 'disable', 'excludeModel'],
+  props: ['field', 'initValue', 'model', 'relation', 'error', 'errorMessage', 'relationType', 'clearable', 'dense', 'hideBottomSpace', 'customDisplay', 'multiple', 'sourceOptions', 'all', 'counter', 'max', 'disable', 'excludeModel'],
   data () {
     return {
       options: this.sourceOptions ? this.sourceOptions : null,
@@ -58,6 +67,9 @@ export default {
     }
   },
   methods: {
+    selectAll () {
+      this.value = this.filteredOptions ? this.filteredOptions : this.options
+    },
     filterFn ({ name, key = null, relation = null }, val, update, abort) {
       // console.log('filtering')
       // console.log(key)
