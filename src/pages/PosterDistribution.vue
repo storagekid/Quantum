@@ -1780,6 +1780,7 @@ export default {
         baseDesign['clinic_id'] = design['clinic_id']
         baseDesign['address_id'] = design['address_id']
         baseDesign['address'] = this.model.addresses.filter(i => { return i.id === design.address_id })[0]
+        this.log('Here')
         baseDesign['campaign_id'] = design['campaign_id']
         baseDesign['original_facade_file_id'] = design.original_facade_file_id
         baseDesign['composed_facade_file_id'] = design.composed_facade_file_id
