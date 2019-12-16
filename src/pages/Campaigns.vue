@@ -43,9 +43,9 @@
         <q-card-section>
           <div class="q-mt-md text-subtitle2 text-center">Total: {{ clinicsSelected.length }} </div>
         </q-card-section>
-        <q-card-section>
+        <!-- <q-card-section>
           <q-btn class="full-width" outline color="info" @click="clinicsSelected = clinicOptions" :disable="clinicsSelected === clinicOptions" label="Todas"></q-btn>
-        </q-card-section>
+        </q-card-section> -->
         <q-card-section>
           <clinic-scope-component
             :sourceClinics="clinicOptionsIds"
