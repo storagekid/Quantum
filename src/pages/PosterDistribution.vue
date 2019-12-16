@@ -1244,8 +1244,8 @@ export default {
             this.visible = false
           }).catch((response) => {
             // console.log('THERE')
-            this.$store.dispatch('Response/responseErrorManager', response)
             this.visible = false
+            this.$store.dispatch('Response/responseErrorManager', response)
           })
       } else {
         this.cleanSelectedState()
