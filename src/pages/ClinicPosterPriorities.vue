@@ -2,7 +2,16 @@
   <q-page class="q-pa-md q-gutter-md">
     <div class="row">
       <div class="flex full-width q-pa-xs q-gutter-col-md bg-warning" v-if="$store.getters['User/isRoot']">
+        <q-select
+          label="Selecciona una Campaña"
+          style="min-width: 200px; margin: 0 20px"
+          :options="campaigns"
+          v-model="campaignSelected"
+          dense
+          >
+        </q-select>
         <q-toggle
+          :disable="!campaignSelected"
           v-model="adminOptions.showTables"
           color="white"
           label="Show AAFF Tables"
@@ -18,6 +27,7 @@
       :dense="true"
       startFilter="&&Activa!=&&Fecha de Baja=="
       v-if="modelsReady"
+      v-show="!adminOptions.showTables"
       v-on:tableReady="tableReady = true"
       >
       <template slot="body-cell-clinic_poster.clinic.active" slot-scope="item" :item="item">
@@ -72,7 +82,6 @@
                         @click="toggleClicked(priority, language, size, type)"
                         >
                         {{ groupedForTable.posters[priority][size][language][type] || '' }}
-                          <!-- {{ countPosters(priority, language, size, type) }} -->
                       </td>
                     </template>
                   </template>
@@ -107,6 +116,7 @@ export default {
   data () {
     return {
       modelName: 'clinic_poster_priorities',
+      campaignSelected: null,
       modelsNeeded: {
         clinic_poster_priorities: {
           scoped: true,
@@ -116,7 +126,7 @@ export default {
         },
         campaigns: {
           refresh: true,
-          full: true
+          with: ['campaign_poster_priorities']
         }
       },
       modelSelected: null,
@@ -129,6 +139,9 @@ export default {
     }
   },
   computed: {
+    campaigns () {
+      return this.$store.state.Model.models.campaigns.items
+    },
     filteredPosters () {
       if (this.tableReady) return this.$store.state.Model.models.clinic_poster_priorities.items.filter((i) => { return this.$refs.clinicPostersTable.filterIds.includes(i.id) })
       return []
@@ -257,18 +270,6 @@ export default {
       if (!this.clicked[priority][language][type].includes(size)) return false
       return true
     },
-    countPosters (priority, language, size, type) {
-      if (this.groupedForTable.posters[priority]) {
-        if (this.groupedForTable.posters[priority][size]) {
-          if (this.groupedForTable.posters[priority][size][language]) {
-            if (this.groupedForTable.posters[priority][size][language][type]) {
-              return this.groupedForTable.posters[priority][size][language][type].length
-            }
-          }
-        }
-      }
-      return null
-    },
     priorityLanguageCount (priority, language) {
       let count = 0
       if (this.groupedForTable.posters[priority]) {
@@ -305,18 +306,24 @@ export default {
       return count
     },
     translatedPriority (priority) {
-      switch (priority) {
-        case 1:
-          return 'Recalls'
-        case 2:
-          return 'Implantology'
-        case 3:
-          return 'Financing'
-        case 4:
-          return 'Orthodontic'
-        case 5:
-          return 'Benefits'
+      let name = this.campaignSelected.campaign_poster_priorities.filter((i) => { return i.priority === priority })[0].poster_model_name
+      if (!name) {
+        switch (priority) {
+          case 1:
+            return 'Recalls'
+          case 2:
+            return 'Implantology'
+          case 3:
+            return 'Financing'
+          case 4:
+            return 'Orthodontic'
+          case 5:
+            return 'Benefits'
+          default:
+            return 'JohnDoe'
+        }
       }
+      return name
     }
   },
   created () {
