@@ -57,6 +57,7 @@ export default {
   },
   computed: {
     modelIndex () {
+      if (this.relation) return this.$store.state.Model.models[this.relation.name].items[this.relation.index][this.modelName].findIndex((i) => { return i.id === this.model.id })
       return this.$store.state.Model.models[this.modelName].items.findIndex((i) => { return i.id === this.model.id })
     },
     cleanForm () {
