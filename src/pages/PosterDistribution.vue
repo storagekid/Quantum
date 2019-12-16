@@ -1013,14 +1013,14 @@ export default {
     },
     canSaveHolder () {
       if (JSON.stringify(this.holderToShow) === this.holderBackUp) {
-        console.log('Holders are the same')
+        // console.log('Holders are the same')
         return false
       } else {
         if (this.holderToShow.ext && this.holderToShow.int) {
           if (this.holderToShow.ext.clinic_poster && this.holderToShow.int.clinic_poster) {
             if (this.holderToShow.ext.clinic_poster.poster && this.holderToShow.int.clinic_poster.poster) {
               if (this.holderToShow.ext.clinic_poster.poster.name !== this.holderToShow.int.clinic_poster.poster.name) {
-                console.log('Different Sizes')
+                // console.log('Different Sizes')
                 return false
               }
             }
@@ -1165,8 +1165,8 @@ export default {
     designsInRange () {
       let designs = []
       let campaignId = this.designCampaignSelected.value ? this.designCampaignSelected.id : null
-      console.log(this.designCampaignSelected)
-      console.log(campaignId)
+      // console.log(this.designCampaignSelected)
+      // console.log(campaignId)
       if (this.designs.length && this.dateSelected) {
         for (let i = 0; i < this.designs.length; i++) {
           if (this.designs[i].starts_at === this.dateSelected.value && this.designs[i].campaign_id === campaignId) {
@@ -1195,15 +1195,15 @@ export default {
   },
   watch: {
     holderToShow () {
-      console.log('Watcher in holder to show')
+      // console.log('Watcher in holder to show')
       if (this.holderToShow) {
         if (!this.holderBackUp) {
-          console.log('Saving')
+          // console.log('Saving')
           this.holderBackUp = JSON.stringify(this.holderToShow)
         } else {
           let old = JSON.parse(this.holderBackUp)
           if (old.name !== this.designs[this.designSelected].distributions.holders[this.holderSelected[0]].name) {
-            console.log('Different Holder Selected')
+            // console.log('Different Holder Selected')
             this.holderBackUp = JSON.stringify(this.holderToShow)
           }
         }
@@ -1337,7 +1337,7 @@ export default {
           items.map(i => {
             i['dates'] = []
             for (let distribution of i.poster_distributions_active) if (!i.dates.includes(distribution.starts_at)) i.dates.push(distribution.starts_at)
-            if (i.dates.length > 1) console.log(i.nickname)
+            // if (i.dates.length > 1) console.log(i.nickname)
             let actionPayload = {}
             actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/newDistributionCriterion'
             actionPayload.method = 'POST'
@@ -1366,7 +1366,7 @@ export default {
           items.map(i => {
             i['dates'] = []
             for (let distribution of i.poster_distributions_active) if (!i.dates.includes(distribution.starts_at)) i.dates.push(distribution.starts_at)
-            if (i.dates.length > 1) console.log(i.nickname)
+            // if (i.dates.length > 1) console.log(i.nickname)
             let actionPayload = {}
             actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/posterPrioritiesFixer'
             actionPayload.method = 'POST'
@@ -1774,7 +1774,7 @@ export default {
       for (let design of designs) {
         let baseDesign = this.createDesign()
         let data = JSON.parse(design.distributions)
-        console.log(data)
+        // console.log(data)
         baseDesign['id'] = design['id']
         baseDesign['clinic_id'] = design['clinic_id']
         baseDesign['address_id'] = design['address_id']
@@ -1796,7 +1796,7 @@ export default {
         baseDesign.distributions['height'] = data['height']
         baseDesign.distributions['holders'] = []
         baseDesign.distributions['posterIds'] = data['posterIds'] ? data['posterIds'] : []
-        console.log('There')
+        // console.log('There')
         if (data['holders'].length) {
           for (let holder of data['holders']) {
             if (!holder.lastX) holder['lastX'] = 0
@@ -1810,14 +1810,14 @@ export default {
         }
         if (baseDesign.distributions.holders.length) {
           let campaignId = baseDesign.campaign_id ? baseDesign.campaign_id : ''
-          console.log('Beyond')
+          // console.log('Beyond')
           // console.log('Campaign: ' + campaignId)
           for (let holder of baseDesign.distributions.holders) {
             holder.ext = this.model.posters[campaignId].filter(i => { return i.id === holder.ext })[0]
             holder.int = this.model.posters[campaignId].filter(i => { return i.id === holder.int })[0]
           }
         }
-        console.log('Finish ' + design.id)
+        // console.log('Finish ' + design.id)
         this.designs.push(baseDesign)
       }
     },
