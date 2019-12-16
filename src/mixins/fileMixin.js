@@ -16,14 +16,15 @@ export const FileMethods = {
         })
       })
     },
-    downloadFile (id) {
+    downloadFile (ids) {
       return new Promise((resolve, reject) => {
         // console.log(id)
-        let url = this.$store.state.App.dataWarehouse + 'files/' + id
+        let url = this.$store.state.App.dataWarehouse + 'files/downloads'
         this.$axios({
           'url': url,
-          method: 'GET',
-          responseType: 'blob'
+          method: 'POST',
+          responseType: 'blob',
+          data: { ids: typeof ids === 'object' ? ids : [ids] }
         }).then((response) => {
           this.triggerDownload(response)
           this.$store.dispatch('Notify/displayMessage', { message: 'File Downloaded', position: 'top', type: 'positive' }, { root: true })
