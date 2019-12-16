@@ -20,7 +20,7 @@ const routes = [
       },
       {
         path: '/marketing-user-home',
-        name: 'MarketingUserHome',
+        name: 'marketing-user-home',
         component: () => import('pages/Homes/MarketingUserHome.vue'),
         meta: { requiresAuth: true }
       },
