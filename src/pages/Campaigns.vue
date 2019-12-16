@@ -22,12 +22,14 @@
           label="Distribución"
           unelevated
           size="sm"
-          :disable="!item.item.campaign_posters_count || !can('Marketing','create')"
           >
           <div class="column q-gutter-sm q-py-sm">
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="showGenerateClinicDistributionPDF(item.item)"></q-btn>
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Rehacer Fachadas" @click="showGenerateCLinicDistributionFacades(item.item)" :disable="false"></q-btn>
-            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Lanzar Distribución" @click="showCampaignDistributionLauncher(item.item)"></q-btn>
+            <template v-if="item.item.campaign_posters_count || can('Marketing','create')">
+              <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="showGenerateClinicDistributionPDF(item.item)"></q-btn>
+              <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Rehacer Fachadas" @click="showGenerateCLinicDistributionFacades(item.item)" :disable="false"></q-btn>
+              <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Lanzar Distribución" @click="showCampaignDistributionLauncher(item.item)"></q-btn>
+            </template>
+            <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Descargar legales" @click="showDownloadLegals(item.item)"></q-btn>
           </div>
         </q-btn-dropdown>
       </template>
@@ -43,7 +45,14 @@
         <q-card-section>
           <q-btn class="full-width" outline color="info" @click="clinicsSelected = clinicOptions" :disable="clinicsSelected === clinicOptions" label="Todas"></q-btn>
         </q-card-section>
-        <q-card-section class="row items-center">
+        <q-card-section>
+          <clinic-scope-component
+            :sourceClinics="clinicOptionsIds"
+            @ClinicScopeSelected="updateScopeSelected"
+            >
+          </clinic-scope-component>
+        </q-card-section>
+        <!-- <q-card-section class="row items-center">
           <custom-select
             :all="clinicsSelected.length === clinicOptions.length"
             v-if="clinicOptions.length"
@@ -58,9 +67,9 @@
             @updated="updateCustomSelect('clinicsSelected', $event)"
             >
           </custom-select>
-        </q-card-section>
+        </q-card-section> -->
         <q-card-section>
-          <div class="q-pa-md">
+          <div class="q-pa-xs">
             <q-toggle
               v-model="confirm.fake"
               label="Use Mailtrap"
@@ -90,15 +99,17 @@
 <script>
 import { PageMixins } from '../mixins/pageMixins'
 import { ModelsFetcher } from '../mixins/modelMixin'
+import { FileMethods } from '../mixins/fileMixin'
 import { customSelectMixins } from '../mixins/customSelectMixins'
-import CustomSelect from '../components/form/customSelect'
+// import CustomSelect from '../components/form/customSelect'
+import ClinicScopeComponent from '../components/scope/clinicScopeComponent'
 import { multiAsyncActionBarsMixins } from '../mixins/multiAsyncActionBarsMixins'
 import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
 
 export default {
   name: 'CampaignsPage',
-  mixins: [ PageMixins, ModelsFetcher, customSelectMixins, multiAsyncActionBarsMixins ],
-  components: { CustomSelect, MultiAsyncActionBars },
+  mixins: [ PageMixins, ModelsFetcher, FileMethods, customSelectMixins, multiAsyncActionBarsMixins ],
+  components: { MultiAsyncActionBars, ClinicScopeComponent },
   data () {
     return {
       modelName: 'campaigns',
@@ -137,6 +148,11 @@ export default {
         action: null
       },
       clinicOptions: [],
+      clinicOptionsIds: [],
+      clinicsByScope: {},
+      countriesSelected: [],
+      statesSelected: [],
+      countiesSelected: [],
       clinicsSelected: []
     }
   },
@@ -174,6 +190,33 @@ export default {
     }
   },
   methods: {
+    updateScopeSelected (e) {
+      this.clinicsSelected = this.clinicOptions.filter(i => e.clinicsIDs.includes(i.id))
+    },
+    showDownloadLegals (campaign) {
+      this.confirm.item = campaign
+      this.confirm.action = 'downloadLegals'
+      let items = this.$store.state.Model.models.languages.items
+      this.clinicOptions = items
+      this.confirm.state = true
+    },
+    downloadLegals () {
+      for (let clinic of this.clinicsSelected) {
+        let actionPayload = {}
+        actionPayload.url = this.$store.state.App.dataWarehouse + 'legals/downloadCSV'
+        actionPayload.method = 'GET'
+        actionPayload.responseType = 'blob'
+        actionPayload.params = {
+          'campaign_id': this.confirm.item.id,
+          'language_id': clinic.id
+        }
+        clinic.actionPayload = actionPayload
+      }
+      this.multiAsyncAction.items = this.clinicsSelected
+      this.multiAsyncAction.headerText = 'Downloading Legals CSVs'
+      this.multiAsyncAction.show = true
+      this.clearConfirm()
+    },
     startAction () {
       this[this.confirm.action]()
     },
@@ -185,7 +228,7 @@ export default {
         if (i.ends_at < campaign.starts_at && i.deleted_at) return false
         let clinicStart = new Date(i.starts_at)
         let campaignEnd = new Date(campaign.ends_at)
-        if (clinicStart > campaignEnd) return false
+        if (clinicStart > campaignEnd || !campaignEnd) return false
         if (typeof i.clinic_distributions_by_campaign === 'object') {
           if (i.clinic_distributions_by_campaign.hasOwnProperty('')) return true
         }
@@ -210,7 +253,7 @@ export default {
             let endDate = []
             let noEndDate = []
             for (let dist of noCampaign) {
-              if (dist.starts_at < campaign.ends_at) {
+              if (dist.starts_at < campaign.ends_at || (dist.starts_at >= campaign.starts_at && !campaign.ends_at)) {
                 if (!dist.ends_at) noEndDate.push(dist)
                 else if (dist.ends_at >= campaign.ends_at) endDate.push(dist)
               }
@@ -237,21 +280,26 @@ export default {
       this.clearConfirm()
     },
     showGenerateClinicDistributionPDF (campaign) {
+      // console.log('showGenerateClinicDistributionPDF')
       this.confirm.item = campaign
       this.confirm.action = 'generateClinicsDistributionPDF'
       this.clinicOptions = []
-      let items = this.$store.state.Model.models.clinics.items
+      let items = JSON.parse(JSON.stringify(this.$store.state.Model.models.clinics.items))
       items = items.filter(i => {
         if (i.ends_at < campaign.starts_at && i.deleted_at) return false
+        // console.log('Here')
         let clinicStart = new Date(i.starts_at)
-        let campaignEnd = new Date(campaign.ends_at)
-        if (clinicStart > campaignEnd) return false
+        let campaignEnd = campaign.ends_at ? new Date(campaign.ends_at) : null
+        if (campaignEnd && clinicStart > campaignEnd) return false
+        // console.log('There')
         if (typeof i.clinic_distributions_by_campaign === 'object') {
           if (i.clinic_distributions_by_campaign.hasOwnProperty('')) return true
         }
       })
       items.map(i => {
+        this.clinicOptionsIds.push(i.id)
         let actionPayload = {}
+        console.log('HERE')
         actionPayload.url = this.$store.state.App.dataWarehouse + 'clinics/' + i.id + '/posterDistributionByCampaing'
         actionPayload.method = 'POST'
         actionPayload.params = {
@@ -311,6 +359,7 @@ export default {
         fake: true,
         action: null
       }
+      this.clinicsSelectedIds = []
       this.clinicsSelected = []
     }
   }
