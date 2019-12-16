@@ -601,12 +601,18 @@ export const RelationController = {
       return copy
     },
     async batchRelation (payload, batchSource, mode, parentIndex) {
+      // console.log('batchRelation')
+      // console.log(payload)
+      // console.log(batchSource)
+      // console.log(mode)
+      // console.log(parentIndex)
       let batchRound = 0
       let failed = []
       let succeeded = []
       while ((failed.length + succeeded.length) < (batchSource.length)) {
         payload.parentId = batchSource[batchRound].id
-        payload.parentIndex = parentIndex
+        payload.parentIndex = this.$store.state.Model.models[payload.parentName].items.findIndex((i) => { return i.id === batchSource[batchRound].id })
+        // console.log(payload.parentIndex)
         let action = mode === 'update' ? 'updateRelation' : 'saveRelation'
         await this[action](payload)
           .then((response) => {
