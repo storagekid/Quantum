@@ -9,7 +9,7 @@
       :style="btnStyles"
       :class="btnClasses"
     >
-    <img :src="country.image" :alt="country.label" width="" :style="{width:'100%', opacity: country.value === $i18n.locale ? 1 : 0.3}">
+    <img :src="country.image" :alt="country.label" width="" :style="{width: country.value === $i18n.locale ? '100%' : '70%', opacity: country.value === $i18n.locale ? 1 : 0.4}">
     </q-btn>
   </q-btn-group>
 </template>
