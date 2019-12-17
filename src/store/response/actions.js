@@ -14,8 +14,6 @@ export function responseErrorManager ({ commit, dispatch }, response) {
       dispatch('Notify/displayMessage', { message: response.data.message, position: 'top', type: 'negative' }, { root: true })
     }
   } else if (response.message) {
-    console.log('HERE')
-    console.log(response)
     dispatch('Notify/displayMessage', { message: response.message, position: 'top', type: 'negative' }, { root: true })
   } else if (!response.status) {
     dispatch('Notify/displayMessage', { message: 'Estamos en mantenimiento. Disculpe las molestias', position: 'top', type: 'negative' }, { root: true })
