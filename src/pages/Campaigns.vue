@@ -24,7 +24,7 @@
           size="sm"
           >
           <div class="column q-gutter-sm q-py-sm">
-            <template v-if="item.item.campaign_posters_count || can('Marketing','create')">
+            <template v-if="item.item.campaign_posters_count && can('Marketing','create')">
               <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Generar PDFs" @click="showGenerateClinicDistributionPDF(item.item)"></q-btn>
               <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Rehacer Fachadas" @click="showGenerateCLinicDistributionFacades(item.item)" :disable="false"></q-btn>
               <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Lanzar Distribución" @click="showCampaignDistributionLauncher(item.item)"></q-btn>
