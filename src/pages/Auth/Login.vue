@@ -15,7 +15,7 @@
         </transition-group>
         <div class="row justify-center items-center">
           <div class="col-xs-10 col-sm-8 col-md-6 col-lg-6 col-xl-6">
-            <language-menu></language-menu>
+            <language-menu btn-classes="q-pa-sm"></language-menu>
           </div>
         </div>
       </div>

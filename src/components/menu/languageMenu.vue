@@ -5,6 +5,7 @@
       :key="index"
       @click="changeLanguage(country.value)"
       size="xs"
+      dense
       :style="btnStyles"
       :class="btnClasses"
     >
