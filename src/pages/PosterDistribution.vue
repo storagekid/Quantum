@@ -1769,40 +1769,39 @@ export default {
       this.startUploader()
     },
     buildModelDesigns (designs) {
-      // console.log('Building Designs')
-      this.log('Building Designs')
+      // this.log('Building Designs')
       this.designs = []
       for (let design of designs) {
         let baseDesign = this.createDesign()
         let data = JSON.parse(design.distributions)
-        this.log(data)
+        // this.log(data)
         baseDesign['id'] = design['id']
         baseDesign['clinic_id'] = design['clinic_id']
         baseDesign['address_id'] = design['address_id']
-        this.log('MHere')
+        // this.log('MHere')
         baseDesign['address'] = this.model.addresses.filter(i => { return i.id === design.address_id })[0]
-        this.log('Here')
+        // this.log('Here')
         baseDesign['campaign_id'] = design['campaign_id']
         baseDesign['original_facade_file_id'] = design.original_facade_file_id
         baseDesign['composed_facade_file_id'] = design.composed_facade_file_id
         // baseDesign['complete_facade_file_id'] = design.complete_facade_file_id
-        this.log('YHere')
+        // this.log('YHere')
         baseDesign['complete_facades'] = design.complete_facades
         baseDesign['starts_at'] = design['starts_at']
         baseDesign['ends_at'] = design['ends_at']
 
         baseDesign['file'] = design.original_facade ? design.original_facade.url : null
         baseDesign['name'] = design.original_facade ? design.original_facade.name : ''
-        this.log('XHere')
+        // this.log('XHere')
 
         baseDesign.distributions['scale'] = data['scale']
         baseDesign.distributions['postersScale'] = data['postersScale']
         baseDesign.distributions['width'] = data['width']
         baseDesign.distributions['height'] = data['height']
         baseDesign.distributions['holders'] = []
-        this.log('ZHere')
+        // this.log('ZHere')
         baseDesign.distributions['posterIds'] = data['posterIds'] ? data['posterIds'] : []
-        this.log('There')
+        // this.log('There')
         if (data['holders'].length) {
           for (let holder of data['holders']) {
             if (!holder.lastX) holder['lastX'] = 0
@@ -1816,14 +1815,14 @@ export default {
         }
         if (baseDesign.distributions.holders.length) {
           let campaignId = baseDesign.campaign_id ? baseDesign.campaign_id : ''
-          this.log('Beyond')
+          // this.log('Beyond')
           // console.log('Campaign: ' + campaignId)
           for (let holder of baseDesign.distributions.holders) {
             holder.ext = this.model.posters[campaignId].filter(i => { return i.id === holder.ext })[0]
             holder.int = this.model.posters[campaignId].filter(i => { return i.id === holder.int })[0]
           }
         }
-        this.log('Finish ' + design.id)
+        // this.log('Finish ' + design.id)
         this.designs.push(baseDesign)
       }
     },
