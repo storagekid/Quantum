@@ -1,18 +1,18 @@
 export function responseErrorManager ({ commit, dispatch }, response) {
+  // console.log('Hrer')
+  // console.log(response)
+  // if (typeof response === 'string') dispatch('Notify/displayMessage', { message: response, position: 'top', type: 'negative' }, { root: true })
   if (response.data) {
     if (response.data.exception) {
       if (response.status) dispatch('responseStatusPrinter', response)
       else dispatch('Notify/displayMessage', { message: 'Error en el servidor. Por favor contacte con el admimistrador.', position: 'top', type: 'negative' }, { root: true })
-      return
-    }
-    if (response.data.errors) {
+    } else if (response.data.errors) {
       for (let error in response.data.errors) {
         dispatch('Notify/displayMessage', { message: response.data.errors[error][0], position: 'top', type: 'negative' }, { root: true })
       }
-    }
-    if (response.data.message) {
+    } else if (response.data.message) {
       dispatch('Notify/displayMessage', { message: response.data.message, position: 'top', type: 'negative' }, { root: true })
-    }
+    } else if (typeof response.data === 'string') dispatch('Notify/displayMessage', { message: response.data, position: 'top', type: 'negative' }, { root: true })
   } else if (response.message) {
     dispatch('Notify/displayMessage', { message: response.message, position: 'top', type: 'negative' }, { root: true })
   } else if (!response.status) {
