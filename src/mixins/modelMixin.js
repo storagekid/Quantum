@@ -446,6 +446,26 @@ export const ModelController = {
       }
       return true
     },
+    buildModelToSend (name, model) {
+      let data = {
+        name: name,
+        model: {},
+        files: false
+      }
+      for (let field in model) {
+        if (this.quasarData.formFields[field]) {
+          if (this.quasarData.formFields[field].type.name === 'file') {
+            if (model[field] instanceof File) {
+              if (!data.files) data.files = {}
+              data.files[field] = model[field]
+            }
+          } else data.model[field] = model[field]
+        }
+      }
+      data.model = this.fieldsObjectValueExtrator(data.model)
+      data.model.id = model.id
+      return data
+    },
     fieldsObjectValueExtrator (data) {
       let fieldsToExtract = ['select', 'array', 'enum', 'selectFromModel']
       let copy = {}
