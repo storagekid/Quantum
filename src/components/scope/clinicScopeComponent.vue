@@ -67,7 +67,7 @@ import { customSelectMixins } from '../../mixins/customSelectMixins'
 
 export default {
   name: 'ClinicScopeComponent',
-  props: ['sourceClinics'],
+  props: ['sourceClinics', 'storeScope'],
   mixins: [customSelectMixins],
   components: { CustomSelect },
   data () {
@@ -176,6 +176,12 @@ export default {
       this.statesSource = this.$store.state.Scope.clinic.states.items
       this.countiesSource = this.$store.state.Scope.clinic.counties.items
       this.clinicsSource = this.$store.state.Scope.clinic.clinics.items
+    }
+    if (this.storeScope) {
+      this.countrySelected = Array.isArray(this.storeScope.countries) ? this.storeScope.countries : [this.storeScope.countries]
+      this.stateSelected = Array.isArray(this.storeScope.states) ? this.storeScope.states : [this.storeScope.states]
+      this.countySelected = Array.isArray(this.storeScope.counties) ? this.storeScope.counties : [this.storeScope.counties]
+      this.clinicSelected = Array.isArray(this.storeScope.clinics) ? this.storeScope.clinics : [this.storeScope.clinics]
     }
     this.initialScope()
   }
