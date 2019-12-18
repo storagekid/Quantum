@@ -136,7 +136,7 @@ export default {
     onSubmit (file = false) {
       this.$q.loading.show()
       let payload = this.buildModelToSend('profiles', this.profile)
-      console.log(payload)
+      // console.log(payload)
       // let payload = { name: 'profiles', model: this.fieldsObjectValueExtrator(this.profile) }
       // if (file) payload.model['file'] = this.profile.avatar
       this.saveModel(payload, 'update').then((response) => {
