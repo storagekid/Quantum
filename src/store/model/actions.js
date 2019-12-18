@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-function formConstructor (source) {
+function formConstructor (source, files = null) {
   // console.log(source)
   let payload = new FormData()
   for (let key of Object.keys(source)) {
@@ -27,6 +27,9 @@ function formConstructor (source) {
       // console.log(key)
       payload.append(key, source.hasOwnProperty(key) ? source[key] : '')
     }
+  }
+  if (files) {
+    for (let file in files) payload.append('files[' + file + ']', files[file])
   }
   return payload
 }
@@ -217,7 +220,7 @@ export function sendNewForm (context, { source }) { // CLEANED
 }
 export function sendUpdateForm (context, { source }) { // CLEANED
   // console.log(source.model)
-  let payload = formConstructor(source.model)
+  let payload = formConstructor(source.model, source.files ? source.files : false)
   if (source.quasarInfo) payload.append('quasarData', JSON.stringify(source.quasarInfo))
   if (source.options) payload.append('options', JSON.stringify(source.options))
   payload.append('_method', 'PATCH')
