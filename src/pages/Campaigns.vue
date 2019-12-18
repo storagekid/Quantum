@@ -22,6 +22,7 @@
           label="Distribución"
           unelevated
           size="sm"
+          :loading="btnLoading.includes(item.item.id)"
           >
           <div class="column q-gutter-sm q-py-sm">
             <template v-if="item.item.campaign_posters_count && can('Marketing','create')">
@@ -29,7 +30,7 @@
               <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Rehacer Fachadas" @click="showGenerateCLinicDistributionFacades(item.item)" :disable="false"></q-btn>
               <q-btn flat v-close-popup size="sm" icon="send" color="primary" label="Lanzar Distribución" @click="showCampaignDistributionLauncher(item.item)"></q-btn>
             </template>
-            <q-btn flat v-close-popup size="sm" icon="cloud_download" color="primary" label="Descargar Fachadas" @click="showDownloadCampaignPDFs(item.item)"></q-btn>
+            <q-btn flat v-close-popup size="sm" icon="cloud_download" color="primary" label="Descargar Fachadas" @click="showDownloadCampaignPDFs(item.item)" :disable="btnLoading.includes(item.item.id)"></q-btn>
             <q-btn flat v-close-popup size="sm" icon="cloud_download" color="primary" label="Descargar legales" @click="showDownloadLegals(item.item)"></q-btn>
           </div>
         </q-btn-dropdown>
@@ -154,7 +155,8 @@ export default {
       countriesSelected: [],
       statesSelected: [],
       countiesSelected: [],
-      clinicsSelected: []
+      clinicsSelected: [],
+      btnLoading: []
     }
   },
   computed: {
@@ -212,12 +214,14 @@ export default {
     },
     downloadCampaignPDFs () {
       let fileIds = []
+      let campaignId = this.confirm.item.id
+      this.btnLoading.push(campaignId)
       this.clinicsSelected.map(i => {
         i.campaign_facades.forEach(o => {
           if (o.campaign_id === this.confirm.item.id) fileIds.push(o.facades_file_id)
         })
       })
-      this.downloadFile(fileIds)
+      this.downloadFile(fileIds).then(() => { this.btnLoading.splice(this.btnLoading.indexOf(campaignId)) }).catch(() => {})
       this.clearConfirm()
     },
     showDownloadLegals (campaign) {
