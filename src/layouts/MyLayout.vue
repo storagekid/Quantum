@@ -21,23 +21,31 @@
         </q-btn>
 
         <scope-top-bar></scope-top-bar>
-        <q-btn
-          flat
-          dense
-          round
-          v-if="$store.getters['User/isRoot']"
-          @click="downloadLog"
-        >
-          <q-icon name="cloud_download" />
-        </q-btn>
-        <q-btn
-          flat
-          dense
-          round
-          @click="$router.push({name:'logout'})"
-        >
-          <q-icon name="exit_to_app" />
-        </q-btn>
+        <div class="row items-center q-gutter-md">
+          <q-btn
+            flat
+            dense
+            round
+            v-if="$store.getters['User/isRoot']"
+            @click="downloadLog"
+          >
+            <q-icon name="cloud_download" />
+          </q-btn>
+          <q-btn round outline color="secondary" to="/profile-home">
+            <q-avatar size="38px">
+              <q-img :src="profileAvatar"></q-img>
+              <!-- <q-badge floating color="teal">new</q-badge> -->
+            </q-avatar>
+          </q-btn>
+          <q-btn
+            flat
+            dense
+            round
+            @click="$router.push({name:'logout'})"
+          >
+            <q-icon name="exit_to_app" />
+          </q-btn>
+        </div>
 
       </q-toolbar>
     </q-header>
@@ -75,6 +83,12 @@ export default {
   data () {
     return {
       leftDrawerOpen: this.$q.platform.is.desktop && this.$q.screen.lt.lg
+    }
+  },
+  computed: {
+    profileAvatar () {
+      if (this.$store.state.User.profile.avatar) if (this.$store.state.User.profile.avatar.thumbnail) return this.$store.state.App.publicSources + '/' + this.$store.state.User.profile.avatar.thumbnail
+      return require('../assets/profile.png')
     }
   },
   methods: {
