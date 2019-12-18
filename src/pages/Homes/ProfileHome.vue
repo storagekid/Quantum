@@ -3,7 +3,7 @@
     <div class="row q-col-gutter-md">
       <div class="col-sm-12 col-md-3">
         <q-card class="my-card">
-          <q-img :src="profileAvatar">
+          <q-img :ratio="1" :src="profileAvatar">
           </q-img>
           <q-uploader
             class="full-width hidden"

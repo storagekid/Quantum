@@ -33,7 +33,7 @@
           </q-btn>
           <q-btn round outline color="secondary" to="/profile-home">
             <q-avatar size="38px">
-              <q-img :src="profileAvatar"></q-img>
+              <q-img :ratio="1" :src="profileAvatar"></q-img>
               <!-- <q-badge floating color="teal">new</q-badge> -->
             </q-avatar>
           </q-btn>
