@@ -1,7 +1,7 @@
 <template>
     <q-toolbar-title class="text-center">
       <q-btn
-        icon="swap_horiz"
+        :icon="$q.platform.is.desktop ? 'swap_horiz' : ''"
         icon-right="domain"
         v-if="$store.state.Scope.store.stores.items.length && (mode === 'clinic')"
         @click="openStoreSelector = true"
@@ -24,19 +24,18 @@
         <q-btn
           @click="openSelector = true"
           :disabled="$store.state.Scope.clinic.clinics.items.length === 1"
-          class="q-py-sm"
         >
-          <q-toolbar-title v-if="!clinicSelected">{{text}}</q-toolbar-title>
-          <q-toolbar-title v-else>
-            {{clinicSelected.city}}
-            <div class="text-caption">
-              {{clinicSelected.address_real_1}}
+          <template v-if="!clinicSelected">{{text}}</template>
+          <div class="col" v-else>
+            <div class="col text-bold" style="line-height: 1">{{clinicSelected.city}}</div>
+            <div class="col" style="font-size: 10px; line-height: 1">
+              {{clinicStreet}}
             </div>
-          </q-toolbar-title>
+          </div>
         </q-btn>
       </template>
       <q-btn
-        icon="swap_horiz"
+        :icon="$q.platform.is.desktop ? 'swap_horiz' : ''"
         icon-right="store_mall_directory"
         v-if="$store.state.Scope.clinic.clinics.items.length && (mode === 'store')"
         @click="openSelector = true"
@@ -69,6 +68,16 @@ export default {
     },
     clinicSelected () {
       return this.$store.getters['Scope/clinicSelected']
+    },
+    clinicStreet () {
+      if (this.clinicSelected) {
+        if (this.clinicSelected.nickname.indexOf('(') > -1) {
+          let start = this.clinicSelected.nickname.indexOf('(')
+          let street = this.clinicSelected.nickname.substr(start)
+          return street
+        }
+      }
+      return ''
     },
     storeText () {
       return this.$store.getters['Scope/scopeStoreText']

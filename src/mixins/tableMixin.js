@@ -130,9 +130,6 @@ export const searchMethods = {
         if (typeof item === 'object') return item.label
         else if (typeof item === 'boolean') return item
         return item
-      } else if (Array.isArray(row[name])) {
-        let value = JSON.stringify(row[name])
-        return value === '[]' ? '' : value
       }
       return row[name] ? row[name] : ''
     },

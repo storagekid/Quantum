@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <div class="row q-col-gutter-md">
-      <div class="col-sm-12 col-md-3">
+      <div class="col-xs-12 col-sm-4 col-md-3">
         <q-card class="my-card">
           <q-img :ratio="1" :src="profileAvatar">
           </q-img>
@@ -26,21 +26,24 @@
           </q-card-actions>
         </q-card>
       </div>
-      <div class="col-sm-12 col-md-9">
-        <div class="" style="max-width: 400px">
+      <div class="col-xs-12 col-sm-8 col-md-9">
+        <div class="" style="max-width: 600px">
           <q-form
             @submit="onSubmit"
             @reset="onReset"
             class="q-gutter-md"
             >
             <q-input
+              bg-color="grey-1"
               filled
+              color="primary"
               v-model="profile.name"
               label="Name *"
               lazy-rules
               :rules="[ val => val && val.length > 0 && val.length < 32 || 'Please type something']"
             />
             <q-input
+              bg-color="grey-1"
               filled
               v-model="profile.lastname1"
               label="Surname *"
@@ -48,6 +51,7 @@
               :rules="[ val => val && val.length > 0 && val.length < 32 || 'Please type something']"
             />
             <q-input
+              bg-color="grey-1"
               filled
               v-model="profile.lastname2"
               label="Second surname *"
@@ -55,13 +59,14 @@
               :rules="[ val => val !== null ? val.length > 3 && val.length < 32 : !val || 'Please type something']"
             />
             <q-select
+              bg-color="grey-1"
               filled
               v-model="profile.gender"
               label="Gender"
               :options="[{'label': 'Varón', value: 'Varón'}, {'label': 'Mujer', value: 'Mujer'}]"
             />
             <div>
-              <q-btn label="Submit" type="submit" color="primary"/>
+              <q-btn label="Guardar" type="submit" color="primary"/>
               <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
             </div>
           </q-form>

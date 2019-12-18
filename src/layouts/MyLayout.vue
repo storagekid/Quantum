@@ -31,7 +31,7 @@
           >
             <q-icon name="cloud_download" />
           </q-btn>
-          <q-btn round outline color="secondary" to="/profile-home">
+          <q-btn round outline color="secondary" to="/profile-home" v-if="$q.platform.is.desktop">
             <q-avatar size="38px">
               <q-img :ratio="1" :src="profileAvatar"></q-img>
               <!-- <q-badge floating color="teal">new</q-badge> -->

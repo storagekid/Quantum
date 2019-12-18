@@ -9,8 +9,8 @@
         :table-header-class="tableHeaderClass"
         :dense="!($q.screen.lt.md || dense) ? true : dense"
         :loading="loading"
-        :grid="grid"
-        :grid-header="gridHeader"
+        :grid="grid || ($q.platform.is.mobile && !forceTable)"
+        :grid-header="gridHeader || ($q.platform.is.mobile && !forceTable)"
         :hide-header="false"
         :ref="'table-' + modelName"
         :data="model"
@@ -302,7 +302,15 @@
                               {{ col.label }}
                           </q-item-section>
                           <q-item-section side class="q-pr-none">
-                            {{ getItem(props.row, col.name) || '-' }}
+                            <!-- {{ getItem(props.row, col.name) || '-' }} -->
+                            <template v-if="Array.isArray(getItem(props.row, col.name))">
+                              <ul>
+                                <li v-for="(item, index) in getItem(props.row, col.name)" :key="'ai' + index">
+                                  {{ item.label }}
+                                </li>
+                              </ul>
+                            </template>
+                            <template v-else>{{ getItem(props.row, col.name) }}</template>
                           </q-item-section>
                         </template>
                       </template>
@@ -467,7 +475,7 @@ import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
-  props: ['mode', 'sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
+  props: ['mode', 'sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'forceTable', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
   mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect },
   data () {
