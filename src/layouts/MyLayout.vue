@@ -61,7 +61,7 @@
       <main-menu></main-menu>
     </q-drawer>
 
-    <q-page-container class="main-background">
+    <q-page-container class="main-background page-container">
       <keep-alive>
         <router-view/>
       </keep-alive>

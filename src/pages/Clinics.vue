@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page :class="[pageContainerClasses]">
     <model-table
       :sticky="true"
       :virtualScroll="true"
@@ -58,12 +58,13 @@
 
 <script>
 
+import { PageMixins } from '../mixins/pageMixins'
 import { ModelsFetcher } from '../mixins/modelMixin'
 import ClinicView from '../components/clinic/ClinicView'
 
 export default {
   name: 'ClinicsPage',
-  mixins: [ModelsFetcher],
+  mixins: [ModelsFetcher, PageMixins],
   components: { ClinicView },
   data () {
     return {

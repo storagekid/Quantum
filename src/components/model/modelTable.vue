@@ -3,7 +3,7 @@
     <template v-if="!updateModel">
       <q-table
         :virtual-scroll="virtualScroll"
-        :class="[wrapperClass ? wrapperClass : sticky === true ? 'custom-table-wrapper my-sticky-header-column-table' : 'custom-table-wrapper', {'full': fullscreen ? true : false}]"
+        :class="[wrapperClass ? wrapperClass : sticky === true && !$q.platform.is.mobile ? 'custom-table-wrapper my-sticky-header-column-table' : 'custom-table-wrapper', {'full': fullscreen ? true : false, 'mobile': $q.platform.is.mobile ? true : false}]"
         v-if="model"
         :table-class="tableClass ? tableClass : 'custom-table'"
         :table-header-class="tableHeaderClass"
@@ -28,7 +28,7 @@
         @request="onRequest"
         @fullscreen="fullscreen = $event"
         >
-        <template v-slot:top="props" class="dense">
+        <template v-slot:top="props">
           <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete || can.show)">
             <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="newModel = !newModel" v-if="can.create && (!grid)"/>
             <q-btn dense flat size="lg" color="info" icon="visibility" @click="showUpdate('display')" :disabled="!selectedItems.length || selectedItems.length > 1"/>
@@ -55,41 +55,53 @@
           </q-btn-group>
           <q-space />
           <q-btn dense flat color="warning" icon="help" @click="showSearchHelp = true"></q-btn>
-          <q-input dense debounce="800" v-model="filters['searchBar'].text" placeholder="Search">
-            <template v-slot:append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-          <q-select
-            v-model="visibleColumns"
-            multiple
-            dense
-            options-dense
-            display-value="Columns"
-            emit-value
-            map-options
-            :options="columns"
-            option-value="name"
-            style="min-width: 150px"
-          />
-          <q-select
-            dense
-            options-dense
-            color="secondary"
-            v-model="separator"
-            emit-value
-            :options="[
-              { label: 'Horizontal', value: 'horizontal' },
-              { label: 'Vertical', value: 'vertical' },
-              { label: 'Cell', value: 'cell' },
-              { label: 'None', value: 'none' }
-            ]"
-          />
-          <q-btn
-            flat round dense
-            :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
-            @click="props.toggleFullscreen"
-          />
+          <div :class="['row', 'items-center', 'justify-center', {'full-width': $q.platform.is.mobile ? true : false}]">
+            <div class="col-auto">
+              <q-input dense debounce="800" v-model="filters['searchBar'].text" placeholder="Search">
+                <template v-slot:append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </div>
+            <div class="col-auto">
+              <q-select
+                v-model="visibleColumns"
+                multiple
+                dense
+                options-dense
+                :display-value="visibleColumns.length"
+                label="Columns"
+                emit-value
+                map-options
+                :options="columns"
+                option-value="name"
+                :style="{'min-width': $q.platform.is.mobile ? '70px' : '100px'}"
+              />
+            </div>
+            <div class="col-auto" v-if="!$q.platform.is.mobile">
+              <q-select
+                dense
+                options-dense
+                color="secondary"
+                v-model="separator"
+                display-value="line"
+                emit-value
+                :options="[
+                  { label: 'Horizontal', value: 'horizontal' },
+                  { label: 'Vertical', value: 'vertical' },
+                  { label: 'Cell', value: 'cell' },
+                  { label: 'None', value: 'none' }
+                ]"
+              />
+            </div>
+            <div class="col-auto">
+              <q-btn
+                flat round dense
+                :icon="props.inFullscreen ? 'fullscreen_exit' : 'fullscreen'"
+                @click="props.toggleFullscreen"
+              />
+            </div>
+          </div>
           <!-- Old Table Headers Before Quasar v.1.1.6 -->
             <!-- <div v-if="$refs['table-' + modelName] && grid" class="custom-table full-width">
               <div class="q-table q-mb-sm q-mt-xs">
@@ -138,7 +150,7 @@
             </div> -->
           <!-- END Old Table Headers -->
         </template>
-        <q-tr slot="header" slot-scope="props" :props="props" v-if="ready">
+        <q-tr slot="header" slot-scope="props" :props="props" v-if="ready" :class="gridHeaderClasses">
           <q-th class="text-left" auto-width dense>
             <q-checkbox
               class="items-start"
@@ -532,6 +544,10 @@ export default {
     }
   },
   computed: {
+    gridHeaderClasses () {
+      if (this.$q.platform.is.mobile) return ['mobile-header-tr']
+      return ''
+    },
     viewMode () {
       return this.mode === 'display'
     },
