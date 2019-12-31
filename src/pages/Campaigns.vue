@@ -357,7 +357,10 @@ export default {
       items = items.filter(i => {
         if (!i.campaign_facades.length) return false
         for (let pdf of i.campaign_facades) {
-          if (pdf.campaign_id === campaign.id) return true
+          if (pdf.campaign_id === campaign.id) {
+            this.clinicOptionsIds.push(i.id)
+            return true
+          }
         }
         return false
       })
