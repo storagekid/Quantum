@@ -57,16 +57,16 @@
                 </q-item-section>
               </q-item>
 
-              <q-item clickable @click="toggleTable('clinics', 'nextOpening')">
+              <q-item clickable @click="toggleTable('clinics', 'nextOpening')" v-if="clinics.nextOpening">
                 <q-item-section avatar>
                   <q-icon color="warning" name="new_releases" />
                 </q-item-section>
 
                 <q-item-section>
                   <q-item-label caption>Próxima Apertura</q-item-label>
-                  <q-item-label class="text-h6 text-primary text-bold">{{ clinics.nextOpening[0].nickname }}</q-item-label>
+                  <q-item-label class="text-h6 text-primary text-bold">{{ clinics.nextOpening.nickname }}</q-item-label>
                   <q-item-label class="text-primary text-bold">
-                    {{ new Date(clinics.nextOpening[0].starts_at).toLocaleDateString('es-ES', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}) }}
+                    {{ new Date(clinics.nextOpening.starts_at).toLocaleDateString('es-ES', {weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}) }}
                   </q-item-label>
                 </q-item-section>
               </q-item>
@@ -485,8 +485,8 @@ export default {
         } else if (!i.open && !i.parent_id && i.ends_at) clinics.closed.push(i)
         else if (!i.open && !i.parent_id && !i.ends_at) clinics.scheduled.push(i)
       })
-      let nextOpening = clinics.scheduled.sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at))
-      clinics.nextOpening = [nextOpening[0]]
+      let nextOpening = clinics.scheduled.length > 1 ? clinics.scheduled.sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at))[0] : clinics.scheduled.length ? clinics.scheduled[0] : null
+      if (nextOpening) clinics.nextOpening = nextOpening[0]
       return clinics
     },
     sourceModel () {
