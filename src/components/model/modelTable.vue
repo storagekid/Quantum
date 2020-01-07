@@ -504,7 +504,7 @@ export default {
         sortBy: null,
         descending: false,
         page: 1,
-        rowsPerPage: this.rows ? this.rows : this.virtualScroll ? 0 : 15
+        rowsPerPage: this.rows ? this.rows : (this.virtualScroll && !this.$q.platform.is.mobile) ? 0 : 15
       },
       names: [],
       showSearchHelp: false,
