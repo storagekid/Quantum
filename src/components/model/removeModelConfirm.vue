@@ -1,11 +1,11 @@
 <template>
   <q-card id="remove-model" class="bg-white">
     <q-card-section class="text-center bg-secondary text-primary">
-      Removing {{name}}
+      Removing {{ $tc('models.' + name + '.name', modelQty) }}
     </q-card-section>
     <q-separator />
     <q-card-section class="text-center">
-      <p>{{modelQty}} {{name}} will be removed <strong class="text-negative" v-if="forceDeleting"> PERMANENTLY</strong></p>
+      <p>{{modelQty}} {{ $tc('models.' + name + '.name', modelQty) }} will be removed <strong class="text-negative" v-if="forceDeleting"> PERMANENTLY</strong></p>
       <p class="text-negative q-title">Are you Sure?</p>
     </q-card-section>
     <q-btn color="primary" label="DO IT" class="full-width" @click="sendDestroyForm" v-if="!preventScopeSelected"/>
