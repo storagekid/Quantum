@@ -1,6 +1,6 @@
 <template>
   <div class="row justify-center items-stretch flex col" style="overflow: auto;" ref="mainWindow">
-    <div class="col-sm-3 q-pa-md" style="position: relative; min-width: 300px" v-show="selectorOpen">
+    <div class="col-sm-3 q-pa-md" style="position: relative; min-width: 300px; max-height: calc(100vh - 50px); overflow: auto" v-show="selectorOpen">
       <q-btn
         v-if="$store.getters['User/isRoot'] && !clinicSelected"
         size="md"
@@ -81,17 +81,30 @@
         >
       </custom-select>
       <template v-if="can('Marketing','create')">
-        <q-btn
-          v-if="clinicSelected"
-          size="sm"
-          icon="add"
-          color="primary"
-          class="full-width q-mt-md"
-          @click="startUploader"
-          :disable="!clinicHasPosters"
-          >
-          Añade un plano
-        </q-btn>
+        <div class="full-width q-mt-md">
+          <q-btn-group spread>
+            <q-btn
+              v-if="clinicSelected"
+              size="sm"
+              icon="add"
+              color="primary"
+              @click="startUploader"
+              :disable="!clinicHasPosters"
+              >
+              Añade un plano
+            </q-btn>
+            <q-btn
+              v-if="designsInRange.length"
+              size="sm"
+              icon="add"
+              color="secondary"
+              text-color="primary"
+              @click="showCreatePoster"
+              >
+              Añade un soporte
+            </q-btn>
+          </q-btn-group>
+        </div>
         <q-btn size="sm" icon="save" color="info" class="full-width q-my-md" label="Guardar" :disable="!modelReady" @click="save"></q-btn>
         <q-btn size="sm" icon="file_copy" color="info" class="full-width q-mb-md" label="Clonar" :disable="!designsInRange.length" @click="cloneDialog.state = true"></q-btn>
       </template>
@@ -127,42 +140,69 @@
                   <span class="text-h6 text-white">{{ clinicPoster.priority }}</span>
                 </div>
               </q-card-section>
-              <q-card-actions v-if="designs.length">
-                <q-btn-dropdown size="sm" dense color="primary" icon="add" class="full-width" :disabled="postersInDesigns.includes(clinicPoster.id)">
-                  <q-list bordered separator>
-                    <q-item
-                      clickable
-                      v-close-popup
-                      v-for="(design, index) in designsInRange"
-                      :key="'DB' + index"
-                      @click.stop="addPosterToDesign(index, posterIndex)"
-                      @mouseover.stop="designTargeted = design.id"
-                      @mouseleave.stop="designTargeted = null"
-                      >
-                      <q-item-section>
-                        <q-item-label class="q-py-sm">
-                          {{design.name}}
-                          <q-list v-if="design.distributions.holders.length" dense separator class="q-mt-sm">
-                            <template v-for="(holder, holderIndex) in design.distributions.holders">
-                              <q-item
-                                v-if="clinicPoster.clinic_poster.poster.name === holder.size && ((!holder.ext && (clinicPoster.clinic_poster.type === 'Ext' || clinicPoster.clinic_poster.type === 'Office')) || (!holder.int && (clinicPoster.clinic_poster.type === 'Int' || clinicPoster.clinic_poster.type === 'Office Int')))"
-                                clickable
-                                :key="'Holder' + holderIndex"
-                                @click.stop="addPosterToHolder(index, posterIndex, holderIndex)"
-                                @mouseover.self="board.selected = holderIndex"
-                                @mouseleave.self="board.selected = false"
-                                >
-                                <q-item-section>
-                                  <q-item-label class="text-primary" v-close-popup>{{holder.name}}</q-item-label>
-                                </q-item-section>
-                              </q-item>
-                            </template>
-                          </q-list>
-                        </q-item-label>
-                      </q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-btn-dropdown>
+              <q-card-actions v-if="designs.length" class="q-pt-none">
+                <div class="col items-center">
+                  <q-btn-dropdown size="sm" dense color="primary" icon="add" class="full-width" :disabled="postersInDesigns.includes(clinicPoster.id)">
+                    <q-list bordered separator>
+                      <q-item
+                        clickable
+                        v-close-popup
+                        v-for="(design, index) in designsInRange"
+                        :key="'DB' + index"
+                        @click.stop="addPosterToDesign(index, posterIndex)"
+                        @mouseover.stop="designTargeted = design.id"
+                        @mouseleave.stop="designTargeted = null"
+                        >
+                        <q-item-section>
+                          <q-item-label class="q-py-sm">
+                            {{design.name}}
+                            <q-list v-if="design.distributions.holders.length" dense separator class="q-mt-sm">
+                              <template v-for="(holder, holderIndex) in design.distributions.holders">
+                                <q-item
+                                  v-if="clinicPoster.clinic_poster.poster.name === holder.size && ((!holder.ext && (clinicPoster.clinic_poster.type === 'Ext' || clinicPoster.clinic_poster.type === 'Office')) || (!holder.int && (clinicPoster.clinic_poster.type === 'Int' || clinicPoster.clinic_poster.type === 'Office Int')))"
+                                  clickable
+                                  :key="'Holder' + holderIndex"
+                                  @click.stop="addPosterToHolder(index, posterIndex, holderIndex)"
+                                  @mouseover.self="board.selected = holderIndex"
+                                  @mouseleave.self="board.selected = false"
+                                  >
+                                  <q-item-section>
+                                    <q-item-label class="text-primary" v-close-popup>{{holder.name}}</q-item-label>
+                                  </q-item-section>
+                                </q-item>
+                              </template>
+                            </q-list>
+                          </q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-btn-dropdown>
+                  <q-btn size="xs" dense color="negative" icon="delete" class="full-width" v-if="can('Marketing','delete')" @click="showRemovePriority(clinicPoster)"></q-btn>
+                </div>
+              </q-card-actions>
+            </q-card>
+          </div>
+          <div v-for="(clinicPoster, posterIndex) in clinicHoldersUnused" :key="posterIndex + 'uh'" class="col-xs-3">
+            <q-card :class="{ghost: postersInDesigns.includes(clinicPoster.id)}" :disabled="postersInDesigns.includes(clinicPoster.id)">
+              <q-card-section class="bg-secondary q-pa-xs">
+                <div class="text-caption text-primary text-center" style="line-height: 1">{{clinicPoster.poster.name}}</div>
+                <div class="text-caption text-primary text-center" style="line-height: 1">{{clinicPoster.type}}</div>
+              </q-card-section>
+              <q-card-section class="flex justify-center q-pa-xs">
+                <div
+                  :style="{
+                    'min-width': clinicPoster.poster.width / 25 + 'px',
+                    'min-height': clinicPoster.poster.height / 25 + 'px',
+                  }"
+                  class="left-poster q-ma-none column justify-center text-center q-mt-sm"
+                  >
+                </div>
+              </q-card-section>
+              <q-card-actions v-if="designs.length" class="q-pt-none">
+                <div class="col items-center">
+                  <q-btn size="xs" dense color="positive" label="Prioridad" class="full-width" v-if="can('Marketing','delete')" @click="showCreatePriority(clinicPoster)"></q-btn>
+                  <q-btn size="xs" dense color="negative" icon="delete" class="full-width" v-if="can('Marketing','delete')" @click="showRemovePoster(clinicPoster)"></q-btn>
+                </div>
               </q-card-actions>
             </q-card>
           </div>
@@ -241,8 +281,8 @@
             </q-banner>
           </div>
           <div class="col-xs-12" v-else-if="!designs.length">
-            <template v-if="clinicSelected.posters">
-              <q-banner class="bg-warning text-white text-center" v-if="Object.keys(clinicSelected.posters).length">
+            <template v-if="clinicSelected.clinic_poster_priorities">
+              <q-banner class="bg-warning text-white text-center" v-if="Object.keys(clinicSelected.clinic_poster_priorities).length">
                 <div class="text-h6">
                   Añade un plano para empezar a usar el distribuidor
                 </div>
@@ -845,6 +885,64 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="createPoster.state" persistent>
+      <q-card style="min-width: 600px">
+        <q-card-section class="bg-primary text-white text-center">
+          <span class="text-h6">New Poster</span>
+        </q-card-section>
+        <q-card-section class="row items-center">
+          <div class="full-width">
+            <custom-select
+              :dense="true"
+              :hide-bottom-space="true"
+              :field="{name: 'type', type: { model: 'type', default: { text: 'Selecciona un Tipo'} }}"
+              :sourceOptions="['Ext', 'Int', 'Office', 'Office Int']"
+              :initValue="createPoster.typeSelected"
+              @updated="updateCustomSelect('createPoster.typeSelected', $event)"
+              >
+            </custom-select>
+          </div>
+          <div class="full-width">
+            <custom-select
+              :dense="true"
+              :hide-bottom-space="true"
+              :field="{name: 'posters', type: { model: 'posters', default: { text: 'Selecciona un Tamaño'} }}"
+              :initValue="createPoster.posterSelected"
+              @updated="updateCustomSelect('createPoster.posterSelected', $event)"
+              >
+            </custom-select>
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Cancel" color="primary" v-close-popup />
+          <q-btn label="Confirmar" color="positive" v-close-popup @click="startCreatePoster"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+    <q-dialog v-model="createPriority.state" persistent>
+      <q-card style="min-width: 600px">
+        <q-card-section class="bg-primary text-white text-center">
+          <span class="text-h6">New Priority</span>
+        </q-card-section>
+        <q-card-section class="row items-center">
+          <div class="full-width">
+            <custom-select
+              :dense="true"
+              :hide-bottom-space="true"
+              :field="{name: 'clinic_poster_priorities', type: { model: 'clinic_poster_priorities', default: { text: 'Selecciona la Prioridad'} }}"
+              :sourceOptions="[1,2,3,4,5,6,7,8,9,10,11,12]"
+              :initValue="createPriority.prioritySelected"
+              @updated="updateCustomSelect('createPriority.prioritySelected', $event)"
+              >
+            </custom-select>
+          </div>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn label="Cancel" color="primary" v-close-popup />
+          <q-btn label="Confirmar" color="positive" v-close-popup @click="startCreatePriority"/>
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
     <q-dialog v-model="ppFixer.state" persistent>
       <q-card style="min-width: 600px">
         <q-card-section class="bg-primary text-white text-center">
@@ -880,6 +978,16 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+    <q-dialog v-model="removeModel.state">
+      <remove-model-confirm
+        :modelQty="removeModel.items.length"
+        :name="removeModel.modelName"
+        :models="removeModel.items"
+        :relatedTo="removeModel.relation"
+        :parentIndex="removeModel.parentIndex"
+        v-on:confirmed="removeConfirmed">
+      </remove-model-confirm>
+    </q-dialog>
     <multi-async-action-bars
       v-if="multiAsyncAction.show"
       :opened="multiAsyncAction.show"
@@ -899,15 +1007,16 @@
 import { PageMixins } from '../mixins/pageMixins'
 import { ModelsFetcher, ModelController } from '../mixins/modelMixin'
 import { FileMethods } from '../mixins/fileMixin'
-import CustomSelect from '../components/form/customSelect'
 import { customSelectMixins } from '../mixins/customSelectMixins'
 import { multiAsyncActionBarsMixins } from '../mixins/multiAsyncActionBarsMixins'
+import CustomSelect from '../components/form/customSelect'
 import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
+import RemoveModelConfirm from '../components/model/removeModelConfirm'
 
 export default {
   name: 'PosterDistribution',
   mixins: [PageMixins, ModelsFetcher, ModelController, FileMethods, customSelectMixins, multiAsyncActionBarsMixins],
-  components: { CustomSelect, MultiAsyncActionBars },
+  components: { CustomSelect, MultiAsyncActionBars, RemoveModelConfirm },
   data () {
     return {
       modelsNeeded: {
@@ -948,8 +1057,26 @@ export default {
       },
       selectorOpen: true,
       updatingFacade: false,
+      createPriority: {
+        state: false,
+        prioritySelected: 1,
+        clinicPoster: null
+      },
+      createPoster: {
+        state: false,
+        typeSelected: 'Ext',
+        posterSelected: null
+      },
       confirm: {
         state: false,
+        id: null,
+        index: null
+      },
+      removeModel: {
+        state: false,
+        items: [],
+        relation: null,
+        parentIndex: null,
         id: null,
         index: null
       },
@@ -1155,6 +1282,38 @@ export default {
       }
       return null
     },
+    clinicHoldersUnused () {
+      if (this.clinicPosters) {
+        let posters = []
+        for (let poster of this.clinicHolders) {
+          let index = this.clinicPosters.findIndex(i => i.clinic_poster_id === poster.id)
+          // console.log(index)
+          if (index === -1) posters.push(poster)
+        }
+        return posters
+      }
+      return null
+    },
+    clinicHolders () {
+      if (this.model && this.dateSelected) {
+        let posters = []
+        for (let poster of this.model.clinic_posters) {
+          if (poster.ends_at <= this.dateSelected.value || poster.starts_at > this.dateSelected.value) continue
+          posters.push(poster)
+        }
+        return posters
+      }
+      return null
+    },
+    clinicHoldersByPosterId () {
+      if (!this.clinicSelected) return []
+      let holdersById = {}
+      for (let posterPriority of this.model.clinic_poster_priorities) {
+        if (!holdersById[posterPriority.clinic_poster_id]) holdersById[posterPriority.clinic_poster_id] = []
+        holdersById[posterPriority.clinic_poster_id].push(posterPriority.id)
+      }
+      return holdersById
+    },
     modelReady () {
       if (!this.clinicSelected || !this.designs.length) return false
       for (let design of this.designs) {
@@ -1266,6 +1425,148 @@ export default {
     }
   },
   methods: {
+    showRemovePoster (clinicPoster) {
+      this.visible = true
+      let priorities = this.clinicHoldersByPosterId[clinicPoster.id].length
+      if (priorities) { // Update to End Date instead of Deleting
+        let model = JSON.parse(JSON.stringify(clinicPoster))
+        let date = new Date(this.designsInRange[0].starts_at)
+        date.setDate(date.getDate() - 1)
+        // console.log(date)
+        let dateString = date.getFullYear() + '-' + (date.getMonth() < 10 ? '0' : '') + (Number(date.getMonth()) + 1) + '-' + (date.getDate() < 10 ? '0' : '') + date.getDate()
+        model.ends_at = dateString
+        let payload = {
+          name: 'clinic_posters',
+          model: model,
+          options: { full: true }
+        }
+        this.saveModel(payload, 'update')
+          .then((response) => {
+            this.visible = false
+            let poster = this.model.clinic_posters.filter(i => i.id === clinicPoster.id)[0]
+            console.log(poster)
+            console.log(response.model)
+            poster.ends_at = response.model.ends_at
+          }).catch(() => {
+            this.visible = false
+            return false
+          })
+      } else { // Remove Clinic Poster
+        this.removeModel.modelName = 'clinic_posters'
+        this.removeModel.items = [clinicPoster]
+        this.removeModel.id = clinicPoster.id
+        this.removeModel.state = true
+      }
+    },
+    showCreatePoster () {
+      this.createPoster.state = true
+    },
+    startCreatePoster () {
+      this.visible = true
+      let payload = {
+        name: 'clinic_posters',
+        model: {
+          clinic_id: this.clinicSelected.id,
+          poster_id: this.createPoster.posterSelected.value,
+          type: this.createPoster.typeSelected,
+          starts_at: this.designsInRange[0].starts_at,
+          ends_at: this.designsInRange[0].ends_at
+        },
+        options: { full: true }
+      }
+      // console.log(payload)
+      this.saveModel(payload, 'new')
+        .then((response) => {
+          this.visible = false
+          this.model.clinic_posters.push(response.model)
+          this.createPoster = {
+            state: false,
+            posterSelected: null,
+            typeSelected: 'Ext'
+          }
+        }).catch(() => {
+          this.visible = false
+          return false
+        })
+    },
+    showCreatePriority (clinicPoster) {
+      this.createPriority.state = true
+      this.createPriority.clinicPoster = clinicPoster
+    },
+    startCreatePriority () {
+      this.visible = true
+      let payload = {
+        name: 'clinic_poster_priorities',
+        model: {
+          campaign_id: this.campaignSelectedId,
+          clinic_poster_id: this.createPriority.clinicPoster.id,
+          priority: this.createPriority.prioritySelected,
+          starts_at: this.designsInRange[0].starts_at,
+          ends_at: this.designsInRange[0].ends_at
+        },
+        options: { full: true }
+      }
+      // console.log(payload)
+      this.saveModel(payload, 'new')
+        .then((response) => {
+          this.visible = false
+          this.model.clinic_poster_priorities.push(response.model)
+          this.model.posters[this.campaignSelectedId].push(response.model)
+          let poster = this.model.clinic_posters.filter(i => i.id === this.createPriority.clinicPoster.id)[0]
+          poster.clinic_poster_priorities.push(response.model)
+          this.createPriority = {
+            state: false,
+            prioritySelected: 1,
+            clinicPoster: null
+          }
+        }).catch(() => {
+          this.visible = false
+          return false
+        })
+    },
+    showRemovePriority (posterPriority) {
+      console.log(posterPriority)
+      // console.log(this.clinicHoldersByPosterId[posterPriority.clinic_poster_id].length)
+      let priorities = this.clinicHoldersByPosterId[posterPriority.clinic_poster_id].length
+      if (priorities === 1) {
+        this.removeModel.modelName = 'clinic_posters'
+        this.removeModel.items = [posterPriority.clinic_poster]
+        this.removeModel.id = posterPriority.clinic_poster.id
+      } else if (priorities > 1) {
+        this.removeModel.modelName = 'clinic_poster_priorities'
+        this.removeModel.items = [posterPriority]
+        this.removeModel.id = posterPriority.id
+      }
+      this.removeModel.state = true
+    },
+    removeConfirmed () {
+      if (this.removeModel.modelName === 'clinic_poster_priorities') {
+        this.cleanDeletedPriorities(this.removeModel.id, this.removeModel.items[0].clinic_poster_id)
+      } else if (this.removeModel.modelName === 'clinic_posters') {
+        if (this.clinicHoldersByPosterId[this.removeModel.id].length === 1) this.cleanDeletedPriorities(this.clinicHoldersByPosterId[this.removeModel.id][0], this.removeModel.id)
+        let index = this.model.clinic_posters.findIndex(i => i.id === this.removeModel.id)
+        this.model.clinic_posters.splice(index, 1)
+      }
+      this.removeModel.modelName = null
+      this.removeModel.items = []
+      this.removeModel.id = null
+      this.removeModel.state = false
+      this.save()
+    },
+    cleanDeletedPriorities (priorityId, posterId) {
+      let index = null
+      for (let poster of this.model.clinic_posters) {
+        if (poster.id === posterId) {
+          index = poster.clinic_poster_priorities.findIndex(i => i.id === priorityId)
+          poster.clinic_poster_priorities.splice(index, 1)
+          break
+        }
+      }
+      index = this.model.clinic_poster_priorities.findIndex(i => i.id === priorityId)
+      this.model.clinic_poster_priorities.splice(index, 1)
+      index = this.model.posters[this.campaignSelectedId].findIndex(i => i.id === priorityId)
+      this.model.posters[this.campaignSelectedId].splice(index, 1)
+    },
     saveHolder () {
       let design = this.designs[this.designSelected]
       let designId = design.id
