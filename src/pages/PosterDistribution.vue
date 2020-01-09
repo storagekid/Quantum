@@ -208,66 +208,6 @@
           </div>
         </div>
       </template>
-      <q-card class="q-mt-md" v-if="holderToShow">
-        <q-card-section class="bg-primary text-h6 text-white q-pa-sm">
-          <div class="text-center">{{ holderToShow.name }}</div>
-        </q-card-section>
-        <q-card-section class="">
-          <q-list dense>
-            <q-item class="q-px-none" v-for="side in ['ext', 'int']" :key="side">
-              <div class="row align-center justify-between q-col-gutter-md full-width">
-                <div class="col-xs-2 self-center text-h6">
-                  <span v-if="side === 'ext'">Ext:</span>
-                  <span v-else>Int:</span>
-                </div>
-                <template v-if="holderToShow[side]">
-                  <div class="col-xs-4">
-                    <q-select
-                      :options="posterOptions"
-                      dense
-                      v-model="holderToShow[side].clinic_poster.poster"
-                      >
-                    </q-select>
-                  </div>
-                  <div class="col-xs-4">
-                    <q-select
-                      :options="side === 'ext' ? ['Ext', 'Office'] : ['Int', 'Office Int']"
-                      dense
-                      v-model="holderToShow[side].clinic_poster.type"
-                      >
-                    </q-select>
-                  </div>
-                  <div class="col-xs-2">
-                    <q-select
-                      :options="posterPriorityOptions"
-                      emit-value
-                      map-options
-                      dense
-                      v-model="holderToShow[side].priority"
-                      >
-                    </q-select>
-                  </div>
-                </template>
-                <div class="col-xs-10" v-else>
-                  <q-btn
-                    dense
-                    color="positive"
-                    icon="add"
-                    label="Crear Prioridad"
-                    >
-                  </q-btn>
-                </div>
-              </div>
-            </q-item>
-          </q-list>
-        </q-card-section>
-        <q-card-section>
-          <q-card-actions class="q-pa-none">
-            <q-btn size="sm" color="info" @click="restoreHolderToShow">Restore</q-btn>
-            <q-btn size="sm" color="primary" :disable="!canSaveHolder" @click="saveHolder">Save</q-btn>
-          </q-card-actions>
-        </q-card-section>
-      </q-card>
     </div>
     <div class="col">
       <q-page class="q-pa-md col-xs-12" style="max-height: calc(100vh - 70px); overflow: auto; min-width: 800px; background-color: rgba(200,200,200, .3)">
@@ -807,12 +747,6 @@
                 </q-item-section>
               </q-item>
             </q-list>
-            <!-- <div class="col-xs-12" v-for="(newPriority, index) in newCriterion.newPriorities" :key="'NP' + index">
-              <div class="row justify-around">
-                <q-btn size="sm" flat color="negative" icon="delete" @click="removeNewPriority(index)"></q-btn>
-                <p class="q-ma-none self-center">{{ newPriority.oldType }}<span class="text-info">{{ ' (' + newPriority.oldPriority + ')' }}</span> => <span class="text-positive">{{ ' (' + newPriority.newPriority + ')' }}</span></p>
-              </div>
-            </div> -->
           </div>
           <div class="row q-col-gutter-sm">
             <div class="col-xs-2">
@@ -1046,6 +980,7 @@ export default {
         value: null
       },
       campaignToShow: null,
+      originalPosterPriorities: null,
       model: null,
       board: {
         minWidth: 800,
@@ -1138,30 +1073,15 @@ export default {
     posterOptions () {
       return this.$store.state.Model.models.posters.items
     },
-    canSaveHolder () {
-      if (JSON.stringify(this.holderToShow) === this.holderBackUp) {
-        // console.log('Holders are the same')
-        return false
-      } else {
-        if (this.holderToShow.ext && this.holderToShow.int) {
-          if (this.holderToShow.ext.clinic_poster && this.holderToShow.int.clinic_poster) {
-            if (this.holderToShow.ext.clinic_poster.poster && this.holderToShow.int.clinic_poster.poster) {
-              if (this.holderToShow.ext.clinic_poster.poster.name !== this.holderToShow.int.clinic_poster.poster.name) {
-                // console.log('Different Sizes')
-                return false
-              }
-            }
-          }
-        }
-        // let old = JSON.parse(this.holderBackUp)
+    posterPrioritiesByCamapaign () {
+      if (!this.clinicSelected) return []
+      let grouped = {}
+      for (let posterPriority of this.model.clinic_poster_priorities) {
+        let campaignId = posterPriority.campaign_id ? posterPriority.campaign_id : ''
+        if (!grouped[campaignId]) grouped[campaignId] = []
+        grouped[campaignId].push(posterPriority)
       }
-      return true
-    },
-    holderToShow () {
-      if (this.holderSelected.length === 1 && this.clinicSelected) {
-        return this.designs[this.designSelected].distributions.holders[this.holderSelected[0]]
-      }
-      return null
+      return grouped
     },
     posterPriorityOptions () {
       let options = []
@@ -1262,8 +1182,8 @@ export default {
     },
     clinicHasPosters () {
       if (this.model) {
-        if (this.model.posters) {
-          if (Object.keys(this.model.posters).length) return true
+        if (this.posterPrioritiesByCamapaign) {
+          if (Object.keys(this.posterPrioritiesByCamapaign).length) return true
         }
       }
       return null
@@ -1271,7 +1191,7 @@ export default {
     clinicPosters () {
       if (this.model && this.dateSelected) {
         let posters = []
-        for (let poster of this.model.posters[this.campaignSelectedId]) {
+        for (let poster of this.posterPrioritiesByCamapaign[this.campaignSelectedId]) {
           if (this.campaignSelectedId !== '') {
             posters.push(poster)
             continue
@@ -1353,21 +1273,6 @@ export default {
     }
   },
   watch: {
-    holderToShow () {
-      // console.log('Watcher in holder to show')
-      if (this.holderToShow) {
-        if (!this.holderBackUp) {
-          // console.log('Saving')
-          this.holderBackUp = JSON.stringify(this.holderToShow)
-        } else {
-          let old = JSON.parse(this.holderBackUp)
-          if (old.name !== this.designs[this.designSelected].distributions.holders[this.holderSelected[0]].name) {
-            // console.log('Different Holder Selected')
-            this.holderBackUp = JSON.stringify(this.holderToShow)
-          }
-        }
-      } else this.holderBackUp = null
-    },
     dates () {
       // console.log('Watching dates')
       // console.log(this.dates)
@@ -1396,13 +1301,10 @@ export default {
         this.$store.dispatch('Model/getModelView', { model: 'clinics', id: this.clinicSelected.value, params: { view: 'distributions' } })
           .then((data) => {
             this.model = data.model
-            // console.log('HERE')
-            // console.log(data.model)
             if (this.model.poster_distributions.length) this.buildModelDesigns(this.model.poster_distributions)
-            this.model['originalPosterPriorities'] = JSON.parse(JSON.stringify(this.model.posters))
+            this.originalPosterPriorities = JSON.parse(JSON.stringify(this.posterPrioritiesByCamapaign))
             this.visible = false
           }).catch((response) => {
-            // console.log('THERE')
             this.visible = false
             this.$store.dispatch('Response/responseErrorManager', response)
           })
@@ -1511,7 +1413,7 @@ export default {
         .then((response) => {
           this.visible = false
           this.model.clinic_poster_priorities.push(response.model)
-          this.model.posters[this.campaignSelectedId].push(response.model)
+          // this.posterPrioritiesByCamapaign[this.campaignSelectedId].push(response.model)
           let poster = this.model.clinic_posters.filter(i => i.id === this.createPriority.clinicPoster.id)[0]
           poster.clinic_poster_priorities.push(response.model)
           this.createPriority = {
@@ -1525,8 +1427,6 @@ export default {
         })
     },
     showRemovePriority (posterPriority) {
-      // console.log(posterPriority)
-      // console.log(this.clinicHoldersByPosterId[posterPriority.clinic_poster_id].length)
       let priorities = this.clinicHoldersByPosterId[posterPriority.clinic_poster_id].length
       if (priorities === 1) {
         this.removeModel.modelName = 'clinic_posters'
@@ -1564,45 +1464,6 @@ export default {
       }
       index = this.model.clinic_poster_priorities.findIndex(i => i.id === priorityId)
       this.model.clinic_poster_priorities.splice(index, 1)
-      index = this.model.posters[this.campaignSelectedId].findIndex(i => i.id === priorityId)
-      this.model.posters[this.campaignSelectedId].splice(index, 1)
-    },
-    saveHolder () {
-      let design = this.designs[this.designSelected]
-      let designId = design.id
-      let params = {
-        designId: designId
-      }
-      this.$axios({
-        url: this.$store.state.App.dataWarehouse + 'poster_distributions/' + design.id + '/saveHolder',
-        method: 'POST',
-        params: params
-      }).then((response) => {
-        this.$q.loading.hide()
-        this.$store.commit('Model/updateRelationItems', { name: 'clinics', relation: 'poster_distributions', item: response.data.model, parentIndex: this.clinicIndex })
-        this.$store.dispatch('Notify/displayMessage', { message: 'Holder Saved', position: 'top', type: 'positive' })
-      }).catch((response) => {
-        this.$q.loading.hide()
-        this.$store.dispatch('Notify/displayMessage', { message: 'Action Failed', position: 'top', type: 'negative' })
-      })
-      return true
-    },
-    restoreHolderToShow () {
-      let old = JSON.parse(this.holderBackUp)
-      let holder = this.designs[this.designSelected].distributions.holders[this.holderSelected[0]]
-      for (let side of ['ext', 'int']) {
-        if (old[side]) {
-          if (!holder[side]) {
-            this.$set(holder, side, {})
-            for (let prop in old[side]) this.$set(holder[side], prop, old[side][prop])
-            if (!this.designs[this.designSelected].distributions.posterIds.includes(holder[side].id)) this.designs[this.designSelected].distributions.posterIds.push(holder[side].id)
-          } else {
-            holder[side].priority = old[side].priority
-            holder[side].clinic_poster = old[side].clinic_poster
-          }
-        } else holder[side] = null
-      }
-      this.holderBackUp = JSON.stringify(this.holderToShow)
     },
     cleanSelectedState () {
       this.designs = []
@@ -1756,7 +1617,7 @@ export default {
           // console.log('HERE')
           // console.log(data.model)
           // if (this.model.poster_distributions.length) this.buildModelDesigns(this.model.poster_distributions)
-          // this.model['originalPosterPriorities'] = JSON.parse(JSON.stringify(this.model.posters))
+          // this.originalPosterPriorities = JSON.parse(JSON.stringify(this.posterPrioritiesByCamapaign))
           this.newCriterion.clinicOptions = []
           let items = JSON.parse(JSON.stringify(this.$store.state.Model.models.clinics.items))
           items = items.filter(i => {
@@ -1910,7 +1771,6 @@ export default {
       })
       return true
     },
-
     downloadPDF (fileId) {
       this.btnLoaders.facadePdf = true
       this.downloadFile(fileId)
@@ -1980,12 +1840,6 @@ export default {
       let newdate = date.replace(/\//g, '-')
       return newdate >= this.clinicSelected.starts_at
     },
-    // hideDatePicker (index) {
-    //   let picker = 'qDateProxy-' + index
-    //   // console.log(picker)
-    //   if (this.$refs[picker][0]) this.$refs[picker][0].hide()
-    //   else this.$refs[picker].hide()
-    // },
     composeFacade (index, force = false) {
       this.btnLoaders.compose = true
       let payload = { relation: 'poster_distributions', id: this.designs[index].id }
@@ -2060,8 +1914,8 @@ export default {
       for (let design of this.designs) {
         design.posterIds[this.campaignSelectedId] = [...design.posterIds['']]
         for (let holder of design.distributions.holders) {
-          holder.ext[this.campaignSelectedId] = this.model.posters[this.campaignSelectedId].filter(i => { return i.id === holder.ext[''].id })[0]
-          holder.int[this.campaignSelectedId] = this.model.posters[this.campaignSelectedId].filter(i => { return i.id === holder.int[''].id })[0]
+          holder.ext[this.campaignSelectedId] = this.posterPrioritiesByCamapaign[this.campaignSelectedId].filter(i => { return i.id === holder.ext[''].id })[0]
+          holder.int[this.campaignSelectedId] = this.posterPrioritiesByCamapaign[this.campaignSelectedId].filter(i => { return i.id === holder.int[''].id })[0]
         }
       }
     },
@@ -2119,8 +1973,8 @@ export default {
           // this.log('Beyond')
           // console.log('Campaign: ' + campaignId)
           for (let holder of baseDesign.distributions.holders) {
-            holder.ext = this.model.posters[campaignId].filter(i => { return i.id === holder.ext })[0]
-            holder.int = this.model.posters[campaignId].filter(i => { return i.id === holder.int })[0]
+            holder.ext = this.posterPrioritiesByCamapaign[campaignId].filter(i => { return i.id === holder.ext })[0]
+            holder.int = this.posterPrioritiesByCamapaign[campaignId].filter(i => { return i.id === holder.int })[0]
           }
         }
         // this.log('Finish ' + design.id)
@@ -2135,8 +1989,8 @@ export default {
       return new Promise((resolve, reject) => {
         let modelsToUpdate = []
         for (let originalPriority of this.model.clinic_poster_priorities) {
-          for (let campaign in this.model.posters) {
-            for (let newPriority of this.model.posters[campaign]) {
+          for (let campaign in this.posterPrioritiesByCamapaign) {
+            for (let newPriority of this.posterPrioritiesByCamapaign[campaign]) {
               if (originalPriority.id !== newPriority.id) continue
               else if (originalPriority.priority === newPriority.priority) break
               else {
@@ -2170,57 +2024,28 @@ export default {
         } else resolve()
       })
     },
-    duplicatePosterPriorities (campaignId) {
-      return new Promise((resolve, reject) => {
-        this.$set(this.model.posters, campaignId, [])
-        // this.model.posters[campaignId] = []
-        this.model.originalPosterPriorities[campaignId] = []
-        let counter = 0
-        for (let i = 0; i < this.model.posters[''].length; i++) {
-          let payload = { name: 'clinic_poster_priorities', model: JSON.parse(JSON.stringify(this.model.posters[''][i])) }
-          payload.model.campaign_id = campaignId
-          payload.url = this.$store.state.App.dataWarehouse + 'clinic_poster_priorities'
-          this.$store.dispatch('Model/sendNewForm', {
-            'source': payload
-          }).then((response) => {
-            response.model.priority = parseInt(response.model.priority)
-            this.model.posters[campaignId].push(response.model)
-            this.model.originalPosterPriorities[campaignId].push(response.model)
-            this.$store.dispatch('Notify/displayMessage', { message: 'Poster Priority Cretated', position: 'top', type: 'positive' })
-            counter++
-            if (counter === this.model.posters[campaignId].length) resolve()
-            // this.$emit('formRespondedOK')
-          }).catch((response) => {
-            // this.$emit('formRespondedWithErrors')
-            this.$store.dispatch('Response/responseErrorManager', response)
-            counter++
-            if (counter === this.model.posters[campaignId].length) reject()
-          })
-        }
-      })
-    },
     updatePosterPriorities (campaignId) {
       return new Promise((resolve, reject) => {
         let counter = 0
-        for (let i = 0; i < this.model.posters[campaignId].length; i++) {
-          if (this.model.posters[campaignId][i].priority !== this.model.originalPosterPriorities[campaignId][i].priority) {
-            let payload = { name: 'clinic_poster_priorities', model: this.model.posters[campaignId][i] }
+        for (let i = 0; i < this.posterPrioritiesByCamapaign[campaignId].length; i++) {
+          if (this.posterPrioritiesByCamapaign[campaignId][i].priority !== this.originalPosterPriorities[campaignId][i].priority) {
+            let payload = { name: 'clinic_poster_priorities', model: this.posterPrioritiesByCamapaign[campaignId][i] }
             payload.url = this.$store.state.App.dataWarehouse + 'clinic_poster_priorities/' + payload.model.id
             this.$store.dispatch('Model/sendUpdateForm', {
               'source': payload
             }).then((response) => {
-              this.model.originalPosterPriorities[campaignId][i].priority = response.model.priority
+              this.originalPosterPriorities[campaignId][i].priority = response.model.priority
               this.$store.dispatch('Notify/displayMessage', { message: 'Poster Priority Updated', position: 'top', type: 'positive' })
               counter++
-              if (counter === this.model.posters[campaignId].length) resolve()
+              if (counter === this.posterPrioritiesByCamapaign[campaignId].length) resolve()
             }).catch((response) => {
               this.$store.dispatch('Response/responseErrorManager', response)
               counter++
-              if (counter === this.model.posters[campaignId].length) reject()
+              if (counter === this.posterPrioritiesByCamapaign[campaignId].length) reject()
             })
           } else {
             counter++
-            if (counter === this.model.posters[campaignId].length) resolve()
+            if (counter === this.posterPrioritiesByCamapaign[campaignId].length) resolve()
           }
         }
       })
