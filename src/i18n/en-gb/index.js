@@ -246,7 +246,7 @@ export default {
     clinic_poster_distribution_facades: {
       name: 'Poster Distribution Facade | Poster Distribution Facades'
     },
-    clinic_posters_priorities: {
+    clinic_poster_priorities: {
       name: 'Clinic Poster Priority | Clinic Poster Priorities'
     },
     clinic_profiles: {

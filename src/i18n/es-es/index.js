@@ -246,7 +246,7 @@ export default {
     clinic_poster_distribution_facades: {
       name: 'Fachada de Distribución de Cartelería | Fachadas de Distribución de Cartelería'
     },
-    clinic_posters_priorities: {
+    clinic_poster_priorities: {
       name: 'Prioridad de Poster de Clínica | Prioridades de Posters de Clínica'
     },
     clinic_profiles: {
