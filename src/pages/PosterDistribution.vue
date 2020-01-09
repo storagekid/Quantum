@@ -1444,8 +1444,8 @@ export default {
           .then((response) => {
             this.visible = false
             let poster = this.model.clinic_posters.filter(i => i.id === clinicPoster.id)[0]
-            console.log(poster)
-            console.log(response.model)
+            // console.log(poster)
+            // console.log(response.model)
             poster.ends_at = response.model.ends_at
           }).catch(() => {
             this.visible = false
@@ -1525,7 +1525,7 @@ export default {
         })
     },
     showRemovePriority (posterPriority) {
-      console.log(posterPriority)
+      // console.log(posterPriority)
       // console.log(this.clinicHoldersByPosterId[posterPriority.clinic_poster_id].length)
       let priorities = this.clinicHoldersByPosterId[posterPriority.clinic_poster_id].length
       if (priorities === 1) {
