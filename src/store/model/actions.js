@@ -4,7 +4,7 @@ function formConstructor (source, files = null) {
   // console.log(source)
   let payload = new FormData()
   for (let key of Object.keys(source)) {
-    if (source[key] === null) {
+    if (source[key] === null || typeof source[key] === 'undefined') {
       // console.log('Null')
       // console.log(key)
       payload.append(key, '')
