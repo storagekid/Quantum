@@ -480,7 +480,7 @@ export const ModelController = {
         if (this.quasarData.fields.includes(field) && field !== 'id') {
           // console.log(field)
           if (fieldsToExtract.includes(this.quasarData.formFields[field].type.name) && data[field]) {
-            copy[field] = data[field].value
+            copy[field] = data[field].value ? data[field].value : null
           }
         }
       }
@@ -523,7 +523,7 @@ export const ModelController = {
       // console.log('saveModelOnNewController')
       return new Promise((resolve, reject) => {
         payload.url = this.$store.state.App.dataWarehouse + payload.name
-        payload.options = this.$store.getters['Model/availableOptions'][payload.name]
+        payload.options = payload.options ? payload.options : this.$store.getters['Model/availableOptions'][payload.name]
         this.$store.dispatch('Model/sendNewForm', {
           'source': payload
         }).then((response) => {
