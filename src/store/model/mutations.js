@@ -81,7 +81,7 @@ export function retrieveModel (state, { model }) {
 }
 export function addModelItems (state, { name, items }) {
   // console.log('Adding: ' + items)
-  state.models[name].items.unshift(items)
+  if (state.models[name]) state.models[name].items.unshift(items)
 }
 export function addRelationItems ({ models }, { name, relation, items, parentIndex, arrayPosition = false }) {
   // console.log('addRelationItems')
@@ -137,6 +137,7 @@ export function removeRelationByIds (state, { name, relation, id, parentId }) {
 export function removeModelItem ({ models }, { name, id }) {
   // console.log('NAme: ' + name)
   // console.log('ID: ' + id)
+  if (!models[name]) return true
   let item = models[name].items.find((item) => item.id === id)
   // console.log(item)
   models[name].items.splice(models[name].items.indexOf(item), 1)
@@ -152,6 +153,7 @@ export function updateModelItems ({ models }, { name, item }) {
   // console.log('Updating Model Item')
   // console.log(name)
   // console.log(item)
+  if (!models[name]) return true
   for (const [index, model] of models[name].items.entries()) {
     if (model.id === item.id) {
       for (let prop in item) {
