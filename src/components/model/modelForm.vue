@@ -50,6 +50,7 @@
             suffix=""
             v-model="model[field.name]"
             type="number"
+            :step="field.type.step ? field.type.step : 1"
             :disable="viewMode"
             />
           <q-input
