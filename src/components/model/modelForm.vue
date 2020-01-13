@@ -1,11 +1,11 @@
 <template>
   <form v-if="quasarData">
-    <div class="row q-col-gutter-md q-mt-md" v-for="(row, index) in step.fields" :key="'R'+index">
+    <div :class="['row', 'q-col-gutter-md', {'q-mt-md': mode !== 'filter'}]" v-for="(row, index) in step.fields" :key="'R'+index">
       <template
         v-for="(field, index) in row"
         >
         <div
-          v-if="!batchMode || (batchMode && field.batch)"
+          v-if="(!batchMode || (batchMode && field.batch)) && (mode !== 'filter' || (mode === 'filter') && model[field.name] !== undefined)"
           :key="'F'+index"
           class="col-xs-12 col-sm-4"
           >
@@ -14,10 +14,11 @@
             icon="subject"
             :label-width="12"
             bottom-slots
-            :error="$v.model[field.name].$error"
+            :error="$v.model[field.name].$error && !filterMode"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.label"
+            :clearable="filterMode"
             stack-label
             suffix=""
             v-model="model[field.name]"
@@ -28,10 +29,11 @@
             v-if="field.type.name === 'password'"
             icon="subject"
             bottom-slots
-            :error="$v.model[field.name].$error"
+            :error="$v.model[field.name].$error && !filterMode"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.label"
+            :clearable="filterMode"
             stack-label
             suffix=""
             v-model="model[field.name]"
@@ -42,10 +44,11 @@
             v-if="field.type.name === 'number'"
             icon="subject"
             bottom-slots
-            :error="$v.model[field.name].$error"
+            :error="$v.model[field.name].$error && !filterMode"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.label"
+            :clearable="filterMode"
             stack-label
             suffix=""
             v-model="model[field.name]"
@@ -58,10 +61,11 @@
             mask="####-##-##"
             :rules="[]"
             bottom-slots
-            :error="$v.model[field.name].$error"
+            :error="$v.model[field.name].$error && !filterMode"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.label"
+            :clearable="filterMode"
             stack-label
             v-model="model[field.name]"
             :disable="viewMode"
@@ -76,11 +80,11 @@
           </q-input>
           <custom-select
             v-if="field.type.name === 'select'"
-            :clearable="true"
+            :clearable="filterMode"
             :field="field"
             :excludeModel="field.type.hasFamily && mode === 'update' ? getFamily() : false"
             :initValue="model[field.name]"
-            :error="$v.model[field.name].$error"
+            :error="$v.model[field.name].$error && !filterMode"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             @updated="updateCustomSelect('model.' + field.name, ...arguments)"
             :disable="viewMode"
@@ -90,10 +94,11 @@
             v-if="field.type.name === 'enum'"
             icon="subject"
             bottom-slots
-            :error="$v.model[field.name].$error"
+            :error="$v.model[field.name].$error && !filterMode"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.type.default.text"
+            :clearable="filterMode"
             stack-label
             v-model="model[field.name]"
             :options="field.type.array"
@@ -103,10 +108,11 @@
             v-if="field.type.name === 'array'"
             icon="subject"
             bottom-slots
-            :error="$v.model[field.name].$error"
+            :error="$v.model[field.name].$error && !filterMode"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.type.default.text"
+            :clearable="filterMode"
             stack-label
             v-model="model[field.name]"
             :options="field.type.array"
@@ -115,7 +121,7 @@
             v-if="field.type.name === 'file'"
             class="full-width"
             bottom-slots
-            :error="$v.model[field.name].$error"
+            :error="$v.model[field.name].$error && !filterMode"
             url=""
             :factory="sendFile(field, ...arguments)"
             :label="field.label"
@@ -198,6 +204,9 @@ export default {
   computed: {
     viewMode () {
       return this.mode === 'display'
+    },
+    filterMode () {
+      return this.mode === 'filter'
     }
   },
   methods: {
