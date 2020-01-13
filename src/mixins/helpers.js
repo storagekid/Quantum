@@ -10,9 +10,8 @@ export const Helpers = {
       this.$store.commit('App/log', params)
     },
     dateString (option = null, date = new Date(Date.now())) {
-      // console.log('Getting Date')
       let year = date.getFullYear()
-      let month = (date.getMonth() < 10 ? '0' : '') + (Number(date.getMonth()) + 1)
+      let month = (date.getMonth() < 9 ? '0' : '') + (Number(date.getMonth()) + 1)
       let day = null
       if (option === 'first') day = new Date(year, date.getMonth(), 1).getDate()
       else if (option === 'last') day = new Date(year, date.getMonth() + 1, 0).getDate()
