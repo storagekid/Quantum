@@ -50,6 +50,19 @@ export const ModelsFetcher = {
     }
   },
   methods: {
+    applyFiltersToOptions (name) {
+      let options = []
+      for (let option in this.modelFilter[name].values) {
+        if (this.modelFilter[name].values[option] === 'delay') {
+          this.modelFilter[name].values[option] = ''
+          continue
+        } else if (!this.modelFilter[name].values[option]) continue
+        let value = typeof this.modelFilter[name].values[option] === 'object' ? this.modelFilter[name].values[option].value : this.modelFilter[name].values[option]
+        let operator = this.modelFilter[name].operators[option] ? this.modelFilter[name].operators[option] : '='
+        options.push([option, operator, value])
+      }
+      return options
+    },
     getModelsNeeded (object = this.objectModelsName) {
       this.$q.loading.show()
       // console.log('getModelsNeeded')
@@ -80,6 +93,11 @@ export const ModelsFetcher = {
                 continue
               }
               // console.log('Fetching: ' + name)
+              if (this.modelFilter) {
+                if (this.modelFilter[name]) {
+                  model['where'] = this.applyFiltersToOptions(name)
+                }
+              }
               this.$store.dispatch('Model/getModel', {
                 'model': name,
                 'options': model
@@ -114,6 +132,26 @@ export const ModelsFetcher = {
           this.$q.loading.hide()
         }
       })
+    },
+    updateFilteredModels (models) {
+      this.$q.loading.show()
+      let size = models.length
+      let counter = 0
+      for (let model of models) {
+        let options = this[this.objectModelsName][model]
+        options['where'] = this.applyFiltersToOptions(model)
+        this.$store.dispatch('Model/getModel', {
+          'model': model,
+          'options': options
+        }).then((response) => {
+          counter = counter + 1
+          if (counter === size) this.$q.loading.hide()
+        }).catch((error) => {
+          counter = counter + 1
+          this.$store.dispatch('Response/responseErrorManager', error.response)
+          if (counter === size) this.$q.loading.hide()
+        })
+      }
     },
     compareOptions (model) {
       // console.log('comparing')
