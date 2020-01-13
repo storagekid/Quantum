@@ -34,6 +34,7 @@ module.exports = function (ctx) {
         'QScrollArea',
         'QAvatar',
         'QForm',
+        'QField',
         'QSeparator',
         'QLayout',
         'QHeader',
