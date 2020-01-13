@@ -1,5 +1,11 @@
 <template>
   <q-page class="q-pa-md">
+    <model-filter-menu
+      :filters="modelFilter.mailings"
+      v-on:filtersUpdate="filterModels"
+      v-if="modelsReady"
+      >
+    </model-filter-menu>
     <model-table
       :modelName="modelName"
       :dense="true"
@@ -173,19 +179,35 @@
 </template>
 
 <script>
+import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
+import CustomSelect from '../components/form/customSelect'
+import ModelFilterMenu from '../components/model/modelFilterMenu'
 import { PageMixins } from '../mixins/pageMixins'
 import { ModelsFetcher } from '../mixins/modelMixin'
+import { ModelFilterMixins } from '../mixins/modelFilterMixins'
 import { customSelectMixins } from '../mixins/customSelectMixins'
-import CustomSelect from '../components/form/customSelect'
 import { multiAsyncActionBarsMixins } from '../mixins/multiAsyncActionBarsMixins'
-import MultiAsyncActionBars from '../components/loaders/multiAsyncActionBars'
+import { FormMixins } from '../mixins/formMixins'
 
 export default {
   name: 'mailings',
-  mixins: [ PageMixins, ModelsFetcher, multiAsyncActionBarsMixins, customSelectMixins ],
-  components: { CustomSelect, MultiAsyncActionBars },
+  mixins: [ PageMixins, ModelsFetcher, multiAsyncActionBarsMixins, customSelectMixins, FormMixins, ModelFilterMixins ],
+  components: { CustomSelect, MultiAsyncActionBars, ModelFilterMenu },
   data () {
     return {
+      modelFilter: {
+        mailings: {
+          values: {
+            starts_at: this.dateString('first'),
+            ends_at: this.dateString('last'),
+            campaign_id: 'delay'
+          },
+          operators: {
+            starts_at: '>=',
+            ends_at: '<='
+          }
+        }
+      },
       modelName: 'mailings',
       modelsNeeded: {
         mailings: {
