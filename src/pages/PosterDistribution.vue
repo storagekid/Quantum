@@ -957,6 +957,7 @@ export default {
         clinics: {
         },
         campaigns: {
+          refresh: true,
           with: ['campaign_poster_priorities'],
           withCount: ['campaign_posters'],
           orderBy: 'starts_at',
@@ -1988,15 +1989,13 @@ export default {
     savePosterPriorities () {
       return new Promise((resolve, reject) => {
         let modelsToUpdate = []
-        for (let originalPriority of this.model.clinic_poster_priorities) {
-          for (let campaign in this.posterPrioritiesByCamapaign) {
-            for (let newPriority of this.posterPrioritiesByCamapaign[campaign]) {
-              if (originalPriority.id !== newPriority.id) continue
-              else if (originalPriority.priority === newPriority.priority) break
-              else {
-                // console.log('Diferent Priority Found')
-                modelsToUpdate.push(newPriority)
-              }
+        for (let originalPriority of this.originalPosterPriorities[this.campaignSelectedId]) {
+          for (let newPriority of this.posterPrioritiesByCamapaign[this.campaignSelectedId]) {
+            if (originalPriority.id !== newPriority.id) continue
+            else if (originalPriority.priority === newPriority.priority) break
+            else {
+              // console.log('Diferent Priority Found')
+              modelsToUpdate.push(newPriority)
             }
           }
         }
