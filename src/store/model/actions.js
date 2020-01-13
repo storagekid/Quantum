@@ -218,6 +218,31 @@ export function sendNewForm (context, { source }) { // CLEANED
     })
   })
 }
+export function sendCloneForm (context, { source }) { // CLEANED
+  // console.log('sendNewForm')
+  console.log(source)
+  // console.log(source.model)
+  let payload = formConstructor(source.model)
+  // console.log(payload)
+  if (source.quasarInfo) payload.append('quasarData', JSON.stringify(source.quasarInfo))
+  if (source.options) payload.append('options', JSON.stringify(source.options))
+  let headers = {}
+  // console.log('HERE')
+  headers['Content-Type'] = 'multipart/form-data'
+  return new Promise((resolve, reject) => {
+    axios({
+      url: source.url,
+      method: 'POST',
+      data: payload
+      // headers: headers
+    }).then(({ data }) => {
+      resolve(data)
+      resolve()
+    }).catch((error) => {
+      reject(error.response)
+    })
+  })
+}
 export function sendUpdateForm (context, { source }) { // CLEANED
   // console.log(source.model)
   let payload = formConstructor(source.model, source.files ? source.files : false)

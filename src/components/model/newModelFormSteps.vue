@@ -125,7 +125,7 @@ export default {
     }
   },
   created () {
-    this.buildModel()
+    this.model = this.buildModel()
     this.buildStepper()
   }
 }

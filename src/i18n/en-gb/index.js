@@ -375,6 +375,8 @@ export default {
       create: 'Create',
       save: 'Save',
       saved: 'Saved',
+      clone: 'Clone',
+      cloned: 'Cloned',
       update: 'Update',
       updated: 'Updated',
       delete: 'Delete',

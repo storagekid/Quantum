@@ -35,7 +35,7 @@
             <q-btn-group flat rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
               <!-- <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/> -->
               <q-btn dense flat size="sm" rounded color="primary" icon="edit" @click="showUpdate('update')" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
-              <q-btn dense flat size="sm" rounded color="primary" icon="file_copy" @click="cloneModel = true" :disabled="!selectedItems.length || selectedItems.length  > 1 || true" v-if="can.create"/>
+              <q-btn dense flat size="sm" rounded color="primary" icon="file_copy" @click="cloneModel = true" :disabled="!selectedItems.length || selectedItems.length  > 1" v-if="can.create"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="find_replace" :label="!$q.screen.lt.md ? 'Multi Edit' : ''" @click="showUpdateBatch" :disabled="selectedItems.length < 2 || !batchForm" v-if="can.edit"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="delete" @click="removeModel = true" :disabled="!shouldRemove" v-if="can.delete"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="restore_from_trash" @click="restoreModel = true" :disabled="!shouldRestore" v-if="showRestore"/>
@@ -355,7 +355,7 @@
       </new-model>
     </q-dialog>
     <q-dialog v-model="cloneModel">
-      <clone-model-confirm :name="modelName" :model="selectedItems[0]" v-on:confirmed="cloneConfirmed"></clone-model-confirm>
+      <clone-model-confirm :name="modelName" :model="selectedItems[0]" v-on:formResponded="cloneConfirmed" v-on:formSent="changeStatus"></clone-model-confirm>
     </q-dialog>
     <q-dialog v-model="removeModel">
       <remove-model-confirm
@@ -448,6 +448,16 @@
         </q-page-container>
       </q-layout>
     </q-dialog>
+    <!-- <q-btn
+      fab
+      round
+      dense
+      size="xl"
+      color="warning"
+      text-color="primary"
+      @click="endUpdating"
+      icon="chevron_left"
+    /> -->
     <q-inner-loading :showing="visible">
       <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
     </q-inner-loading>
@@ -652,6 +662,9 @@ export default {
     }
   },
   methods: {
+    changeStatus () {
+      this.visible = !this.visible
+    },
     buildFilters (value) {
       // console.log(value)
       let searches = []
@@ -863,9 +876,13 @@ export default {
       this.selectedItems = []
       this.restoreModel = false
     },
-    cloneConfirmed () {
-      this.selectedItems = []
-      this.removeModel = false
+    cloneConfirmed (e) {
+      // console.log(e)
+      this.changeStatus()
+      if (e === 'success') {
+        this.selectedItems = []
+        this.cloneModel = false
+      }
     },
     getTable () {
       if (this.fetchingTable) return

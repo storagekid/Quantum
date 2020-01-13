@@ -208,8 +208,10 @@ export const ModelsFetcher = {
 export const ModelBuilder = {
   methods: {
     buildModel (source = null) {
+      // console.log(source)
+      let model = {}
       if (source) {
-        this.$set(this.model, 'id', source.id)
+        this.$set(model, 'id', source.id)
       }
       for (let step of this.quasarData.newLayout) {
         for (let row of step.fields) {
@@ -217,10 +219,10 @@ export const ModelBuilder = {
             let value
             if (row[field].type.name === 'boolean') {
               source ? value = source[field] : value = false
-              this.$set(this.model, field, value)
+              this.$set(model, field, value)
             } else {
               source ? value = source[field] : value = null
-              this.$set(this.model, field, value)
+              this.$set(model, field, value)
             }
           }
         }
@@ -232,10 +234,11 @@ export const ModelBuilder = {
             } else if (relation === 'stores' && this.$store.state.Scope.store[relation].selected.length === 1 && !source) {
               data = [this.getModelById(relation, this.$store.state.Scope.store[relation].selected[0])]
             } else if (source) data = source[relation]
-            this.$set(this.model, relation, data)
+            this.$set(model, relation, data)
           }
         }
       }
+      return model
     }
   }
 }
@@ -570,6 +573,30 @@ export const ModelController = {
             message: this.$t('forms.messages.successAction', {
               model: this.$tc('models.' + payload.name + '.name', 1),
               action: this.$tc('forms.actions.saved', 1)
+            }),
+            position: 'top',
+            type: 'positive' })
+          resolve(response)
+        }).catch((response) => {
+          this.$store.dispatch('Response/responseErrorManager', response)
+          reject(response)
+        })
+      })
+    },
+    cloneModel (payload) { // CLEANED
+      // console.log('saveModelOnNewController')
+      // console.log(payload)
+      return new Promise((resolve, reject) => {
+        payload.url = this.$store.state.App.dataWarehouse + 'model/clone'
+        payload.options = payload.options ? payload.options : this.$store.getters['Model/availableOptions'][payload.name]
+        this.$store.dispatch('Model/sendCloneForm', {
+          'source': payload
+        }).then((response) => {
+          // this.$store.commit('Model/addModelItems', { name: payload.name, items: response.model })
+          this.$store.dispatch('Notify/displayMessage', {
+            message: this.$t('forms.messages.successAction', {
+              model: this.$tc('models.' + payload.name + '.name', 1),
+              action: this.$tc('forms.actions.cloned', 1)
             }),
             position: 'top',
             type: 'positive' })
