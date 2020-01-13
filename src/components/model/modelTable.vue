@@ -331,19 +331,9 @@
         :relation="relatedTo"
         :quasarData="quasarData"
         v-on:modelUpdated="endUpdating"
+        v-on:cancelUpdate="endUpdating"
         v-if="updateModel">
       </update-model>
-      <q-page-sticky position="top-left" :offset="[5, 5]">
-        <q-btn
-          round
-          dense
-          size="xl"
-          color="warning"
-          text-color="primary"
-          @click="endUpdating"
-          icon="chevron_left"
-        />
-      </q-page-sticky>
     </template>
     <q-dialog v-model="newModel">
       <new-model
@@ -448,16 +438,6 @@
         </q-page-container>
       </q-layout>
     </q-dialog>
-    <!-- <q-btn
-      fab
-      round
-      dense
-      size="xl"
-      color="warning"
-      text-color="primary"
-      @click="endUpdating"
-      icon="chevron_left"
-    /> -->
     <q-inner-loading :showing="visible">
       <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
     </q-inner-loading>

@@ -19,6 +19,16 @@
       >
       </update-model-tabs>
     </q-card-section>
+    <q-btn
+      round
+      dense
+      size="xl"
+      color="warning"
+      text-color="primary"
+      @click="endUpdating"
+      icon="chevron_left"
+      style="position: absolute; left: -10px; top: -10px"
+    />
     <q-inner-loading :showing="visible">
       <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
     </q-inner-loading>
@@ -44,6 +54,9 @@ export default {
     closeModal () {
       this.$q.loading.hide()
       this.$emit('modelUpdated')
+    },
+    endUpdating () {
+      this.$emit('cancelUpdate')
     }
   }
 }
