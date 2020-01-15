@@ -2,7 +2,9 @@ export function responseErrorManager ({ commit, dispatch }, response) {
   // console.log('Hrer')
   // console.log(response)
   // if (typeof response === 'string') dispatch('Notify/displayMessage', { message: response, position: 'top', type: 'negative' }, { root: true })
-  if (response.data) {
+  if (!response) dispatch('responseNoResponse')
+  else if (response.status) dispatch('responseStatusPrinter', response)
+  else if (response.data) {
     if (response.data.exception) {
       if (response.status) dispatch('responseStatusPrinter', response)
       else dispatch('Notify/displayMessage', { message: 'Error en el servidor. Por favor contacte con el admimistrador.', position: 'top', type: 'negative' }, { root: true })
