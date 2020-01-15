@@ -30,12 +30,12 @@
         >
         <template v-slot:top="props">
           <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete || can.show)">
-            <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="newModel = !newModel" v-if="can.create && (!grid)"/>
+            <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="showNewModel" v-if="can.create && (!grid)"/>
             <q-btn dense flat size="lg" color="info" icon="visibility" @click="showUpdate('display')" :disabled="!selectedItems.length || selectedItems.length > 1"/>
             <q-btn-group flat rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
               <!-- <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/> -->
               <q-btn dense flat size="sm" rounded color="primary" icon="edit" @click="showUpdate('update')" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/>
-              <q-btn dense flat size="sm" rounded color="primary" icon="file_copy" @click="cloneModel = true" :disabled="!selectedItems.length || selectedItems.length  > 1" v-if="can.create"/>
+              <q-btn dense flat size="sm" rounded color="primary" icon="file_copy" @click="showNewModel('clone')" :disabled="!selectedItems.length || selectedItems.length  > 1" v-if="can.create"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="find_replace" :label="!$q.screen.lt.md ? 'Multi Edit' : ''" @click="showUpdateBatch" :disabled="selectedItems.length < 2 || !batchForm" v-if="can.edit"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="delete" @click="removeModel = true" :disabled="!shouldRemove" v-if="can.delete"/>
               <q-btn dense flat size="sm" rounded color="primary" icon="restore_from_trash" @click="restoreModel = true" :disabled="!shouldRestore" v-if="showRestore"/>
@@ -201,7 +201,11 @@
           </template>
         </q-tr>
         <template v-slot:body="props">
-          <q-tr :class="{selected: props.selected ? true : false, deleted: props.row.deleted_at ? true : false}">
+          <q-tr
+            :class="{selected: props.selected ? true : false, deleted: props.row.deleted_at ? true : false}"
+            @click.exact="rowClicked(props.row)"
+            @click.shift.exact="(rowShiftClicked(props.row))"
+            >
             <td class="row-checkbox">
               <q-checkbox dense v-model="props.selected"/>
             </td>
@@ -335,17 +339,19 @@
         v-if="updateModel">
       </update-model>
     </template>
-    <q-dialog v-model="newModel">
+    <q-dialog v-model="newModel.state">
       <new-model
         :modelName="modelName"
         :quasarData="quasarData"
         :relation="relatedTo"
+        :mode="newModel.mode"
+        :source="selectedItems[0]"
         v-on:profileCreated="endCreating"
-        v-if="newModel">
+        v-if="newModel.state">
       </new-model>
     </q-dialog>
     <q-dialog v-model="cloneModel">
-      <clone-model-confirm :name="modelName" :model="selectedItems[0]" v-on:formResponded="cloneConfirmed" v-on:formSent="changeStatus"></clone-model-confirm>
+      <clone-model-confirm :name="modelName" :source="selectedItems[0]" v-on:formResponded="cloneConfirmed" v-on:formSent="changeStatus"></clone-model-confirm>
     </q-dialog>
     <q-dialog v-model="removeModel">
       <remove-model-confirm
@@ -474,7 +480,10 @@ export default {
         index: null,
         blueprint: null
       },
-      newModel: false,
+      newModel: {
+        state: false,
+        mode: 'new'
+      },
       cloneModel: false,
       updateMode: 'update',
       updateModel: false,
@@ -489,6 +498,7 @@ export default {
       filters: {
         'searchBar': { text: '' }
       },
+      lastRowSelected: null,
       selectedItems: [],
       pagination: {
         sortBy: null,
@@ -517,6 +527,9 @@ export default {
     }
   },
   computed: {
+    selectedIds () {
+      return this.selectedItems.map(i => i.id)
+    },
     gridHeaderClasses () {
       if (this.$q.platform.is.mobile) return ['mobile-header-tr']
       return ''
@@ -642,6 +655,48 @@ export default {
     }
   },
   methods: {
+    rowShiftClicked (row) {
+      if (this.selectedItems.length) {
+        let lastIndex = null
+        let newIndex = null
+        let direction = null
+        let rowsToPush = []
+        for (let computedRow in this.$refs['table-' + this.modelName].computedRows) {
+          if (!lastIndex) {
+            if (this.$refs['table-' + this.modelName].computedRows[computedRow].id === this.selectedItems[(this.selectedItems.length - 1)].id) {
+              lastIndex = parseInt(computedRow)
+              continue
+            }
+          }
+          if (!newIndex) {
+            if (this.$refs['table-' + this.modelName].computedRows[computedRow].id === row.id) newIndex = parseInt(computedRow)
+          }
+          if (lastIndex !== null && newIndex !== null) break
+        }
+        if (lastIndex > newIndex) direction = -1
+        else direction = 1
+        let currentIndex = lastIndex
+        let moves = Math.abs(newIndex - lastIndex)
+        do {
+          currentIndex = currentIndex + direction
+          moves--
+          rowsToPush.push(this.$refs['table-' + this.modelName].computedRows[currentIndex])
+        } while (moves)
+        this.selectedItems = this.selectedItems.concat(rowsToPush)
+      }
+    },
+    rowClicked (row) {
+      this.selectedItems = [row]
+      this.$emit('rowClicked', row)
+    },
+    showNewModel (mode = null) {
+      if (!mode) {
+        this.newModel.mode = 'new'
+      } else {
+        this.newModel.mode = mode
+      }
+      this.newModel.state = true
+    },
     changeStatus () {
       this.visible = !this.visible
     },
@@ -835,7 +890,8 @@ export default {
       return name
     },
     endCreating () {
-      this.newModel = false
+      this.newModel.state = false
+      this.newModel.mode = 'new'
       this.selectedItems = []
       if (this.can.edit && this.editAferCreate) {
         this.selectedItems.push(this.$refs['table-' + this.modelName].computedRows[0])
