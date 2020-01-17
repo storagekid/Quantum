@@ -245,6 +245,7 @@ export const ModelBuilder = {
 export const ModelUpdaterBuilder = {
   methods: {
     buildUpdaterModel (source) {
+      let model = {}
       // console.log(source)
       if (source.length > 1) {
         this.buildUpdaterBatchModel(source)
@@ -252,7 +253,7 @@ export const ModelUpdaterBuilder = {
       }
       // console.log('Single Mode')
       // console.log('ModelUpdaterBuilder')
-      this.$set(this.model, 'id', source.id)
+      this.$set(model, 'id', source.id)
       for (let step of this.quasarData.updateLayout) {
         for (let row of step.fields) {
           for (let field in row) {
@@ -262,7 +263,7 @@ export const ModelUpdaterBuilder = {
             if (source && row[field].onObject) defSource = source[row[field].onObject]
             if (row[field].type.name === 'boolean') {
               defSource ? value = defSource[field] : value = false
-              this.$set(this.model, field, value)
+              this.$set(model, field, value)
             } else if (row[field].type.name === 'select') {
               if (defSource && defSource[field]) {
                 let relField
@@ -280,7 +281,7 @@ export const ModelUpdaterBuilder = {
               } else {
                 value = null
               }
-              this.$set(this.model, field, value)
+              this.$set(model, field, value)
             } else if (row[field].type.name === 'array') {
               if (defSource && defSource[field]) {
                 let item = row[field].type.array.filter(i => { return i.value === defSource[field] })[0]
@@ -288,10 +289,10 @@ export const ModelUpdaterBuilder = {
               } else {
                 value = null
               }
-              this.$set(this.model, field, value)
+              this.$set(model, field, value)
             } else {
               defSource ? value = defSource[field] : value = null
-              this.$set(this.model, field, value)
+              this.$set(model, field, value)
             }
           }
         }
@@ -301,14 +302,16 @@ export const ModelUpdaterBuilder = {
             if (relation === 'clinics' && this.$store.state.Scope.clinic[relation].items.length === 1 && !source) {
               data = [this.getModelById(relation, this.$store.state.Scope.clinic[relation].items[0])]
             } else if (source) data = source[relation]
-            this.$set(this.model, relation, data)
+            this.$set(model, relation, data)
             if (this.quasarData.relations[relation].type === 'HasManyThrough') {
               data = source[this.quasarData.relations[relation].middleModel]
-              this.$set(this.model, this.quasarData.relations[relation].middleModel, data)
+              this.$set(model, this.quasarData.relations[relation].middleModel, data)
             }
           }
         }
       }
+      // console.log('End ModelUpdaterBuilder')
+      return model
     },
     buildUpdaterBatchModel (source) {
       // console.log('BATCH MODE')
@@ -542,6 +545,7 @@ export const ModelController = {
         payload.url = this.$store.state.App.dataWarehouse + payload.name + '/' + payload.model.id
         payload.options = this.$store.getters['Model/availableOptions'][payload.name]
         // console.log('saveModelOnUpdateController')
+        // console.log(payload)
         this.$store.dispatch('Model/sendUpdateForm', {
           'source': payload
         }).then((response) => {
@@ -564,7 +568,7 @@ export const ModelController = {
       // console.log('saveModelOnNewController')
       return new Promise((resolve, reject) => {
         payload.url = this.$store.state.App.dataWarehouse + payload.name
-        payload.options = payload.options ? payload.options : this.$store.getters['Model/availableOptions'][payload.name]
+        payload.options = payload.options ? { ...payload.options, ...this.$store.getters['Model/availableOptions'][payload.name] } : this.$store.getters['Model/availableOptions'][payload.name]
         this.$store.dispatch('Model/sendNewForm', {
           'source': payload
         }).then((response) => {
