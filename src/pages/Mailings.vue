@@ -1,6 +1,7 @@
 <template>
   <q-page class="q-pa-md">
     <model-filter-menu
+      :modelName="modelName"
       :filters="modelFilter.mailings"
       v-on:filtersUpdate="filterModels"
       v-if="modelsReady"
@@ -199,7 +200,7 @@ export default {
         mailings: {
           values: {
             starts_at: this.dateString('first'),
-            ends_at: this.dateString('last'),
+            ends_at: null,
             campaign_id: 'delay'
           },
           operators: {
