@@ -3,8 +3,12 @@ import axios from 'axios'
 function formConstructor (source, files = null) {
   // console.log(source)
   let payload = new FormData()
+  let localFiles = {}
   for (let key of Object.keys(source)) {
-    if (source[key] === null || typeof source[key] === 'undefined') {
+    // console.log(key.indexOf('_file_id'))
+    if ((key.indexOf('_file_id') > -1)) {
+      if (source[key] instanceof File) localFiles[key] = source[key]
+    } else if (source[key] === null || typeof source[key] === 'undefined') {
       // console.log('Null')
       // console.log(key)
       payload.append(key, '')
@@ -30,6 +34,9 @@ function formConstructor (source, files = null) {
   }
   if (files) {
     for (let file in files) payload.append('files[' + file + ']', files[file])
+  }
+  if (localFiles) {
+    for (let file in localFiles) payload.append('files[' + file + ']', localFiles[file])
   }
   return payload
 }
@@ -197,7 +204,7 @@ export function sendNewForm (context, { source }) { // CLEANED
   // console.log('sendNewForm')
   // console.log(source)
   // console.log(source.model)
-  let payload = formConstructor(source.model)
+  let payload = formConstructor(source.model, source.files ? source.files : false)
   // console.log(payload)
   if (source.quasarInfo) payload.append('quasarData', JSON.stringify(source.quasarInfo))
   if (source.options) payload.append('options', JSON.stringify(source.options))
