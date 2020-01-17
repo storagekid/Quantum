@@ -1,7 +1,7 @@
 <template>
   <div class="row justify-center">
     <h3 class="q-display-2 text-center col-xs-12 text-tertiary q-my-none">Model Review</h3>
-    <q-card class="col-xs-12 col-sm-4" v-for="(group, index) in quasarData.newLayout" :key="'Review'+index">
+    <q-card flat class="col-xs-12 col-sm-4" v-for="(group, index) in quasarData.newLayout" :key="'Review'+index">
       <q-card-section class="text-primary uppercase">{{group.title}} {{group.subtitle ? group.subtitle : ''}}</q-card-section>
       <q-separator />
       <q-card-section>
@@ -78,13 +78,26 @@
         </template>
       </q-card-section>
     </q-card>
+    <q-card flat class="col-xs-12 col-sm-4" v-if="relationsToClone.length">
+      <q-card-section class="text-primary uppercase">Relations to Clone</q-card-section>
+      <q-separator />
+      <q-card-section>
+        <q-list dense>
+          <q-item v-for="(relation, index) in relationsToClone" :key="'RelationsFieldLabel'+index">
+            <q-item-section avatar>
+              {{$tc('models.' + relation + '.name', 2)}}
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-card-section>
+    </q-card>
   </div>
 </template>
 
 <script>
 export default {
   name: 'ModelReview',
-  props: ['model', 'quasarData'],
+  props: ['model', 'quasarData', 'mode', 'relationsToClone'],
   data () {
     return {}
   },
