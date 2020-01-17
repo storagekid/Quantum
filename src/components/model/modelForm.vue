@@ -197,7 +197,7 @@ import { FileMethods } from '../../mixins/fileMixin'
 export default {
   name: 'ModelForm',
   mixins: [customSelectMixins, FormMixins, FileMethods],
-  props: ['mode', 'modelName', 'model', 'quasarData', 'step', 'batchMode', 'batchSource', 'dense'],
+  props: ['mode', 'modelName', 'model', 'source', 'quasarData', 'step', 'batchMode', 'batchSource', 'dense'],
   components: { RelationCard, CustomSelect },
   data () {
     return {
@@ -260,13 +260,19 @@ export default {
       this.$store.dispatch('Notify/displayMessage', { message: 'File Saved', position: 'top', type: 'positive' })
       this.model[field.name] = null
     },
-    validateFromLaravel (rules) {
+    validateFromLaravel (rules, field) {
       let validations = {}
       for (let rule of rules) {
         if (typeof rule !== 'string') continue
         if (rule === 'required') {
           const { required } = require('vuelidate/lib/validators')
           validations = { ...validations, required }
+        } else if (rule === 'unique') {
+          if (this.mode === 'clone' && this.source) {
+            let sourceValue = this.source[field].trim()
+            const unique = (value) => value.trim() !== sourceValue
+            validations = { ...validations, unique }
+          }
         } else if (rule.includes('min:')) {
           const { minLength } = require('vuelidate/lib/validators')
           let minValue = parseInt(rule.substring((rule.indexOf(':') + 1)))
@@ -291,7 +297,7 @@ export default {
       for (let field in row) {
         if (this.batchMode && !row[field].batch) continue
         if (this.quasarData.rules[field]) {
-          model[field] = this.validateFromLaravel(this.quasarData.rules[field])
+          model[field] = this.validateFromLaravel(this.quasarData.rules[field], field)
         }
       }
     }
