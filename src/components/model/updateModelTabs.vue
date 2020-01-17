@@ -15,7 +15,6 @@
         :name="index"
         class="q-pa-none"
         keep-alive
-        style="display: contents"
         >
         <model-form
             :mode="mode"
@@ -117,7 +116,7 @@ export default {
     }
   },
   created () {
-    this.buildUpdaterModel(this.source)
+    this.model = this.buildUpdaterModel(this.source)
     this.buildStepper()
   }
 }
