@@ -12,6 +12,7 @@
           <q-input
             v-if="field.type.name === 'inputText'"
             icon="subject"
+            :dense="isDense"
             :label-width="12"
             bottom-slots
             :error="$v.model[field.name].$error && !filterMode"
@@ -28,6 +29,7 @@
           <q-input
             v-if="field.type.name === 'password'"
             icon="subject"
+            :dense="isDense"
             bottom-slots
             :error="$v.model[field.name].$error && !filterMode"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
@@ -43,6 +45,7 @@
           <q-input
             v-if="field.type.name === 'number'"
             icon="subject"
+            :dense="isDense"
             bottom-slots
             :error="$v.model[field.name].$error && !filterMode"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
@@ -59,6 +62,7 @@
           <q-input
             v-if="field.type.name === 'date'"
             mask="####-##-##"
+            :dense="isDense"
             :rules="[]"
             bottom-slots
             :error="$v.model[field.name].$error && !filterMode"
@@ -80,6 +84,7 @@
           </q-input>
           <custom-select
             v-if="field.type.name === 'select'"
+            :dense="isDense"
             :clearable="filterMode"
             :field="field"
             :excludeModel="field.type.hasFamily && mode === 'update' ? getFamily() : false"
@@ -92,6 +97,7 @@
           </custom-select>
           <q-select
             v-if="field.type.name === 'enum'"
+            :dense="isDense"
             icon="subject"
             bottom-slots
             :error="$v.model[field.name].$error && !filterMode"
@@ -106,6 +112,7 @@
           />
           <q-select
             v-if="field.type.name === 'array'"
+            :dense="isDense"
             icon="subject"
             bottom-slots
             :error="$v.model[field.name].$error && !filterMode"
@@ -119,6 +126,7 @@
           />
           <q-uploader
             v-if="field.type.name === 'file'"
+            :dense="isDense"
             class="full-width"
             bottom-slots
             :error="$v.model[field.name].$error && !filterMode"
@@ -189,7 +197,7 @@ import { FileMethods } from '../../mixins/fileMixin'
 export default {
   name: 'ModelForm',
   mixins: [customSelectMixins, FormMixins, FileMethods],
-  props: ['mode', 'modelName', 'model', 'quasarData', 'step', 'batchMode', 'batchSource'],
+  props: ['mode', 'modelName', 'model', 'quasarData', 'step', 'batchMode', 'batchSource', 'dense'],
   components: { RelationCard, CustomSelect },
   data () {
     return {
@@ -202,6 +210,10 @@ export default {
     }
   },
   computed: {
+    isDense () {
+      if (this.dense !== 'undefined' || this.$q.platform.is.mobile) return true
+      return false
+    },
     viewMode () {
       return this.mode === 'display'
     },
