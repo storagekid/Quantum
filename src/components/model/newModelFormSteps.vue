@@ -1,5 +1,5 @@
 <template>
-  <q-stepper v-model="stepName" color="primary" ref="stepper" alternative-labels animated>
+  <q-stepper v-model="stepName" color="primary" ref="stepper" flat swipeable alternative-labels animated>
       <q-step
         v-for="(step, index) in quasarData.newLayout"
         :key="index"
@@ -10,21 +10,53 @@
         :done-icon="step.doneIcon ? step.doneIcon : 'check'"
         :active-icon="step.ActiveIcon ? step.ActiveIcon : 'account_box'"
         :error-icon="step.ErrorIcon ? step.ErrorIcon : 'account_box'"
-        class="display-contents"
-        style="display: contents">
+        >
         <model-form
           :mode="'new'"
           :modelName="modelName"
           v-on:dirtiness="checkDirtyness"
           v-on:fieldChanged="updateAndCheck"
+          v-on:filesAdded="filesAdded"
           :model="model"
           :quasarData="quasarData"
           :step="step"
         >
         </model-form>
         <q-stepper-navigation>
-          <q-btn color="primary" @click="$refs.stepper.next()" :label="$t('navigation.next')" :disable="!cleanForm"/>
           <q-btn v-if="index > 0" color="primary" flat @click="$refs.stepper.previous()" :label="$t('navigation.previous')" />
+          <q-btn color="primary" @click="$refs.stepper.next()" :label="$t('navigation.next')" :disable="!cleanForm"/>
+        </q-stepper-navigation>
+      </q-step>
+      <q-step name="relationsToClone" title="Relaciones" icon="compare_arrows" v-if="mode === 'clone' && relations.length">
+        <p class="text-center">Would you like to clone relations too?</p>
+        <div class="text-center">
+          <q-btn-group>
+            <q-btn
+              label="All"
+              color="primary"
+              @click="selectAllRelations"
+              >
+            </q-btn>
+            <q-btn
+              label="None"
+              color="secondary"
+              text-color="primary"
+              @click="relationsSelected = []"
+              >
+            </q-btn>
+          </q-btn-group>
+          <q-option-group
+            class="q-mt-md"
+            v-model="relationsSelected"
+            :options="relations"
+            keep-color
+            color="primary"
+            type="toggle"
+          />
+        </div>
+        <q-stepper-navigation default>
+          <q-btn color="primary" flat @click="$refs.stepper.previous()" :label="$t('navigation.previous')" />
+          <q-btn color="primary" @click="$refs.stepper.next()" :label="$t('navigation.next')" :disable="!cleanForm"/>
         </q-stepper-navigation>
       </q-step>
 
@@ -45,18 +77,19 @@
 <script>
 import ModelForm from './modelForm'
 import ModelReview from './modelReview'
-import { ModelBuilder, ModelController, ModelRelations, RelationController } from '../../mixins/modelMixin'
+import { ModelBuilder, ModelUpdaterBuilder, ModelController, ModelRelations, RelationController } from '../../mixins/modelMixin'
 
 export default {
   name: 'NewModelFormSteps',
-  props: ['mode', 'modelName', 'quasarData', 'relation'],
+  props: ['mode', 'modelName', 'quasarData', 'relation', 'source'],
   components: { ModelForm, ModelReview },
-  mixins: [ModelBuilder, ModelController, ModelRelations, RelationController],
+  mixins: [ModelBuilder, ModelUpdaterBuilder, ModelController, ModelRelations, RelationController],
   data () {
     return {
       stepName: 0,
       steps: {},
-      model: {}
+      model: {},
+      relationsSelected: []
     }
   },
   computed: {
@@ -68,14 +101,39 @@ export default {
     },
     clinics () {
       return this.$store.state.Scope.clinics.items
+    },
+    uniqueFields () {
+      let fields = []
+      for (let field in this.quasarData.rules) {
+        if (this.quasarData.rules[field].includes('unique')) fields.push(field)
+      }
+      return fields
+    },
+    relations () {
+      if (Object.keys(this.quasarData.relations).length) {
+        let options = []
+        for (let relation in this.quasarData.relations) options.push({ label: this.$tc('models.' + relation + '.name', 2), value: relation })
+        return options
+      }
+      return []
     }
   },
   methods: {
+    filesAdded (payload) {
+      this.model[payload.field] = payload.files[0]
+    },
+    selectAllRelations () {
+      this.relationsSelected = this.relations.map(i => i.value)
+    },
     startSaving () {
       if (!this.cleanForm) return false
       this.$emit('formSent')
       if (!this.relation) {
         let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
+        if (this.mode === 'clone') {
+          payload.options = { relationsToClone: this.relationsSelected, sourceModel: this.model.id }
+          payload.model.id = null
+        }
         this.saveModel(payload, 'new').then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
       } else {
         let payload = this.buildRelationPayload({
@@ -125,7 +183,8 @@ export default {
     }
   },
   created () {
-    this.model = this.buildModel()
+    if (this.mode === 'clone' && this.source) this.model = this.buildUpdaterModel(this.source)
+    else this.model = this.buildModel()
     this.buildStepper()
   }
 }
