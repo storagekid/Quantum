@@ -350,9 +350,6 @@
         v-if="newModel.state">
       </new-model>
     </q-dialog>
-    <q-dialog v-model="cloneModel">
-      <clone-model-confirm :name="modelName" :source="selectedItems[0]" v-on:formResponded="cloneConfirmed" v-on:formSent="changeStatus"></clone-model-confirm>
-    </q-dialog>
     <q-dialog v-model="removeModel">
       <remove-model-confirm
         :modelQty="selectedItems.length"
@@ -455,7 +452,6 @@ import NewModel from './newModel'
 import UpdateModel from './updateModel'
 import RemoveModelConfirm from './removeModelConfirm'
 import RestoreModelConfirm from './restoreModelConfirm'
-import CloneModelConfirm from './cloneModelConfirm'
 import CustomSelect from '../form/customSelect'
 // import TableCell from '../table/tableCell'
 import TableGridCell from '../table/tableGridCell'
@@ -468,7 +464,7 @@ export default {
   name: 'ModelTable',
   props: ['mode', 'sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'forceTable', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
   mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
-  components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CloneModelConfirm, CustomSelect, TableGridCell },
+  components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CustomSelect, TableGridCell },
   data () {
     return {
       visible: false,
