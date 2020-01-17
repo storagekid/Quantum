@@ -30,7 +30,7 @@
         >
         <template v-slot:top="props">
           <template v-if="typeof hideHeaderButtons === 'undefined' && (can.create || can.edit || can.delete || can.show)">
-            <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="showNewModel" v-if="can.create && (!grid)"/>
+            <q-btn size="sm" color="primary" class="q-mr-md" icon="add_circle" @click="showNewModel('new')" v-if="can.create && (!grid)"/>
             <q-btn dense flat size="lg" color="info" icon="visibility" @click="showUpdate('display')" :disabled="!selectedItems.length || selectedItems.length > 1"/>
             <q-btn-group flat rounded class="q-mr-md" v-if="$store.state.User.role !== 'user'">
               <!-- <q-btn dense flat size="sm" rounded color="primary" icon="visibility" @click="showView" :disabled="!selectedItems.length || selectedItems.length > 1" v-if="can.edit"/> -->
@@ -345,7 +345,7 @@
         :quasarData="quasarData"
         :relation="relatedTo"
         :mode="newModel.mode"
-        :source="selectedItems[0]"
+        :source="newModel.source"
         v-on:profileCreated="endCreating"
         v-if="newModel.state">
       </new-model>
@@ -478,9 +478,9 @@ export default {
       },
       newModel: {
         state: false,
-        mode: 'new'
+        mode: 'new',
+        source: null
       },
-      cloneModel: false,
       updateMode: 'update',
       updateModel: false,
       updateModelBatch: false,
@@ -685,13 +685,10 @@ export default {
       this.selectedItems = [row]
       this.$emit('rowClicked', row)
     },
-    showNewModel (mode = null) {
-      if (!mode) {
-        this.newModel.mode = 'new'
-      } else {
-        this.newModel.mode = mode
-      }
+    showNewModel (mode) {
+      this.newModel.mode = mode
       this.newModel.state = true
+      if (mode === 'clone') this.newModel.source = this.selectedItems['0']
     },
     changeStatus () {
       this.visible = !this.visible
