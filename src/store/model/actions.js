@@ -227,7 +227,7 @@ export function sendNewForm (context, { source }) { // CLEANED
 }
 export function sendCloneForm (context, { source }) { // CLEANED
   // console.log('sendNewForm')
-  console.log(source)
+  // console.log(source)
   // console.log(source.model)
   let payload = formConstructor(source.model)
   // console.log(payload)
