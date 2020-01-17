@@ -367,6 +367,7 @@ export default {
   forms: {
     errors: {
       required: 'This field is required',
+      unique: 'The field must be unique',
       email: 'You must type a valid email',
       minLength: 'At least {min} characters are required',
       maxLength: 'It must be shorter than {max} characters'

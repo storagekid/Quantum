@@ -367,6 +367,7 @@ export default {
   forms: {
     errors: {
       required: 'El campo es obligatorio',
+      unique: 'El campo debe ser único',
       email: 'Debes escribir un email válido',
       minLength: 'Debe tener una longitud mínima de {min} caracteres',
       maxLength: 'Debe tener una longitud mínima de {max} caracteres'
