@@ -12,12 +12,13 @@
         :error-icon="step.ErrorIcon ? step.ErrorIcon : 'account_box'"
         >
         <model-form
-          :mode="'new'"
+          :mode="mode"
           :modelName="modelName"
           v-on:dirtiness="checkDirtyness"
           v-on:fieldChanged="updateAndCheck"
           v-on:filesAdded="filesAdded"
           :model="model"
+          :source="source"
           :quasarData="quasarData"
           :step="step"
         >
@@ -64,6 +65,8 @@
         <model-review
           :model="model"
           :quasarData="quasarData"
+          :mode="mode"
+          :relationsToClone="relationsSelected"
           >
         </model-review>
         <q-stepper-navigation default>
