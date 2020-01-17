@@ -7,6 +7,7 @@ export const PageMixins = {
       let classes = []
       if (this.$q.platform.is.desktop) classes.push('q-pa-md')
       else classes.push('q-pa-none')
+      return classes
     }
   },
   methods: {
