@@ -2,8 +2,10 @@
   <div id="table-scope" class="row q-gutter-md items-center justify-center">
     <q-btn-dropdown
       split
+      size="sm"
       color="primary"
       no-caps
+      class="q-mt-none"
       icon="filter_list"
       label="Filtrar"
       @click="sendFilters"
@@ -47,11 +49,12 @@
       </q-list>
     </q-btn-dropdown>
     <model-form
+      dense
       :mode="'filter'"
-      :modelName="'mailings'"
+      :modelName="modelName"
       :model="filters.values"
-      :quasarData="$store.state.Model.models.mailings.quasarData"
-      :step="$store.state.Model.models.mailings.quasarData.updateLayout[0]"
+      :quasarData="$store.state.Model.models[modelName].quasarData"
+      :step="$store.state.Model.models[modelName].quasarData.updateLayout[0]"
       v-on:fieldChanged="updateAndCheck"
       >
     </model-form>
@@ -66,7 +69,7 @@ export default {
   name: 'ModelFilterMenu',
   components: { ModelForm },
   mixins: [ ModelsFetcher ],
-  props: ['filters'],
+  props: ['modelName', 'filters'],
   data () {
     return {}
   },
