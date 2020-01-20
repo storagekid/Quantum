@@ -682,6 +682,12 @@ export default {
       }
     },
     rowClicked (row) {
+      if (this.selectedItems.length === 1) {
+        if (this.selectedItems[0].id === row.id) {
+          this.selectedItems = []
+          return
+        }
+      }
       this.selectedItems = [row]
       this.$emit('rowClicked', row)
     },
