@@ -56,9 +56,15 @@
       v-model="leftDrawerOpen"
       content-class="bg-accent text-accent shadow-5"
       >
-      <profile-card></profile-card>
-      <language-menu styles="margin: 0" btn-classes="q-pa-xs"></language-menu>
-      <main-menu></main-menu>
+      <div class="col">
+        <div style="height:25vh">
+          <profile-card></profile-card>
+          <language-menu styles="margin: 0" btn-classes="q-pa-xs"></language-menu>
+        </div>
+        <div class="col q-pt-md" style="height:75vh">
+          <main-menu></main-menu>
+        </div>
+      </div>
     </q-drawer>
 
     <q-page-container class="main-background page-container">

@@ -1,13 +1,15 @@
 <template>
-  <q-list
-    dense
-    class="q-mt-md bg-white text-accent"
-    >
-    <template v-for="item in menu.filtered_items">
-      <menu-item :item="item" :key="item.id" :parentGroups="[]" menuName="main-menu" :currentRoute="currentRoute" v-on:routeChanged="setCurrentRoute">
-      </menu-item>
-    </template>
-  </q-list>
+  <div style="max-height: 72vh; overflow: auto;">
+    <q-list
+      dense
+      class="bg-white text-accent"
+      >
+      <template v-for="item in menu.filtered_items">
+        <menu-item :item="item" :key="item.id" :parentGroups="[]" menuName="main-menu" :currentRoute="currentRoute" v-on:routeChanged="setCurrentRoute">
+        </menu-item>
+      </template>
+    </q-list>
+  </div>
 </template>
 
 <script>
