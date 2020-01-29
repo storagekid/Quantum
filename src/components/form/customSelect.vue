@@ -18,11 +18,12 @@
     :options="filteredOptions"
     @filter="!relation ? filterFn({name: field.type.model}, ...arguments) : filterFn({ name: field ? field.type.model : relation, key: field ? field.type.filterKey : relation, relation: relation }, ...arguments)"
     @filter-abort="abortFilteredOptions"
+    @clear="clearSelected"
     >
     <template slot="prepend">
       <q-icon name="subject"></q-icon>
     </template>
-    <template v-slot:append v-if="multiple">
+    <template v-slot:append v-if="multiple && options">
       <q-btn size="md" color="primary" icon="select_all" flat dense @click="selectAll"></q-btn>
     </template>
     <template v-slot:no-option>
@@ -32,10 +33,10 @@
         </q-item-section>
       </q-item>
     </template>
-    <template v-slot:selected v-if="customDisplay && value.length">
-      <q-chip square color="secondary" class="full-width">
-        <q-avatar icon="bookmark" color="primary" text-color="white" />
-        {{ customDisplay }}
+    <template v-slot:selected v-if="customDisplay && value.length > 1">
+      <q-chip square size="md" color="secondary" class="">
+        <q-avatar icon="bookmark" size="xs" color="primary" text-color="white" />
+        {{ customDisplayText }}
       </q-chip>
     </template>
   </q-select>
@@ -54,10 +55,10 @@ export default {
   },
   watch: {
     value () {
-      this.$emit('updated', this.value)
+      if (this.value !== this.initValue) this.$emit('updated', this.value)
     },
     initValue () {
-      this.value = this.initValue
+      this.value = this.multiple ? this.initValue ? Array.isArray(this.initValue) ? this.initValue : [this.initValue] : [] : this.initValue
     },
     all () {
       if (this.all) this.value = this.options
@@ -66,7 +67,19 @@ export default {
       this.options = this.sourceOptions
     }
   },
+  computed: {
+    customDisplayText () {
+      let text = ''
+      if (this.customDisplay && this.customDisplay !== true) text = this.customDisplay
+      else text = `${this.value.length} ${this.value.length > 1 || !this.value.length ? 'seleccionados' : 'seleccionado'}`
+      // else text = 'patata'
+      return text
+    }
+  },
   methods: {
+    clearSelected () {
+      this.value = this.multiple ? [] : ''
+    },
     selectAll () {
       this.value = this.filteredOptions ? this.filteredOptions : this.options
     },
@@ -139,8 +152,8 @@ export default {
       })
     }
   },
-  created () {
-    this.value = this.initValue
+  mounted () {
+    this.value = this.multiple ? this.initValue ? Array.isArray(this.initValue) ? this.initValue : [this.initValue] : [] : this.initValue
   }
 }
 </script>
