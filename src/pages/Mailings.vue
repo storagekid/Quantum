@@ -2,9 +2,13 @@
   <q-page class="q-pa-md">
     <model-filter-menu
       :modelName="modelName"
-      :filters="modelFilter.mailings"
-      v-on:filtersUpdate="filterModels"
-      v-if="modelsReady"
+      :formModels="formModels"
+      :selectModels="selectModels"
+      :filters="modelFilter[modelName]"
+      @updateFilters="filterModels"
+      @filtersUpdated="updateFilterData"
+      @selectsUpdated="updateSelectsData"
+      v-if="filterModelsReady"
       >
     </model-filter-menu>
     <model-table
@@ -201,11 +205,12 @@ export default {
           values: {
             starts_at: this.dateString('first'),
             ends_at: null,
-            campaign_id: 'delay'
+            campaign_id: ''
           },
           operators: {
             starts_at: '>=',
-            ends_at: '<='
+            ends_at: '<=',
+            campaign_id: 'in'
           }
         }
       },
@@ -214,6 +219,8 @@ export default {
         mailings: {
           full: true,
           withCount: ['mailing_designs', 'sanitary_codes'],
+          orderBy: 'starts_at',
+          orderDesc: true,
           appends: ['design_clinics']
         },
         clinics: {
