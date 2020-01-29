@@ -8,6 +8,7 @@
           v-if="(!batchMode || (batchMode && field.batch)) && (mode !== 'filter' || (mode === 'filter') && model[field.name] !== undefined)"
           :key="'F'+index"
           class="col-xs-12 col-sm-4"
+          :style="{'min-width': filterMode ? '300px' : ''}"
           >
           <q-input
             v-if="field.type.name === 'inputText'"
@@ -84,6 +85,8 @@
           </q-input>
           <custom-select
             v-if="field.type.name === 'select'"
+            :customDisplay="true"
+            :multiple="filterMode ? true : false"
             :dense="isDense"
             :clearable="filterMode"
             :field="field"
