@@ -172,6 +172,18 @@ export function getModel (context, { model, options }) {
     })
   })
 }
+export async function getLastId (context, { model }) {
+  // console.log('getLastId')
+  let item = null
+  if (!context.state.models[model]) {
+    // console.log('No Model Yet')
+    await context.dispatch('getModel', { model: model, options: { orderBy: 'starts_at', desc: true } })
+      .then((response) => {
+        item = response.data.model[response.data.model.length - 1]
+      })
+  }
+  return item.id
+}
 export function getModelView (context, { model, id, params }) {
   return new Promise((resolve, reject) => {
     axios({
