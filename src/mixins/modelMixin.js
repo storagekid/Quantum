@@ -47,19 +47,51 @@ export const ModelsFetcher = {
         options[model] = this.compareOptions(model)
       }
       return options
+    },
+    shouldFetch () {
+      if (typeof this.waitForFilters !== 'undefined') {
+        if (this.waitForFilters) return false
+      } else if (this.fetching) return false
+      return true
     }
   },
   methods: {
-    applyFiltersToOptions (name) {
+    applyFiltersToOptions (name, operators = null) {
       let options = []
       for (let option in this.modelFilter[name].values) {
+        let operator = this.modelFilter[name].operators[option] ? this.modelFilter[name].operators[option] : '='
+        if (operators) {
+          if (Array.isArray(operators)) {
+            if (!operators.includes(operator)) continue
+          } else if (typeof operators === 'string') if (operators !== operator) continue
+        } else return options
         if (this.modelFilter[name].values[option] === 'delay') {
           this.modelFilter[name].values[option] = ''
           continue
         } else if (!this.modelFilter[name].values[option]) continue
-        let value = typeof this.modelFilter[name].values[option] === 'object' ? this.modelFilter[name].values[option].value : this.modelFilter[name].values[option]
-        let operator = this.modelFilter[name].operators[option] ? this.modelFilter[name].operators[option] : '='
-        options.push([option, operator, value])
+        let value = 'null'
+        if (Array.isArray(this.modelFilter[name].values[option])) {
+          if (!this.modelFilter[name].values[option].length) continue
+          value = []
+          for (let data of this.modelFilter[name].values[option]) {
+            if (typeof data === 'object') value.push(data['value'])
+            else value.push(data)
+          }
+        } else if (typeof this.modelFilter[name].values[option] === 'object') {
+          value = this.modelFilter[name].values[option].value
+        } else if (typeof this.modelFilter[name].values[option] === 'string') {
+          if (this.modelFilter[name].values[option][0] === '#') {
+            if (this.modelFilter[name].values[option].indexOf('lastId') > -1) {
+              value = []
+              // let id = await this.$store.dispatch('Model/getLastId', { model: 'mailings' })
+              value.push(this.modelFilter[name].values[option])
+              // console.log(value)
+              // value = []
+            }
+          } else value = this.modelFilter[name].values[option]
+        } else value = this.modelFilter[name].values[option]
+        if (operator === 'in') options.push([option, Array.isArray(value) ? value : [value]])
+        else options.push([option, operator, value])
       }
       return options
     },
@@ -95,7 +127,8 @@ export const ModelsFetcher = {
               // console.log('Fetching: ' + name)
               if (this.modelFilter) {
                 if (this.modelFilter[name]) {
-                  model['where'] = this.applyFiltersToOptions(name)
+                  model['where'] = this.applyFiltersToOptions(name, ['=', '<=', '>='])
+                  model['whereIn'] = this.applyFiltersToOptions(name, ['in'])
                 }
               }
               this.$store.dispatch('Model/getModel', {
@@ -133,24 +166,42 @@ export const ModelsFetcher = {
         }
       })
     },
-    updateFilteredModels (models) {
-      this.$q.loading.show()
-      let size = models.length
-      let counter = 0
-      for (let model of models) {
-        let options = this[this.objectModelsName][model]
-        options['where'] = this.applyFiltersToOptions(model)
-        this.$store.dispatch('Model/getModel', {
-          'model': model,
-          'options': options
-        }).then((response) => {
-          counter = counter + 1
-          if (counter === size) this.$q.loading.hide()
-        }).catch((error) => {
-          counter = counter + 1
-          this.$store.dispatch('Response/responseErrorManager', error.response)
-          if (counter === size) this.$q.loading.hide()
+    fetchModels () {
+      if (this.shouldFetch) {
+        this.fetching = true
+        this.getModelsNeeded(this.objectModelsName).then((size) => {
+          this.modelsFetched = size
+          this.fetching = false
+          this.$q.loading.hide()
+        }).catch((response) => {
+          this.fetching = false
+          this.$q.loading.hide()
         })
+      }
+    },
+    updateFilteredModels (models) {
+      if (!this.modelsReady) this.fetchModels()
+      else {
+        this.$q.loading.show()
+        let size = models.length
+        let counter = 0
+        for (let model of models) {
+          let options = this[this.objectModelsName][model]
+          options['where'] = this.applyFiltersToOptions(model, ['=', '<=', '>='])
+          options['whereIn'] = this.applyFiltersToOptions(model, ['in'])
+          // options['where'] = this.applyFiltersToOptions(model)
+          this.$store.dispatch('Model/getModel', {
+            'model': model,
+            'options': options
+          }).then((response) => {
+            counter = counter + 1
+            if (counter === size) this.$q.loading.hide()
+          }).catch((error) => {
+            counter = counter + 1
+            this.$store.dispatch('Response/responseErrorManager', error.response)
+            if (counter === size) this.$q.loading.hide()
+          })
+        }
       }
     },
     compareOptions (model) {
@@ -171,37 +222,11 @@ export const ModelsFetcher = {
     }
   },
   created () {
-    if (!this.fetching) {
-      // console.log('created in ModelsFetcher')
-      // vm.getModelsNeeded()
-      this.fetching = true
-      this.getModelsNeeded(this.objectModelsName).then((size) => {
-        this.modelsFetched = size
-        this.fetching = false
-        this.$q.loading.hide()
-      }).catch((response) => {
-        this.fetching = false
-        this.$q.loading.hide()
-      })
-    }
+    this.fetchModels()
   },
   beforeRouteEnter (to, from, next) {
-    // console.log('beforeRouteEnter')
     next(vm => {
-      // console.log('Next on beforeRouteEnter')
-      if (!vm.fetching) {
-        // console.log('Fetching False')
-        vm.fetching = true
-        let object = vm.modelsNeeded ? 'modelsNeeded' : 'componentModels'
-        vm.getModelsNeeded(object).then((size) => {
-          vm.modelsFetched = size
-          vm.fetching = false
-          vm.$q.loading.hide()
-        }).catch((response) => {
-          vm.fetching = false
-          vm.$q.loading.hide()
-        })
-      }
+      vm.fetchModels()
     })
   }
 }
