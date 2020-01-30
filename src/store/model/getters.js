@@ -8,3 +8,13 @@ export function availableOptions (state) {
   }
   return options
 }
+export function availableModels (state) {
+  let options = {}
+  for (let model in state.models) {
+    options[model] = {
+      items: state.models[model].items,
+      quasarData: state.models[model].quasarData
+    }
+  }
+  return options
+}
