@@ -48,7 +48,7 @@
         </q-item>
       </q-list>
     </q-btn-dropdown>
-    <template v-if="formModels.length">
+    <template v-if="formModels.length && $store.getters['Model/availableModels'][modelName].quasarData">
       <div v-for="formModel in formModels" :key="'form' + formModel">
         <model-form
           dense
@@ -119,13 +119,13 @@ export default {
       this.$emit('updateFilters')
     },
     updateAndCheck (payload) {
-      this.filters.values[payload.field] = payload.value
+      this.model[payload.field] = payload.value
     },
     setMonths (count) {
       let date = new Date()
       date.setMonth(date.getMonth() - count)
-      this.filters.values['starts_at'] = this.dateString('first', date)
-      this.filters.values['ends_at'] = this.dateString('last')
+      this.model['starts_at'] = this.dateString('first', date)
+      this.model['ends_at'] = this.dateString('last')
     }
   },
   created () {
