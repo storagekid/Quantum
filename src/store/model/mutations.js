@@ -50,6 +50,7 @@ export function updateModelOptions (state, { name, options }) {
     withCount: options.withCount || false,
     withTrashed: options.withTrashed || false,
     where: options.where || false,
+    whereIn: options.whereIn || false,
     paginate: options.paginate || false,
     orderBy: options.orderBy || false,
     orderDesc: options.orderDesc || false,
