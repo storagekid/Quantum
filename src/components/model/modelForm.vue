@@ -127,6 +127,16 @@
             v-model="model[field.name]"
             :options="field.type.array"
           />
+          <form-file
+            v-if="field.type.name === 'file'"
+            :modelField="batchSource"
+            :field="field"
+            :viewMode="viewMode"
+            :filterMode="filterMode"
+            :modelName="modelName"
+            :quasarData="quasarData"
+            >
+          </form-file>
           <q-uploader
             v-if="field.type.name === 'file'"
             :dense="isDense"
@@ -192,6 +202,7 @@
 
 <script>
 import CustomSelect from '../form/customSelect'
+import FormFile from '../form/formFile'
 import { customSelectMixins } from '../../mixins/customSelectMixins'
 import RelationCard from '../relation/relationCard'
 import { FormMixins } from '../../mixins/formMixins'
@@ -201,7 +212,7 @@ export default {
   name: 'ModelForm',
   mixins: [customSelectMixins, FormMixins, FileMethods],
   props: ['mode', 'modelName', 'model', 'source', 'quasarData', 'step', 'batchMode', 'batchSource', 'dense'],
-  components: { RelationCard, CustomSelect },
+  components: { RelationCard, CustomSelect, FormFile },
   data () {
     return {
       relationName: null

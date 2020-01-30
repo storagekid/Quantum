@@ -366,6 +366,7 @@ export default {
       return this.mode === 'display'
     },
     parentIndex () {
+      if (!this.$store.state.Model.models[this.relatedTo]) return null
       return this.$store.state.Model.models[this.relatedTo].items.findIndex((i) => { return i.id === this.model.id })
     }
   },

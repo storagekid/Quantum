@@ -1005,6 +1005,7 @@ export const SortingRelation = {
   },
   computed: {
     relationItemsLength () {
+      if (!this.model[this.relationData.name]) return null
       return this.model[this.relationData.name].length
     },
     itemsOrderChanged () {
@@ -1129,6 +1130,6 @@ export const SortingRelation = {
       this.buildLastItemOrder()
       this.correctFieldOrderValue()
     }
-    this.lastItemCount = this.model[this.relationData.name].length
+    if (this.model[this.relationData.name]) this.lastItemCount = this.model[this.relationData.name].length
   }
 }
