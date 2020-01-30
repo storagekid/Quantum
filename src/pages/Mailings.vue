@@ -217,6 +217,7 @@ export default {
       modelName: 'mailings',
       modelsNeeded: {
         mailings: {
+          refresh: true,
           full: true,
           withCount: ['mailing_designs', 'sanitary_codes'],
           orderBy: 'starts_at',
