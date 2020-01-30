@@ -9,8 +9,10 @@ export const ModelsFetcher = {
   computed: {
     computedFecthing () {
       let object = this.modelsNeeded ? this.modelsNeeded : this.componentModels
-      if (Object.keys(object).length !== this.modelsFetched) return true
-      else {
+      if (Object.keys(object).length !== this.modelsFetched) {
+        // console.log('Numbers doesn\'t match')
+        return true
+      } else {
         for (let model in object) {
           // console.log(model)
           if (!object[model].refresh) return false
@@ -111,19 +113,19 @@ export const ModelsFetcher = {
           for (let name in this[object]) {
             let model = this[object][name]
             if (!this.$store.state.Model.models[name] || model.refresh) {
-              // console.log('Getting Models')
-              // console.log(name)
-              // console.log(model)
-              if (!this.$store.state.Model.models[name]) {
-                // console.log('Not found in STORE')
-              } else if (!this.$store.state.Model.models[name].items.length) {
-                // console.log('No Items Yet in Model')
-              } else if (this.compareOptions(name, object)) {
-                // console.log('Same  Options')
-                counter = counter + 1
-                if (counter === size) resolve(size)
-                continue
+              if (object !== 'filterModelsNeeded') {
+                if (!this.$store.state.Model.models[name]) {
+                  // console.log('Not found in STORE')
+                } else if (!this.$store.state.Model.models[name].items.length) {
+                  // console.log('No Items Yet in Model')
+                } else if (this.compareOptions(name, object)) {
+                  // console.log('Same  Options')
+                  counter = counter + 1
+                  if (counter === size) resolve(size)
+                  continue
+                }
               }
+
               // console.log('Fetching: ' + name)
               if (this.modelFilter) {
                 if (this.modelFilter[name]) {
