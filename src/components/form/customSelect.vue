@@ -33,7 +33,7 @@
         </q-item-section>
       </q-item>
     </template>
-    <template v-slot:selected v-if="customDisplay && value.length > 1">
+    <template v-slot:selected v-if="showCustomDisplayText">
       <q-chip square size="md" color="secondary" class="">
         <q-avatar icon="bookmark" size="xs" color="primary" text-color="white" />
         {{ customDisplayText }}
@@ -68,11 +68,21 @@ export default {
     }
   },
   computed: {
+    showCustomDisplayText () {
+      if (!this.customDisplay) return false
+      if (!this.value) return false
+      if (Array.isArray(this.value)) {
+        if (!this.value.length > 1) return false
+      }
+      if (typeof this.value === 'object') return false
+      return true
+    },
     customDisplayText () {
       let text = ''
       if (this.customDisplay && this.customDisplay !== true) text = this.customDisplay
-      else text = `${this.value.length} ${this.value.length > 1 || !this.value.length ? 'seleccionados' : 'seleccionado'}`
-      // else text = 'patata'
+      else if (Array.isArray(this.value)) {
+        text = `${this.value.length} ${this.value.length > 1 || !this.value.length ? 'seleccionados' : 'seleccionado'}`
+      } else if (typeof this.value === 'object') text = this.value.label
       return text
     }
   },
