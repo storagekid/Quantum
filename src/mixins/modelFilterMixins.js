@@ -2,7 +2,8 @@ export const ModelFilterMixins = {
   data () {
     return {
       filterModelsFetched: 0,
-      fetchingFilterModels: false
+      fetchingFilterModels: false,
+      filtersFetchingTime: null
     }
   },
   computed: {
@@ -29,19 +30,31 @@ export const ModelFilterMixins = {
       return models
     },
     waitForFilters () {
+      if (typeof this.filterModelsNeeded === 'undefined') return false
       if (this.filterModelsReady) return false
       return true
     },
     filterModelsReady () {
       if (typeof this.filterModelsNeeded === 'undefined') {
-        // console.log('filterModelsNeeded true')
+        if (typeof this.modelFilter === 'undefined') {
+          return true
+        }
         return true
-      } else if (Object.keys(this.filterModelsNeeded).length !== this.filterModelsFetched) {
-        // console.log('filterModelsNeeded length: ' + Object.keys(this.filterModelsNeeded).length)
-        // console.log('filterModelsFetched length: ' + this.filterModelsFetched)
-        return false
+      } else {
+        if (Object.keys(this.filterModelsNeeded).length !== this.filterModelsFetched) {
+          for (let model in this.filterModelsNeeded) {
+            if (!this.$store.state.Model.models[model]) return false
+            if (!this.$store.state.Model.models[model].refreshed) return false
+            if (this.$store.state.Model.models[model].refreshed > this.filtersFetchingTime) return false
+          }
+        } else {
+          for (let model in this.filterModelsNeeded) {
+            if (!this.$store.state.Model.models[model]) return false
+            if (!this.$store.state.Model.models[model].refreshed) return false
+            if (this.$store.state.Model.models[model].refreshed > this.filtersFetchingTime) return false
+          }
+        }
       }
-      // console.log('Returning true')
       return true
     },
     shouldFetchFilterModels () {
@@ -88,36 +101,28 @@ export const ModelFilterMixins = {
           // this.modelFilter[e.model].values[this.filterModelsNeeded[field].modelField].push(e.values[field].value)
         } else this.modelFilter[e.model].values[this.filterModelsNeeded[field].modelField] = e.values[field].value
       }
+    },
+    fetchFilterModels () {
+      if (this.shouldFetchFilterModels) {
+        this.fetchingFilterModels = true
+        this.getModelsNeeded('filterModelsNeeded').then((size) => {
+          this.filterModelsFetched = size
+          this.fetchingFilterModels = false
+          this.filtersFetchingTime = Date.now()
+          this.$q.loading.hide()
+        }).catch((response) => {
+          this.fetchingFilterModels = false
+          this.$q.loading.hide()
+        })
+      }
     }
   },
   created () {
-    if (this.shouldFetchFilterModels) {
-      this.fetchingFilterModels = true
-      this.getModelsNeeded('filterModelsNeeded').then((size) => {
-        this.filterModelsFetched = size
-        this.fetchingFilterModels = false
-        this.$q.loading.hide()
-      }).catch((response) => {
-        this.fetchingFilterModels = false
-        this.$q.loading.hide()
-      })
-    }
+    this.fetchFilterModels()
   },
   beforeRouteEnter (to, from, next) {
-    // console.log('beforeRouteEnter')
     next(vm => {
-      // console.log('Next on beforeRouteEnter')
-      if (vm.shouldFetchFilterModels) {
-        vm.fetchingFilterModels = true
-        vm.getModelsNeeded('filterModelsNeeded').then((size) => {
-          vm.filterModelsFetched = size
-          vm.fetchingFilterModels = false
-          vm.$q.loading.hide()
-        }).catch((response) => {
-          vm.fetchingFilterModels = false
-          vm.$q.loading.hide()
-        })
-      }
+      vm.fetchFilterModels()
     })
   }
 }
