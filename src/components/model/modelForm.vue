@@ -129,58 +129,17 @@
           />
           <form-file
             v-if="field.type.name === 'file'"
-            :modelField="batchSource"
+            :modelField="model"
+            :relation="relation"
             :field="field"
             :viewMode="viewMode"
             :filterMode="filterMode"
             :modelName="modelName"
             :quasarData="quasarData"
+            @filesAdded="filesAdded"
+            @restoreOriginalFile="restoreOriginalFile"
             >
           </form-file>
-          <q-uploader
-            v-if="field.type.name === 'file'"
-            :dense="isDense"
-            class="full-width"
-            bottom-slots
-            :error="$v.model[field.name].$error && !filterMode"
-            url=""
-            :factory="sendFile(field, ...arguments)"
-            :label="field.label"
-            :hide-upload-button="true"
-            :hide-upload-progress="true"
-            @added="uploadFilesAdded($event, field.name)"
-            @uploaded="finishUploading(field, ...arguments)"
-            :disable="viewMode"
-            >
-            <template v-slot:header="scope" v-if="model[field.name] && typeof model[field.name] !== 'object'">
-              <div class="row no-wrap items-center q-pa-sm q-gutter-xs">
-                <q-btn v-if="scope.queuedFiles.length > 0" icon="clear_all" @click="scope.removeQueuedFiles" round dense flat >
-                  <q-tooltip>Clear All</q-tooltip>
-                </q-btn>
-                <q-btn v-if="scope.uploadedFiles.length > 0" icon="done_all" @click="scope.removeUploadedFiles" round dense flat >
-                  <q-tooltip>Remove Uploaded Files</q-tooltip>
-                </q-btn>
-                <q-spinner-gears v-if="scope.isUploading" class="q-uploader__spinner" />
-                <div class="col">
-                  <div class="q-uploader__title">
-                    <q-img style="max-height: 100px" contain :src="getThumbnail(field.name)"></q-img>
-                  </div>
-                  <div class="q-uploader__subtitle">{{ scope.uploadSizeLabel }} / {{ scope.uploadProgressLabel }}</div>
-                </div>
-                <q-btn v-if="scope.canAddFiles" type="a" icon="refresh" round dense flat>
-                  <q-uploader-add-trigger />
-                  <q-tooltip>Pick Files</q-tooltip>
-                </q-btn>
-                <q-btn v-if="scope.canUpload" icon="cloud_upload" @click="scope.upload" round dense flat >
-                  <q-tooltip>Upload Files</q-tooltip>
-                </q-btn>
-
-                <q-btn v-if="scope.isUploading" icon="clear" @click="scope.abort" round dense flat >
-                  <q-tooltip>Abort Upload</q-tooltip>
-                </q-btn>
-              </div>
-            </template>
-          </q-uploader>
         </div>
       </template>
     </div>
@@ -194,6 +153,7 @@
         :mode="mode"
         :batchMode="batchMode"
         :batchSource="batchSource"
+        @restoreOriginalFile="restoreOriginalFile"
         >
       </relation-card>
     </template>
@@ -211,7 +171,7 @@ import { FileMethods } from '../../mixins/fileMixin'
 export default {
   name: 'ModelForm',
   mixins: [customSelectMixins, FormMixins, FileMethods],
-  props: ['mode', 'modelName', 'model', 'source', 'quasarData', 'step', 'batchMode', 'batchSource', 'dense'],
+  props: ['mode', 'modelName', 'model', 'relation', 'source', 'quasarData', 'step', 'batchMode', 'batchSource', 'dense'],
   components: { RelationCard, CustomSelect, FormFile },
   data () {
     return {
@@ -236,44 +196,6 @@ export default {
     }
   },
   methods: {
-    getThumbnail (field) {
-      let name = field.substr(0, field.indexOf('_file_id'))
-      let url = this.$store.state.App.publicSources + '/' + this.batchSource[name].thumbnail
-      return url
-    },
-    uploadFilesAdded (files, field) {
-      this.$emit('filesAdded', { files: files, field: field })
-    },
-    sendFile (files, field) {
-      return (files) => {
-        // console.log(field)
-        // console.log(files)
-        let name = this.model.name + ' ' + field.name.substring(0, field.name.indexOf('_file_id'))
-        let dir = this.modelName + '/' + this.model.id
-        return new Promise((resolve, reject) => {
-          resolve({
-            url: this.$store.state.App.dataWarehouse + 'files',
-            headers: [
-              { name: 'Authorization', value: 'Bearer ' + this.$store.state.Auth.token },
-              { name: 'X-Requested-With', value: 'XMLHttpRequest' }
-            ],
-            fieldName: 'file',
-            formFields: [
-              { name: 'fieldName', value: field.name },
-              { name: 'nameSpace', value: this.quasarData.nameSpace },
-              { name: 'modelId', value: this.model.id },
-              { name: 'fileName', value: name },
-              { name: 'fileDir', value: dir },
-              { name: 'thumbnail', value: field.type.thumbnail ? field.type.thumbnail : true }
-            ]
-          })
-        })
-      }
-    },
-    finishUploading (field, info) {
-      this.$store.dispatch('Notify/displayMessage', { message: 'File Saved', position: 'top', type: 'positive' })
-      this.model[field.name] = null
-    },
     validateFromLaravel (rules, field) {
       let validations = {}
       for (let rule of rules) {
