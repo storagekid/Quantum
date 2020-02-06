@@ -271,7 +271,9 @@ export const ModelBuilder = {
 }
 export const ModelUpdaterBuilder = {
   methods: {
-    buildUpdaterModel (source) {
+    buildUpdaterModel (source, quasarData = null) {
+      if (!quasarData) quasarData = this.quasarData
+      console.log(quasarData)
       let model = {}
       // console.log(source)
       if (source.length > 1) {
@@ -281,7 +283,7 @@ export const ModelUpdaterBuilder = {
       // console.log('Single Mode')
       // console.log('ModelUpdaterBuilder')
       this.$set(model, 'id', source.id)
-      for (let step of this.quasarData.updateLayout) {
+      for (let step of quasarData.updateLayout) {
         for (let row of step.fields) {
           for (let field in row) {
             // console.log(field)
@@ -317,6 +319,17 @@ export const ModelUpdaterBuilder = {
                 value = null
               }
               this.$set(model, field, value)
+            } else if (row[field].type.name === 'file') {
+              // console.log('File!!!!')
+              let fieldName = field.substr(0, field.indexOf('_file_id'))
+              // console.log(fieldName)
+              if (defSource && defSource[fieldName]) {
+                // console.log('Found in Parent')
+                value = defSource[fieldName]
+              } else {
+                value = null
+              }
+              this.$set(model, fieldName, value)
             } else {
               defSource ? value = defSource[field] : value = null
               this.$set(model, field, value)
@@ -330,9 +343,9 @@ export const ModelUpdaterBuilder = {
               data = [this.getModelById(relation, this.$store.state.Scope.clinic[relation].items[0])]
             } else if (source) data = source[relation]
             this.$set(model, relation, data)
-            if (this.quasarData.relations[relation].type === 'HasManyThrough') {
-              data = source[this.quasarData.relations[relation].middleModel]
-              this.$set(model, this.quasarData.relations[relation].middleModel, data)
+            if (quasarData.relations[relation].type === 'HasManyThrough') {
+              data = source[quasarData.relations[relation].middleModel]
+              this.$set(model, quasarData.relations[relation].middleModel, data)
             }
           }
         }
@@ -707,9 +720,12 @@ export const RelationController = {
       let copy = {}
       if (quasarData['quasarData']) quasarData = quasarData.quasarData
       for (let field in data) {
-        this.$set(copy, field, data[field])
+        if (typeof data[field] !== 'object' && typeof data[field] !== 'undefined') this.$set(copy, field, data[field])
+        // this.$set(copy, field, data[field])
         if (quasarData.formFields[field] && data[field]) {
-          if (fieldsToExtract.includes(quasarData.formFields[field].type.name)) {
+          if (quasarData.formFields[field].type.name === 'file') {
+            this.$set(copy, field, data[field])
+          } else if (fieldsToExtract.includes(quasarData.formFields[field].type.name)) {
             copy[field] = data[field].value
           }
         }
