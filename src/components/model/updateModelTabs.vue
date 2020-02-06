@@ -22,12 +22,14 @@
             :batchSource="source"
             :modelName="modelName"
             :model="model"
+            :relation="relation"
             :quasarData="quasarData"
             :step="step"
-            v-on:dirtiness="checkDirtyness"
-            v-on:loading="$emit('loading')"
-            v-on:loaded="$emit('loaded')"
-            v-on:filesAdded="filesAdded"
+            @dirtiness="checkDirtyness"
+            @loading="$emit('loading')"
+            @loaded="$emit('loaded')"
+            @filesAdded="filesAdded"
+            @restoreOriginalFile="restoreOriginalFile"
           >
         </model-form>
         <div class="row">
@@ -73,7 +75,11 @@ export default {
   },
   methods: {
     filesAdded (payload) {
-      this.model[payload.field] = payload.files[0]
+      this.$set(this.model, payload.field, payload.files)
+    },
+    restoreOriginalFile (payload) {
+      this.model[payload.field] = this.source[payload.field]
+      this.model[payload.fileFieldName] = this.source[payload.fileFieldName]
     },
     startUpdate () {
       if (!this.cleanForm) return false
