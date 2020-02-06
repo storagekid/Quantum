@@ -65,8 +65,6 @@ export const FileMethods = {
       document.body.removeChild(link)
     },
     removeFile (id) {
-      console.log('WTF-2')
-      console.log(id)
       return new Promise((resolve, reject) => {
         let url = this.$store.state.App.dataWarehouse + 'files/' + id
         this.$axios({

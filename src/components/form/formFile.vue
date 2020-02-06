@@ -67,7 +67,7 @@ export default {
   },
   watch: {
     'modelField.base_af_file_id' () {
-      console.log('File Changed')
+      // console.log('File Changed')
     }
   },
   computed: {
@@ -147,7 +147,7 @@ export default {
       this.closeRemoveWarning()
     },
     sendRemoveRelationFile (payload) {
-      console.log('Removing Relation File')
+      // console.log('Removing Relation File')
       this.removeRelationFile(payload)
         .then(() => {
           this.restoreOriginalFile()
@@ -157,7 +157,7 @@ export default {
         })
     },
     sendRemoveModelFile (payload) {
-      console.log('Removing File')
+      // console.log('Removing File')
       this.removeModelFile(payload)
         .then(() => {
           this.restoreOriginalFile()

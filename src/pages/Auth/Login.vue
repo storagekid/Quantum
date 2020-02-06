@@ -61,10 +61,6 @@ export default {
       this.storeCard = false
     },
     loggedIn (response) {
-      // if (response) {
-      //   console.log(response)
-      //   return
-      // }
       this.user = response.user
       this.menus = response.menus
       this.routes = response.routes

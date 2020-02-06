@@ -672,11 +672,11 @@ export default {
   },
   created () {
     // let child = this.model[this.openRelation].find((item) => { return item.id === this.editing })
-    console.log('Relation Card Creating')
+    // console.log('Relation Card Creating')
     if (this.editing !== false) {
-      console.log('Editing')
+      // console.log('Editing')
       let child = this.model[this.openRelation][this.editing]
-      console.log(child)
+      // console.log(child)
       this.relation = this.buildUpdaterModel(child)
     }
     // this.buildRelationData(this.relationData)

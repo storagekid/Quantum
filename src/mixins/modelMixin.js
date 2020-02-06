@@ -273,7 +273,6 @@ export const ModelUpdaterBuilder = {
   methods: {
     buildUpdaterModel (source, quasarData = null) {
       if (!quasarData) quasarData = this.quasarData
-      console.log(quasarData)
       let model = {}
       // console.log(source)
       if (source.length > 1) {
