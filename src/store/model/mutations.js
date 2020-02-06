@@ -177,6 +177,31 @@ export function updateRelationItems ({ models }, { name, relation, item, parentI
     }
   }
 }
+export function removeModelFile ({ models }, { modelName, modelId, fieldName, fileFieldName }) {
+  // console.log('NAme: ' + name)
+  // console.log('ID: ' + id)
+  console.log('removeModelFile Mutation')
+  console.log(modelName)
+  console.log(modelId)
+  console.log(fieldName)
+  console.log(fileFieldName)
+  if (!models[modelName]) return true
+  let model = models[modelName].items.find((item) => item.id === modelId)
+  console.log(model)
+  model[fieldName] = null
+  model[fileFieldName] = null
+  // models[name].items.splice(models[name].items.indexOf(item), 1)
+}
+export function removeRelationFile ({ models }, { parentName, parentId, modelName, modelId, fieldName, fileFieldName }) {
+  // console.log('NAme: ' + name)
+  // console.log('ID: ' + id)
+  if (!models[parentName]) return true
+  let parent = models[parentName].items.find((item) => item.id === parentId)
+  let child = parent[modelName].find((item) => item.id === modelId)
+  child[fieldName] = null
+  child[fileFieldName] = null
+  // models[name].items.splice(models[name].items.indexOf(item), 1)
+}
 export function sortRelationItems ({ models }, { name, index, relation, field }) {
   models[name].items[index][relation].sort((a, b) => (a[field] > b[field]) ? 1 : ((b[field] > a[field]) ? -1 : 0))
 }
