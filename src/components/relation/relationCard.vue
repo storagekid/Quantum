@@ -82,18 +82,19 @@
                   type="number"
                   @blur="$v.relation[field.name].$touch()"
                   />
-                <q-uploader
+                <form-file
                   v-if="field.type.name === 'file'"
-                  :class="field.type.name === 'boolean' ? 'items-center' : 'items-start'"
-                  bottom-slots
-                  :error="relationData.quasarData.fields.includes(field.name) ? $v.relation[field.name].$error : false"
-                  url=""
-                  :upload-factory="uploadFile"
-                  label="Add a File to upload"
-                  :hide-upload-button="true"
-                  :hide-upload-progress="true"
-                  @added="uploadFilesAdded($event, relationData.name, field.name)"
-                />
+                  :modelField="relation"
+                  :relation="{name: relatedTo, id: model.id}"
+                  :field="field"
+                  :viewMode="viewMode"
+                  :filterMode="false"
+                  :modelName="openRelation"
+                  :quasarData="relationData"
+                  @filesAdded="filesAdded"
+                  @restoreOriginalFile="restoreOriginalFile"
+                  >
+                </form-file>
                 <q-select
                   v-if="['array', 'arrayUnique'].includes(field.type.name)"
                   v-show="field.name !== relationData.quasarData.listFields.draggable"
@@ -331,20 +332,21 @@
 </template>
 
 <script>
-import { ModelRelations, RelationController, SortingRelation } from '../../mixins/modelMixin'
+import { ModelRelations, ModelUpdaterBuilder, RelationController, SortingRelation } from '../../mixins/modelMixin'
 import { searchMethods } from '../../mixins/tableMixin'
 import { FileMethods } from '../../mixins/fileMixin'
-import RemoveModelConfirm from '../model/removeModelConfirm'
 import { customSelectMixins } from '../../mixins/customSelectMixins'
-import CustomSelect from '../form/customSelect'
 import { multiAsyncActionBarsMixins } from '../../mixins/multiAsyncActionBarsMixins'
 import MultiAsyncActionBars from '../loaders/multiAsyncActionBars'
+import RemoveModelConfirm from '../model/removeModelConfirm'
+import CustomSelect from '../form/customSelect'
+import FormFile from '../form/formFile'
 
 export default {
   name: 'RelationCard',
   props: ['relationData', 'relatedTo', 'model', 'modelData', 'mode', 'batchMode', 'batchSource'],
-  mixins: [ModelRelations, RelationController, SortingRelation, searchMethods, FileMethods, multiAsyncActionBarsMixins, customSelectMixins],
-  components: { RemoveModelConfirm, CustomSelect, MultiAsyncActionBars },
+  mixins: [ModelRelations, ModelUpdaterBuilder, RelationController, SortingRelation, searchMethods, FileMethods, multiAsyncActionBarsMixins, customSelectMixins],
+  components: { RemoveModelConfirm, CustomSelect, MultiAsyncActionBars, FormFile },
   data () {
     return {
       showMultiuploader: false,
@@ -407,15 +409,7 @@ export default {
           }).catch(() => { this.relationLoader = false })
       }
     },
-    // hideDatePicker (index) {
-    //   let picker = 'qDateProxy-' + index
-    //   // console.log(picker)
-    //   this.$refs[picker][0].hide()
-    // },
     renderStore (object, path) {
-      // console.log('Render Store')
-      // console.log(object)
-      // console.log(path)
       if (path.indexOf('.') > -1) {
         let names = path.split('.')
         let item = object[names[0]]
@@ -596,15 +590,6 @@ export default {
       // })
       // this.closeRelationForm()
     },
-    uploadFilesAdded (files, relation, field) {
-      this.relation[field] = files[0]
-      this.$v.relation[field].$touch()
-    },
-    uploadFile (file, updateProgress) {
-      return new Promise((resolve, reject) => {
-        resolve(file)
-      })
-    },
     // END FILE METHODS
     showRemoveRelation (relation) {
       this.removeModel = true
@@ -637,7 +622,8 @@ export default {
       this.editing = sourceIndex
       // console.log(item)
       // this.editingId = item.id
-      this.buildRelationData(this.relationData, item)
+      this.relation = this.buildUpdaterModel(item, this.relationData.quasarData)
+      // this.buildRelationData(this.relationData, item)
       this.openRelation = relation
     },
     validateFromLaravel (rules) {
@@ -685,7 +671,15 @@ export default {
     return { relation }
   },
   created () {
-    this.buildRelationData(this.relationData)
+    // let child = this.model[this.openRelation].find((item) => { return item.id === this.editing })
+    console.log('Relation Card Creating')
+    if (this.editing !== false) {
+      console.log('Editing')
+      let child = this.model[this.openRelation][this.editing]
+      console.log(child)
+      this.relation = this.buildUpdaterModel(child)
+    }
+    // this.buildRelationData(this.relationData)
   },
   mounted () {
     this.$v.$touch()
