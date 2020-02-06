@@ -1,5 +1,18 @@
 export const FileMethods = {
+  data () {
+    return {
+      filePicked: null
+    }
+  },
   methods: {
+    filesAdded (payload) {
+      // this.model[payload.field] = payload.files[0]
+      this.filePicked = payload.files[0]
+      this.$emit('filesAdded', { files: payload.files[0], field: payload.field })
+    },
+    restoreOriginalFile (payload) {
+      this.$emit('restoreOriginalFile', payload)
+    },
     uploadFile (payload) {
       return new Promise((resolve, reject) => {
         // console.log(id)
@@ -52,6 +65,8 @@ export const FileMethods = {
       document.body.removeChild(link)
     },
     removeFile (id) {
+      console.log('WTF-2')
+      console.log(id)
       return new Promise((resolve, reject) => {
         let url = this.$store.state.App.dataWarehouse + 'files/' + id
         this.$axios({
@@ -64,6 +79,42 @@ export const FileMethods = {
           this.$store.dispatch('Response/responseErrorManager', response)
           reject()
         })
+      })
+    },
+    removeModelFile (payload) {
+      return new Promise((resolve, reject) => {
+        this.removeFile(payload.fileId)
+          .then(() => {
+            this.$store.commit('Model/removeModelFile', {
+              modelName: payload.modelName,
+              modelId: payload.modelId,
+              fieldName: payload.fieldName,
+              fileFieldName: payload.fileFieldName
+            })
+            resolve()
+          }).catch(() => {
+            this.$store.dispatch('Notify/displayMessage', { message: 'Error on Mutation', position: 'top', type: 'negative' }, { root: true })
+            reject()
+          })
+      })
+    },
+    removeRelationFile (payload) {
+      return new Promise((resolve, reject) => {
+        this.removeFile(payload.fileId)
+          .then(() => {
+            this.$store.commit('Model/removeRelationFile', {
+              parentName: payload.parentName,
+              parentId: payload.parentId,
+              modelName: payload.modelName,
+              modelId: payload.modelId,
+              fieldName: payload.fieldName,
+              fileFieldName: payload.fileFieldName
+            })
+            resolve()
+          }).catch(() => {
+            this.$store.dispatch('Notify/displayMessage', { message: 'Error on Mutation', position: 'top', type: 'negative' }, { root: true })
+            reject()
+          })
       })
     }
   },
