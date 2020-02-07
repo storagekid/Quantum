@@ -141,6 +141,7 @@ export default {
       } else {
         let payload = this.buildRelationPayload({
           relatedTo: this.quasarData.nameSpace,
+          relatedToID: this.relation.id,
           relation: this.modelName,
           model: this.model,
           index: false,
@@ -151,9 +152,14 @@ export default {
           id: this.model['id'],
           quasarData: this.$store.state.Model.models[this.relation.name].quasarData.relations[this.modelName]
         })
-        this.mode === 'update'
-          ? this.updateRelation(payload).then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
-          : this.saveRelation(payload).then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
+        if (this.mode === 'clone') {
+          payload.options = { relationsToClone: this.relationsSelected, sourceModel: this.model.id }
+          payload.model.id = null
+        }
+        this.updateRelation(payload).then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
+        // this.mode === 'clone'
+        //   ? this.updateRelation(payload).then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
+        //   : this.saveRelation(payload).then(() => { this.$emit('formRespondedOK') }).catch(() => { this.$emit('formRespondedWithErrors') })
       }
     },
     checkDirtyness (payload) {
