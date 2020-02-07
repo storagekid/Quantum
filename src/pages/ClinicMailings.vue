@@ -64,7 +64,9 @@ export default {
         mailings: {
           filterType: 'select',
           modelField: 'mailing_design.mailing_id',
-          refresh: true
+          refresh: true,
+          orderBy: 'starts_at',
+          orderDesc: true
         }
       },
       modelFilter: {
