@@ -88,7 +88,7 @@
             :customDisplay="true"
             :multiple="filterMode ? true : false"
             :dense="isDense"
-            :clearable="filterMode"
+            :clearable="clearable(field.name)"
             :field="field"
             :excludeModel="field.type.hasFamily && mode === 'update' ? getFamily() : false"
             :initValue="model[field.name]"
@@ -196,6 +196,9 @@ export default {
     }
   },
   methods: {
+    clearable (field) {
+      return this.filterMode || this.quasarData.rules[field].includes('nullable')
+    },
     validateFromLaravel (rules, field) {
       let validations = {}
       for (let rule of rules) {
