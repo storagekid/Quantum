@@ -25,12 +25,19 @@
           </q-btn-group>
         </div>
       </q-img>
-      <q-pdfviewer
-        v-if="fileFormat === 'pdf'"
-        v-model="hasFile"
-        :src="fileUrl"
-        type="html5"
-      />
+      <template v-if="fileFormat === 'pdf'">
+        <q-pdfviewer
+          v-model="hasFile"
+          :src="fileUrl"
+          type="html5"
+          content-class="fit container"
+          inner-content-class="fit container"
+        />
+        <q-card-actions align="center">
+          <q-btn flat color="primary" icon="refresh" @click="pickFile"></q-btn>
+          <q-btn flat color="negative" icon="delete" @click="removeFileGate(field)"></q-btn>
+        </q-card-actions>
+      </template>
       <q-inner-loading :showing="loadingVisible">
         <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
       </q-inner-loading>
@@ -219,3 +226,13 @@ export default {
   }
 }
 </script>
+
+<style>
+  .container {
+    max-height: 70%;
+    min-width: 400px;
+    min-height: 400px;
+    width: 100%;
+    height: 100%;
+  }
+</style>
