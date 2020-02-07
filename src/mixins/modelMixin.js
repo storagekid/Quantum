@@ -840,6 +840,8 @@ export const RelationController = {
     },
     sendNewRelationForm (payload) {
       return new Promise((resolve, reject) => {
+        payload.url = this.$store.state.App.dataWarehouse + payload.name
+        payload.options = payload.options ? { ...payload.options, ...this.$store.getters['Model/availableOptions'][payload.name] } : this.$store.getters['Model/availableOptions'][payload.name]
         this.$store.dispatch('Model/sendNewForm', {
           'source': payload
         }).then((response) => {
