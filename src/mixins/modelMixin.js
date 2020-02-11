@@ -840,7 +840,7 @@ export const RelationController = {
     },
     sendNewRelationForm (payload) {
       return new Promise((resolve, reject) => {
-        payload.url = this.$store.state.App.dataWarehouse + payload.name
+        if (!payload.url) payload.url = this.$store.state.App.dataWarehouse + payload.name
         payload.options = payload.options ? { ...payload.options, ...this.$store.getters['Model/availableOptions'][payload.name] } : this.$store.getters['Model/availableOptions'][payload.name]
         this.$store.dispatch('Model/sendNewForm', {
           'source': payload
@@ -886,7 +886,8 @@ export const RelationController = {
     },
     saveHasMany (payload) { // CLEANED
       return new Promise((resolve, reject) => {
-        // console.log('saveHasMany')
+        console.log('saveHasMany')
+        console.log(payload)
         payload.url = this.$store.state.App.dataWarehouse + payload.parentName + '/' + payload.parentId + '/' + payload.relation
         payload.quasarInfo = { 'relatedId': payload.parentId, 'parentNameSpace': payload.parentNameSpace, 'relation': payload.relation }
         payload.model[payload.quasarData.getForeignKeyName] = payload.parentId
