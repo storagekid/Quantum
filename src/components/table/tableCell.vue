@@ -1,25 +1,84 @@
 <template>
   <div>
-    <slot :name="'body-cell-' + name" v-bind:item="cellItem">
-      <span class="text-bold text-primary" v-if="cellItem.length < ($q.screen.lt.md ? 20 : 40)">{{ cellItem }}</span>
-      <div class="text-bold text-primary ellipsis" style="max-width: 100px" v-else>
-        {{ cellItem ? cellItem : '*' }}
-        <q-tooltip content-style="font-size: 16px">
-          <div style="max-width: 600px">{{ cellItem }}</div>
-        </q-tooltip>
+      <div v-if="columnType === 'boolean'" class="q-pl-sm">
+        <q-icon size="xs" name="check_circle" v-if="(cellItem && !columnTypeOptions.length) || (columnTypeOptions.length && !cellItem)" color="positive"></q-icon>
+        <q-icon size="xs" name="clear" v-else color="negative"></q-icon>
       </div>
-    </slot>
+      <template v-else-if="columnType === 'file'">
+        <div v-if="cellItem">
+          <q-img style="max-height: 100px" contain :src="$store.state.App.publicSources + '/' + cellItem">
+          </q-img>
+          <q-tooltip self="center left" anchor="center left" content-style="min-width: 300px; max-height: 300px display: flex">
+            <q-img :src="$store.state.App.publicSources + '/' + cellItem">
+            </q-img>
+          </q-tooltip>
+        </div>
+        <span v-else class="text-negative text-bold q-pl-lg"> - </span>
+      </template>
+      <template v-else-if="Array.isArray(cellItem)">
+        <template v-if="columnType === 'array'">
+          <span v-if="columnTypeOptions.mode === 'count'">{{cellItem.length}}</span>
+        </template>
+        <ul v-else-if="cellItem.length" class="q-ma-none">
+          <li v-for="(item, index) in cellItem" :key="'ai' + index">
+            <span class="text-bold text-italic text-caption">{{ item.label}}</span>
+          </li>
+        </ul>
+        <span v-else class="text-negative text-bold q-pl-lg"> - </span>
+      </template>
+      <div class="" v-else>
+        <span v-if="!cellItem" class="text-negative text-bold q-pl-md"> - </span>
+        <span v-else-if="columnType === 'currency'">{{ parseFloat(cellItem) + ' €'}}</span>
+        <template v-else>
+          <template v-if="columnTypeOptions.linebreak">
+            <div v-if="!textToolarge(breakLines(cellItem).upperLine)">{{ breakLines(cellItem).upperLine }}</div>
+            <div class="text-bold text-primary ellipsis" style="max-width: 100px" v-else>
+              {{ breakLines(cellItem).upperLine ? breakLines(cellItem).upperLine : '*' }}
+              <q-tooltip content-style="font-size: 16px">
+                <div style="max-width: 600px">{{ breakLines(cellItem).upperLine }}</div>
+              </q-tooltip>
+            </div>
+            <div v-if="!textToolarge(breakLines(cellItem).bottomLine, 40)" class="text-caption">{{ breakLines(cellItem).bottomLine }}</div>
+            <div class="ellipsis text-caption" style="max-width: 100px" v-else>
+              {{ breakLines(cellItem).bottomLine ? breakLines(cellItem).bottomLine : '*' }}
+              <q-tooltip content-style="font-size: 16px">
+                <div style="max-width: 600px">{{ breakLines(cellItem).bottomLine }}</div>
+              </q-tooltip>
+            </div>
+          </template>
+          <div class="text-bold text-primary ellipsis" style="max-width: 100px" v-else-if="itemTooLarge">
+            {{ cellItem ? cellItem : '*' }}
+            <q-tooltip content-style="font-size: 16px">
+              <div style="max-width: 600px">{{ cellItem }}</div>
+            </q-tooltip>
+          </div>
+          <span v-else>{{ cellItem }}</span>
+        </template>
+      </div>
   </div>
 </template>
 
 <script>
 export default {
   name: 'TableCell',
-  props: ['item', 'row', 'name'],
+  props: ['row', 'name', 'column'],
   data () {
     return {}
   },
   computed: {
+    itemTooLarge () {
+      if (typeof this.cellItem !== 'string') return false
+      return this.cellItem.length > (this.$q.screen.lt.md ? 20 : 40)
+    },
+    cellItemType () {
+      return typeof this.cellItem
+    },
+    columnType () {
+      return this.column.type.name
+    },
+    columnTypeOptions () {
+      return this.column.type.options
+    },
     cellItem () {
       // console.log(this.name)
       if (this.name.indexOf('.') > -1) {
@@ -38,6 +97,45 @@ export default {
         return item
       }
       return this.row[this.name] ? this.row[this.name] : ''
+    }
+  },
+  methods: {
+    textToolarge (text, length = 40) {
+      // console.log(text)
+      return text.length > (this.$q.screen.lt.md ? 20 : length)
+    },
+    breakLines (text) {
+      // console.log(text)
+      let upperLine = ''
+      let bottomLine = ''
+      for (let needle of this.columnTypeOptions.linebreak.needles) {
+        if (text.indexOf(needle) > -1) {
+          upperLine = text.substring(0, text.indexOf(needle))
+          bottomLine = text.substring(text.indexOf(needle))
+          break
+        }
+      }
+      return { upperLine, bottomLine }
+    },
+    upperLine (text) {
+      let upperLine = ''
+      for (let needle of this.columnTypeOptions.linebreak.needles) {
+        if (text.indexOf(needle) > -1) {
+          upperLine = text.substring(0, text.indexOf(needle))
+          break
+        }
+      }
+      return upperLine
+    },
+    bottomLine (text) {
+      let upperLine = ''
+      for (let needle of this.columnTypeOptions.linebreak.needles) {
+        if (text.indexOf(needle) > -1) {
+          upperLine = text.substring(0, text.indexOf(needle))
+          break
+        }
+      }
+      return upperLine
     }
   }
 }
