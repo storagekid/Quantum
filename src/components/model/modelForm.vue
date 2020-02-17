@@ -127,6 +127,18 @@
             v-model="model[field.name]"
             :options="field.type.array"
           />
+          <q-toggle
+            v-if="field.type.name === 'boolean'"
+            color="primary"
+            checked-icon="check"
+            unchecked-icon="clear"
+            keep-color
+            :label="field.label"
+            v-model="model[field.name]"
+            :true-value="1"
+            :false-value="0"
+            >
+          </q-toggle>
           <form-file
             v-if="field.type.name === 'file'"
             :modelField="model"
