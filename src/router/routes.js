@@ -31,9 +31,27 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/materials',
+        name: 'materials',
+        component: () => import('pages/Stationary.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/personal-tags',
         name: 'personal-tags',
         component: () => import('pages/PersonalTags.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/business-cards',
+        name: 'business-cards',
+        component: () => import('pages/BusinessCards.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/medical-chart',
+        name: 'medical-chart',
+        component: () => import('pages/MedicalChart.vue'),
         meta: { requiresAuth: true }
       },
       {
@@ -124,6 +142,12 @@ const routes = [
         path: '/providers',
         name: 'providers',
         component: () => import('pages/Providers.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/product-categories',
+        name: 'product-categories',
+        component: () => import('pages/ProductCategories.vue'),
         meta: { requiresAuth: true }
       },
       {
