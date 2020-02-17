@@ -8,20 +8,9 @@
       :dense="true"
       hideHeaderButtons
       tableView="PosterDistributionDashBoard"
-      startFilter="&&Carteles!=&&Distribuciones!=&&Activa=="
+      startFilter="&&Carteles!=&&Distribuciones!=&&Activa!="
       v-if="modelsReady"
       >
-      <template slot="body-cell-deleted_at" slot-scope="item" :item="item">
-        <q-icon name="check_circle" v-if="item.item" color="negative"></q-icon>
-        <q-icon name="check_circle" v-else color="positive"></q-icon>
-      </template>
-      <template slot="body-cell-open" slot-scope="item" :item="item">
-        <q-icon name="check_circle" v-if="!item.item" color="negative"></q-icon>
-        <q-icon name="check_circle" v-else color="positive"></q-icon>
-      </template>
-      <!-- <template slot="body-cell-clinic_posters" slot-scope="item" :item="item">
-        {{ item.item.filter((i) => { return !i.ends_at} ).length }}
-      </template> -->
       <template slot="body-cell-clinic_distributions_by_campaign" slot-scope="item" :item="item">
         <template v-if="item.item">
           <template v-if="Object.keys(item.item).length">

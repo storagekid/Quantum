@@ -4,31 +4,18 @@
       :modelName="modelName"
       :sticky="true"
       :virtualScroll="true"
-      :dense="true"
+      dense
       :editAferCreate="true"
       :getModelView="true"
       v-if="modelsReady"
       >
       <template slot="body-cell-emails" slot-scope="item" :item="item">
         <div v-for="(email, index) in item.item" :key="index">
-          <q-btn dense small flat color="primary">
+          <span class="text-bold text-primary">
             {{ email.email }}
-          </q-btn>
-          <q-chip dense square color="tertiary-light" text-color="black">{{ email.type }}</q-chip>
+          </span>
+          <q-chip dense square size="sm" color="tertiary-light" text-color="black">{{ email.type }}</q-chip>
         </div>
-      </template>
-      <template slot="body-cell-clinic_profiles" slot-scope="item" :item="item">
-        <div v-for="(clinicProfile, index) in item.item" :key="index">
-            <q-chip dense square color="tertiary-light" text-color="black">{{clinicProfile.clinic.nickname}}</q-chip>
-        </div>
-      </template>
-      <template slot="body-cell-phones" slot-scope="item" :item="item">
-        <div v-for="(phone, index) in item.item" :key="index">
-            {{ phone.number }}
-        </div>
-      </template>
-      <template slot="body-cell-user_id" slot-scope="item" :item="item">
-        <q-icon size="22px" color="positive" name="check_circle" v-if="item.item"></q-icon>
       </template>
     </model-table>
   </q-page>

@@ -7,14 +7,6 @@
       :rows="20"
       v-if="modelsReady"
       >
-      <template slot="body-cell-open" slot-scope="item" :item="item">
-        <q-icon name="check_circle" v-if="item.item" color="positive"></q-icon>
-        <q-icon name="check_circle" v-else color="negative"></q-icon>
-      </template>
-      <template slot="body-cell-active" slot-scope="item" :item="item">
-        <q-icon name="check_circle" v-if="item.item" color="positive"></q-icon>
-        <q-icon name="check_circle" v-else color="negative"></q-icon>
-      </template>
       <template slot="body-cell-actions" slot-scope="item" :item="item">
         <q-btn-dropdown
           icon="insert_photo"
@@ -44,9 +36,6 @@
         <q-card-section>
           <div class="q-mt-md text-subtitle2 text-center">Total: {{ clinicsSelected.length }} </div>
         </q-card-section>
-        <!-- <q-card-section>
-          <q-btn class="full-width" outline color="info" @click="clinicsSelected = clinicOptions" :disable="clinicsSelected === clinicOptions" label="Todas"></q-btn>
-        </q-card-section> -->
         <q-card-section>
           <clinic-scope-component
             :sourceClinics="clinicOptionsIds"
@@ -54,22 +43,6 @@
             >
           </clinic-scope-component>
         </q-card-section>
-        <!-- <q-card-section class="row items-center">
-          <custom-select
-            :all="clinicsSelected.length === clinicOptions.length"
-            v-if="clinicOptions.length"
-            :dense="true"
-            multiple
-            counter
-            :hide-bottom-space="true"
-            :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona las clínicas'} }}"
-            :sourceOptions="clinicOptions"
-            :clearable='true'
-            :initValue="clinicsSelected"
-            @updated="updateCustomSelect('clinicsSelected', $event)"
-            >
-          </custom-select>
-        </q-card-section> -->
         <q-card-section>
           <div class="q-pa-xs">
             <q-toggle

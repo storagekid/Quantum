@@ -1,10 +1,11 @@
 <template>
   <q-page class="q-pa-md">
     <model-table
+      :sticky="true"
+      :virtualScroll="true"
       :modelName="modelName"
       :dense="true"
       :getModelView="true"
-      :rows="20"
       v-if="modelsReady"
       >
       <template slot="body-cell-product_providers" slot-scope="item" :item="item">
@@ -33,6 +34,10 @@ export default {
       modelName: 'products',
       modelsNeeded: {
         products: {
+          full: true,
+          refresh: true
+        },
+        product_categories: {
           full: true,
           refresh: true
         }

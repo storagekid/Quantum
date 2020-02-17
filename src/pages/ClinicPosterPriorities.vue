@@ -30,10 +30,6 @@
       v-show="!adminOptions.showTables"
       v-on:tableReady="tableReady = true"
       >
-      <template slot="body-cell-clinic_poster.clinic.active" slot-scope="item" :item="item">
-        <q-icon name="check_circle" v-if="item.item" color="positive"></q-icon>
-        <q-icon name="check_circle" v-else color="negative"></q-icon>
-      </template>
       <template slot="body-cell-campaign_id" slot-scope="item" :item="item">
         {{ item.item ? $store.state.Model.models.campaigns.items.filter(i => { return i.id === item.item })[0].name : '-' }}
       </template>

@@ -6,9 +6,6 @@
       :dense="true"
       v-if="modelsReady"
       >
-      <template slot="body-cell-sanitary_codes" slot-scope="item" :item="item">
-        {{ item.item.length }}
-      </template>
     </model-table>
   </q-page>
 </template>
