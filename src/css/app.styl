@@ -317,8 +317,14 @@
                 flex-wrap: nowrap;
             }
         }
+        th {
+          &.header-checkbox {
+            // max-width: 50px;
+          }
+        }
         td {
             &.row-checkbox {
+                // max-width: 50px;
                 background: rgba($primary, .1);
                 .q-checkbox__bg {
                     border-color: $primary
@@ -326,6 +332,13 @@
             }
             &.first {
                 background: lighten($secondary, 50%);
+                color: $primary;
+                font-weight: 700;
+            }
+            &.last {
+                // background: lighten($secondary, 50%);
+                color: $primary;
+                font-weight: 900;
             }
         }
         tr.deleted {
