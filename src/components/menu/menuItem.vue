@@ -2,6 +2,7 @@
   <q-expansion-item
     :icon="item.icon"
     :label="$t('menus.main.' +item.name +'.title')"
+    :caption="$t('menus.main.' +item.name +'.subtitle')"
     expand-separator
     :group="item.name"
     v-if="item.children.length"
@@ -36,6 +37,9 @@
     <q-item-section>
       <q-item-label style="font-weight: bold">
         {{$t('menus.main.' +item.name +'.title')}}
+      </q-item-label>
+      <q-item-label caption>
+        {{$t('menus.main.' +item.name +'.subtitle')}}
       </q-item-label>
     </q-item-section>
     <q-item-section side v-if="(home !== item.name) && currentRoute === item.name">
