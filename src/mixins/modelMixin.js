@@ -276,8 +276,7 @@ export const ModelUpdaterBuilder = {
       let model = {}
       // console.log(source)
       if (source.length > 1) {
-        this.buildUpdaterBatchModel(source)
-        return
+        return this.buildUpdaterBatchModel(source, quasarData)
       }
       // console.log('Single Mode')
       // console.log('ModelUpdaterBuilder')
@@ -352,10 +351,10 @@ export const ModelUpdaterBuilder = {
       // console.log('End ModelUpdaterBuilder')
       return model
     },
-    buildUpdaterBatchModel (source) {
-      // console.log('BATCH MODE')
+    buildUpdaterBatchModel (source, quasarData) {
+      if (!quasarData) quasarData = this.quasarData
       let model = {}
-      for (let step of this.quasarData.updateLayout) {
+      for (let step of quasarData.updateLayout) {
         for (let row of step.fields) {
           for (let field in row) {
             let value
@@ -436,9 +435,7 @@ export const ModelUpdaterBuilder = {
           }
         }
       }
-      // console.log('Model to Build')
-      // console.log(model)
-      this.buildUpdaterModel(model)
+      return this.buildUpdaterModel(model)
     }
   }
 }
