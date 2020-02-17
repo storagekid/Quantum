@@ -37,16 +37,16 @@ export default {
         title: 'Menú Items',
         subtitle: ''
       },
-      stationary: {
+      'stationary-draw': {
         title: 'Papelería',
-        subtitle: ''
+        subtitle: 'Coorporativa'
       },
       orders: {
         title: 'Pedidos',
         subtitle: 'Historial de Pedidos'
       },
       materials: {
-        title: 'Papelería',
+        title: 'Materiales',
         subtitle: ''
       },
       'personal-tags': {
@@ -193,6 +193,10 @@ export default {
         title: 'Proveedores',
         subtitle: ''
       },
+      'product-categories': {
+        title: 'Categorías de Producto',
+        subtitle: ''
+      },
       products: {
         title: 'Productos',
         subtitle: ''
@@ -320,6 +324,9 @@ export default {
     },
     poster_models: {
       name: 'Modelo de Cartel | Modelos de Cartel'
+    },
+    'product_categories': {
+      name: 'Categoría de Producto | Categorías de Producto'
     },
     products: {
       name: 'Producto | Productos'

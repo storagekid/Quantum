@@ -37,16 +37,16 @@ export default {
         title: 'Menu Items',
         subtitle: ''
       },
-      stationary: {
-        title: 'Stationary',
-        subtitle: ''
+      'stationary-draw': {
+        title: 'Branding',
+        subtitle: 'Stationary'
       },
       orders: {
         title: 'Orders',
-        subtitle: 'Order History'
+        subtitle: ''
       },
       materials: {
-        title: 'Stationary Items',
+        title: 'Materials',
         subtitle: ''
       },
       'personal-tags': {
@@ -193,6 +193,10 @@ export default {
         title: 'Providers',
         subtitle: ''
       },
+      'product-categories': {
+        title: 'Product Categories',
+        subtitle: ''
+      },
       products: {
         title: 'Products',
         subtitle: ''
@@ -320,6 +324,9 @@ export default {
     },
     poster_models: {
       name: 'Poster Model | Poster Models'
+    },
+    'product_categories': {
+      name: 'Product Category | Product Categories'
     },
     products: {
       name: 'Product | Products'
