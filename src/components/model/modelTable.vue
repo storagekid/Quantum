@@ -151,7 +151,7 @@
           <!-- END Old Table Headers -->
         </template>
         <q-tr slot="header" slot-scope="props" :props="props" v-if="ready" :class="gridHeaderClasses">
-          <q-th class="text-left" auto-width dense>
+          <q-th class="header-checkbox" auto-width dense>
             <q-checkbox
               class="items-start"
               :dense="dense"
@@ -161,7 +161,7 @@
             </q-checkbox>
           </q-th>
           <template v-for="column in columns">
-            <th :class="[props.colsMap[column.name].__thClass, filter.indexOf(column.label) > -1 ? 'filtered' : '']" :key="column.name" auto-width v-if="visibleColumns.includes(column.name)">
+            <th :class="[props.colsMap[column.name].__thClass, filter.indexOf(column.label) > -1 ? 'filtered' : '']" :key="column.name" v-if="visibleColumns.includes(column.name)">
               <slot :name="'head-cell-' + column.name" v-bind:item="props">
                 {{ column.label }}
                 <q-icon :class="props.colsMap[column.name].__iconClass" @click="sortColumn(column)" :name="props.colsMap[column.name].__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-icon>
@@ -206,40 +206,22 @@
             @click.exact="rowClicked(props.row)"
             @click.shift.exact="(rowShiftClicked(props.row))"
             >
-            <td class="row-checkbox">
-              <q-checkbox dense v-model="props.selected"/>
-            </td>
+            <q-td class="row-checkbox" auto-width>
+              <q-checkbox :dense="dense" v-model="props.selected"/>
+            </q-td>
             <template v-for="(column, index) in props.cols">
-              <q-td :key="column.name" v-if="index === 0" :class="[column.__tdClasses, 'first']" auto-width>
-                <slot :name="'body-cell-' + column.name" v-bind:item="getItem(props.row, column.name)" v-if="column.name.indexOf('.') > -1">
-                  <span class="text-bold text-primary" v-if="getItem(props.row, column.name).length < ($q.screen.lt.md ? 20 : 40)">{{ getItem(props.row, column.name) }}</span>
-                  <div class="text-bold text-primary ellipsis" style="max-width: 100px" v-else>
-                    {{ getItem(props.row, column.name) ? getItem(props.row, column.name) : '*' }}
-                    <q-tooltip content-style="font-size: 16px">
-                      <div style="max-width: 600px">{{ getItem(props.row, column.name) }}</div>
-                    </q-tooltip>
-                  </div>
-                </slot>
-                <slot :name="'body-cell-' + column.name" v-bind:item="props.row[column.field]" v-else>
-                  <span class="text-bold text-primary" v-if="getItem(props.row, column.name).length < ($q.screen.lt.md ? 20 : 40)">{{ getItem(props.row, column.name) }}</span>
-                  <div class="text-bold text-primary ellipsis" style="max-width: 100px" v-else>
-                    {{ getItem(props.row, column.name) ? getItem(props.row, column.name) : '*' }}
-                    <q-tooltip content-style="font-size: 16px">
-                      <div style="max-width: 600px">{{ getItem(props.row, column.name) }}</div>
-                    </q-tooltip>
-                  </div>
-                </slot>
-              </q-td>
-              <q-td :key="column.name" v-else-if="column.name !== 'actions'" auto-width>
-                <slot :name="'body-cell-' + column.name" v-bind:item="getItem(props.row, column.name)" v-if="column.name.indexOf('.') > -1">
-                  {{ column.name.indexOf('.') > -1 ? getItem(props.row, column.name) : props.value }}
-                </slot>
-                <slot :name="'body-cell-' + column.name" v-bind:item="props.row[column.field]" v-else>
-                  {{ getItem(props.row, column.name) }}
-                </slot>
-              </q-td>
-              <q-td :key="column.name" v-else auto-width>
+              <q-td :key="column.name" v-if="column.name === 'actions'">
                 <slot :name="'body-cell-' + column.name" v-bind:item="props.row"></slot>
+              </q-td>
+              <q-td :key="column.name" :class="[column.__tdClasses, { 'first': index === 0, 'last': index === props.cols.length - 1 }]" v-else>
+                <slot :name="'body-cell-' + column.name" v-bind:item="props.row[column.field]">
+                  <table-cell
+                    :row="props.row"
+                    :name="column.name"
+                    :column="column"
+                    >
+                  </table-cell>
+                </slot>
               </q-td>
             </template>
           </q-tr>
@@ -453,7 +435,7 @@ import UpdateModel from './updateModel'
 import RemoveModelConfirm from './removeModelConfirm'
 import RestoreModelConfirm from './restoreModelConfirm'
 import CustomSelect from '../form/customSelect'
-// import TableCell from '../table/tableCell'
+import TableCell from '../table/tableCell'
 import TableGridCell from '../table/tableGridCell'
 import { customSelectMixins } from '../../mixins/customSelectMixins'
 import { FileMethods } from '../../mixins/fileMixin'
@@ -464,7 +446,7 @@ export default {
   name: 'ModelTable',
   props: ['mode', 'sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'forceTable', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
   mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
-  components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CustomSelect, TableGridCell },
+  components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CustomSelect, TableGridCell, TableCell },
   data () {
     return {
       visible: false,
