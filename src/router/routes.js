@@ -163,6 +163,18 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/product-providers',
+        name: 'product-providers',
+        component: () => import('pages/ProductProviders.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/service-providers',
+        name: 'service-providers',
+        component: () => import('pages/ServiceProviders.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/clinics',
         name: 'clinics',
         component: () => import('pages/Clinics.vue'),
