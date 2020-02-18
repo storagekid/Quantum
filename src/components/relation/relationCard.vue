@@ -1,6 +1,6 @@
 <template>
-  <q-card style="overflow: visible">
-    <q-card-section class="text-primary text-weight-bolder bg-secondary q-mt-lg">
+  <q-card class="q-mt-lg" style="" flat>
+    <q-card-section class="text-primary text-weight-bolder bg-secondary">
       {{relationData.name}}
       <q-btn dense rounded class="q-ml-md" color="primary" icon="add"
         @click="openRelation = relationData.name"

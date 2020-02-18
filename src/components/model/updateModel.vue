@@ -23,8 +23,8 @@
       round
       dense
       size="xl"
-      color="warning"
-      text-color="primary"
+      color="warning-dark"
+      text-color="white"
       @click="endUpdating"
       icon="chevron_left"
       style="position: absolute; left: -10px; top: -10px"

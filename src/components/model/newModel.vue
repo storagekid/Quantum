@@ -1,5 +1,5 @@
 <template>
-  <q-card :id="'new-' + modelName" class="bg-white relative-position" style="minWidth: 80vw; overflow: visible">
+  <q-card :id="'new-' + modelName" class="bg-white relative-position" style="minWidth: 80vw">
     <q-card-section class="text-center bg-primary text-white">
       <strong>{{ $t('forms.actions.create') + ' ' + $tc('models.' + modelName + '.name', 1)}}</strong>
     </q-card-section>

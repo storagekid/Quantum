@@ -16,10 +16,20 @@
         class="q-pa-none"
         keep-alive
         >
+        <q-banner inline-actions dense class="col-xs-12 text-white bg-warning-dark q-py-none" v-if="batchMode">
+          <template v-slot:avatar>
+            <q-icon name="warning" color="white" />
+          </template>
+          <span class="text-bold">Actualización multiple.</span> ¿Ignorar campos vacios al actualizar?
+          <template v-slot:action>
+            <q-toggle color="white" v-model="ignoreEmptyfields"/>
+          </template>
+        </q-banner>
         <model-form
             :mode="mode"
             :batchMode="batchMode"
             :batchSource="source"
+            :batchIgnoreEmptyFields="ignoreEmptyfields"
             :modelName="modelName"
             :model="model"
             :relation="relation"
@@ -30,10 +40,11 @@
             @loaded="$emit('loaded')"
             @filesAdded="filesAdded"
             @restoreOriginalFile="restoreOriginalFile"
+            @removeFieldFromForm="removeFieldFromForm"
           >
         </model-form>
         <div class="row">
-          <q-btn color="primary" :label="$t('forms.actions.save')" class="q-mt-md full-width" @click="startUpdate" v-if="step.fields.length" :disable="steps[step.title].errors"/>
+          <q-btn color="primary" :label="$t('forms.actions.save')" class="q-mt-md full-width" @click="startUpdate" v-if="step.fields.length" :disable="saveNotReady"/>
         </div>
       </q-tab-panel>
     </q-tab-panels>
@@ -53,10 +64,15 @@ export default {
     return {
       tabName: 0,
       steps: {},
-      model: {}
+      model: {},
+      ignoreEmptyfields: true
     }
   },
   computed: {
+    saveNotReady () {
+      if (this.batchMode && this.ignoreEmptyfields) return false
+      return !this.cleanForm
+    },
     modelIndex () {
       if (this.relation) return this.$store.state.Model.models[this.relation.name].items[this.relation.index][this.modelName].findIndex((i) => { return i.id === this.model.id })
       return this.$store.state.Model.models[this.modelName].items.findIndex((i) => { return i.id === this.model.id })
@@ -74,6 +90,9 @@ export default {
     }
   },
   methods: {
+    removeFieldFromForm (fieldName) {
+      delete this.model[fieldName]
+    },
     filesAdded (payload) {
       this.$set(this.model, payload.field, payload.files)
     },
@@ -82,10 +101,16 @@ export default {
       this.model[payload.fileFieldName] = this.source[payload.fileFieldName]
     },
     startUpdate () {
-      if (!this.cleanForm) return false
+      if (this.saveNotReady) return false
       else if (!this.relation) {
         this.$emit('formSent')
-        let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(this.model) }
+        let model = JSON.parse(JSON.stringify(this.model))
+        if (this.batchMode && this.ignoreEmptyfields) {
+          for (let field in model) {
+            if (!model[field]) delete model[field]
+          }
+        }
+        let payload = { name: this.modelName, model: this.fieldsObjectValueExtrator(model) }
         if (this.batchMode) {
           this.batchModel(payload, this.source).then(() => { this.$emit('formResponded') }).catch(() => { this.$emit('formRespondedWithErrors') })
         } else {

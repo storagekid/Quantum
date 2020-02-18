@@ -16,7 +16,7 @@
             :dense="isDense"
             :label-width="12"
             bottom-slots
-            :error="$v.model[field.name].$error && !filterMode"
+            :error="showErrors(field.name)"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.label"
@@ -32,7 +32,7 @@
             icon="subject"
             :dense="isDense"
             bottom-slots
-            :error="$v.model[field.name].$error && !filterMode"
+            :error="showErrors(field.name)"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.label"
@@ -48,7 +48,7 @@
             icon="subject"
             :dense="isDense"
             bottom-slots
-            :error="$v.model[field.name].$error && !filterMode"
+            :error="showErrors(field.name)"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.label"
@@ -66,7 +66,7 @@
             :dense="isDense"
             :rules="[]"
             bottom-slots
-            :error="$v.model[field.name].$error && !filterMode"
+            :error="showErrors(field.name)"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.label"
@@ -92,7 +92,7 @@
             :field="field"
             :excludeModel="field.type.hasFamily && mode === 'update' ? getFamily() : false"
             :initValue="model[field.name]"
-            :error="$v.model[field.name].$error && !filterMode"
+            :error="showErrors(field.name)"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             @updated="updateCustomSelect('model.' + field.name, ...arguments)"
             :disable="viewMode"
@@ -103,7 +103,7 @@
             :dense="isDense"
             icon="subject"
             bottom-slots
-            :error="$v.model[field.name].$error && !filterMode"
+            :error="showErrors(field.name)"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.type.default.text"
@@ -118,7 +118,7 @@
             :dense="isDense"
             icon="subject"
             bottom-slots
-            :error="$v.model[field.name].$error && !filterMode"
+            :error="showErrors(field.name)"
             :error-message="$v.model[field.name].$error ? getErrors($v.model[field.name]) : ''"
             :name="field.name"
             :label="field.type.default.text"
@@ -183,7 +183,7 @@ import { FileMethods } from '../../mixins/fileMixin'
 export default {
   name: 'ModelForm',
   mixins: [customSelectMixins, FormMixins, FileMethods],
-  props: ['mode', 'modelName', 'model', 'relation', 'source', 'quasarData', 'step', 'batchMode', 'batchSource', 'dense'],
+  props: ['mode', 'modelName', 'model', 'relation', 'source', 'quasarData', 'step', 'batchMode', 'batchSource', 'batchIgnoreEmptyFields', 'dense'],
   components: { RelationCard, CustomSelect, FormFile },
   data () {
     return {
@@ -208,6 +208,9 @@ export default {
     }
   },
   methods: {
+    showErrors (fieldName) {
+      return this.$v.model[fieldName].$error && !this.filterMode && !this.batchIgnoreEmptyFields
+    },
     clearable (field) {
       return this.filterMode || this.quasarData.rules[field].includes('nullable')
     },
