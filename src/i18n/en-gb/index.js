@@ -205,6 +205,14 @@ export default {
         title: 'Services',
         subtitle: ''
       },
+      'product-providers': {
+        title: 'Products by Provider',
+        subtitle: ''
+      },
+      'service-providers': {
+        title: 'Services by Provider',
+        subtitle: ''
+      },
       rrhh: {
         title: 'Human Resources',
         subtitle: ''
