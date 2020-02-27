@@ -3,10 +3,23 @@ export const ModelsFetcher = {
     return {
       modelsFetched: 0,
       fetching: false,
-      fetchingTime: null
+      fetchingTime: null,
+      modelViewsFetched: 0,
+      fetchingViews: false,
+      fetchingViewsTime: null
+    }
+  },
+  watch: {
+    scopeClinic () {
+      // console.log('Scope Changed')
+      this.fetchModelViews()
     }
   },
   computed: {
+    scopeClinic () {
+      if (this.$store.getters['Scope/clinicSelected']) return this.$store.getters['Scope/clinicSelected']
+      return null
+    },
     computedFecthing () {
       let object = this.modelsNeeded ? this.modelsNeeded : this.componentModels
       if (Object.keys(object).length !== this.modelsFetched) {
@@ -54,6 +67,11 @@ export const ModelsFetcher = {
       if (typeof this.waitForFilters !== 'undefined') {
         if (this.waitForFilters) return false
       } else if (this.fetching) return false
+      return true
+    },
+    shouldFetchViews () {
+      if (!this.scopeClinic) return false
+      else if (this.fetchingViews) return false
       return true
     }
   },
@@ -168,6 +186,54 @@ export const ModelsFetcher = {
         }
       })
     },
+    getModelViewssNeeded (object = 'viewsNeeded') {
+      this.$q.loading.show()
+      // console.log('getModelsNeeded')
+      return new Promise((resolve, reject) => {
+        let counter = 0
+        this.fetchingViewsTime = Date.now()
+        // console.log('Fetching Time Set')
+        // console.log(object)
+        // console.log(this[object])
+        if (this[object]) {
+          // console.log('getModelsNeeded')
+          // console.log(object)
+          let size = Object.keys(this[object]).length
+          for (let name in this[object]) {
+            let fetched = false
+            let model = this[object][name]
+            if (this.$store.state.Model.models[name]) {
+              if (this.$store.state.Model.models[name].views[model.view]) {
+                if (this.$store.state.Model.models[name].views[model.view].includes(this.scopeClinic.id)) {
+                  fetched = true
+                  counter = counter + 1
+                  if (counter === size) resolve(size)
+                }
+              }
+            }
+            if (!fetched) {
+              this.$store.dispatch('Model/getModelView', {
+                'model': name,
+                'id': this.scopeClinic.id,
+                'params': model
+              }).then((response) => {
+                // console.log('Response on model: ' + name)
+                // console.log(response)
+                counter = counter + 1
+                if (counter === size) resolve(size)
+              }).catch((error) => {
+                // console.log('Catch on model: ' + name)
+                counter = counter + 1
+                this.$store.dispatch('Response/responseErrorManager', error.response)
+                if (counter === size) reject(size)
+              })
+            }
+          }
+        } else {
+          this.$q.loading.hide()
+        }
+      })
+    },
     fetchModels () {
       if (this.shouldFetch) {
         this.fetching = true
@@ -177,6 +243,19 @@ export const ModelsFetcher = {
           this.$q.loading.hide()
         }).catch((response) => {
           this.fetching = false
+          this.$q.loading.hide()
+        })
+      }
+    },
+    fetchModelViews () {
+      if (this.shouldFetchViews) {
+        this.fetchingViews = true
+        this.getModelViewssNeeded('viewsNeeded').then((size) => {
+          this.modelViewsFetched = size
+          this.fetchingViews = false
+          this.$q.loading.hide()
+        }).catch((response) => {
+          this.fetchingViews = false
           this.$q.loading.hide()
         })
       }
@@ -225,10 +304,12 @@ export const ModelsFetcher = {
   },
   created () {
     this.fetchModels()
+    this.fetchModelViews()
   },
   beforeRouteEnter (to, from, next) {
     next(vm => {
       vm.fetchModels()
+      vm.fetchModelViews()
     })
   }
 }
