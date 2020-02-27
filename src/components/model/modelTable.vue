@@ -47,9 +47,6 @@
             <q-btn size="sm" rounded color="green" icon="grid_on" :label="!$q.screen.lt.md ? 'Excel' : ''" :loading="downloadingExcel" @click="confirm.state = true" v-if="can.show"/>
           </q-btn-group>
           <q-btn-group rounded class="q-mr-md">
-            <!-- Old Old Select All Before Quasar v.1.1.6 -->
-              <!-- <q-btn size="sm" rounded color="blue" icon="clear_all" :label="!$q.screen.lt.md ? 'Seleccionar Todo' : ''" @click="selectedItems = model" :disabled="selectedItems.length === model.length" v-if="relatedTo && grid"/> -->
-            <!-- END Old Select All -->
             <q-btn size="sm" rounded color="blue" icon="clear_all" :label="!$q.screen.lt.md ? 'Borrar Selección' : ''" @click="selectedItems = []" :disabled="!selectedItems.length"/>
             <q-btn size="sm" rounded color="blue" icon="format_clear" :label="!$q.screen.lt.md ? 'Quitar Filtros' : ''" @click="clearFilters" :disabled="!filter"/>
           </q-btn-group>
@@ -102,53 +99,6 @@
               />
             </div>
           </div>
-          <!-- Old Table Headers Before Quasar v.1.1.6 -->
-            <!-- <div v-if="$refs['table-' + modelName] && grid" class="custom-table full-width">
-              <div class="q-table q-mb-sm q-mt-xs">
-                <q-tr class="row justify-between full-width">
-                  <template v-for="column in $refs['table-' + modelName].computedCols">
-                    <template v-if="column.onGrid !== 'hide'">
-                      <th :class="[column.__thClass, filter.indexOf(column.label) > -1 ? 'filtered' : '']" :key="column.name" auto-width v-if="visibleColumns.includes(column.name)">
-                        <div>
-                          {{ column.label }}
-                          <q-icon :class="[column.__iconClass]" @click="sortColumn(column)" :name="column.__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-icon>
-                          <q-icon :class="[column.__filterClass]" name="filter_list">
-                            <q-popup-proxy transition-show="flip-up" transition-hide="flip-down">
-                              <div class="q-pa-md custom-table filter">
-                                <q-option-group
-                                  class="text-h6"
-                                  v-model="filters[column.name].options"
-                                  :options="[
-                                    {label: 'Buscar', value: 'has'},
-                                    {label: 'Exacto', value: 'is'},
-                                    {label: 'Excluir', value: 'not'},
-                                    {label: 'Incluir', value: 'in'},
-                                    {label: 'Sí', value: 'some'},
-                                    {label: 'No', value: 'empty'}
-                                  ]"
-                                  color="primary"
-                                  inline
-                                  dense
-                                />
-                                <q-input
-                                  v-model="filters[column.name].text"
-                                  debounce="800"
-                                  v-if="!['empty', 'some'].includes(filters[column.name].options)"
-                                  :disable="['empty', 'some'].includes(filters[column.name].options)"
-                                  dense
-                                  >
-                                </q-input>
-                              </div>
-                            </q-popup-proxy>
-                          </q-icon>
-                        </div>
-                      </th>
-                    </template>
-                  </template>
-                </q-tr>
-              </div>
-            </div> -->
-          <!-- END Old Table Headers -->
         </template>
         <q-tr slot="header" slot-scope="props" :props="props" v-if="ready" :class="gridHeaderClasses">
           <q-th class="header-checkbox" auto-width dense>
@@ -164,38 +114,16 @@
             <th :class="[props.colsMap[column.name].__thClass, filter.indexOf(column.label) > -1 ? 'filtered' : '']" :key="column.name" v-if="visibleColumns.includes(column.name)">
               <slot :name="'head-cell-' + column.name" v-bind:item="props">
                 {{ column.label }}
-                <q-icon :class="props.colsMap[column.name].__iconClass" @click="sortColumn(column)" :name="props.colsMap[column.name].__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-icon>
-                <q-icon :class="props.colsMap[column.name].__filterClass" name="filter_list">
-                  <q-popup-proxy transition-show="flip-up" transition-hide="flip-down">
-                    <div class="q-pa-md custom-table filter">
-                      <q-option-group
-                        class="text-h6"
-                        v-model="filters[column.name].options"
-                        :options="[
-                          {label: 'Buscar', value: 'has'},
-                          {label: 'Exacto', value: 'is'},
-                          {label: 'Excluir', value: 'not'},
-                          {label: 'Incluir', value: 'in'},
-                          {label: 'Sí', value: 'some'},
-                          {label: 'No', value: 'empty'},
-                          {label: 'Únicos', value: 'uniques'},
-                          {label: 'Duplicados', value: 'clones'}
-                        ]"
-                        color="primary"
-                        inline
-                        dense
-                      />
-                      <q-input
-                        v-model="filters[column.name].text"
-                        debounce="800"
-                        v-if="!['empty', 'some', 'clones', 'uniques'].includes(filters[column.name].options)"
-                        :disable="['empty', 'some', 'clones', 'uniques'].includes(filters[column.name].options)"
-                        dense
-                        >
-                      </q-input>
-                    </div>
-                  </q-popup-proxy>
-                </q-icon>
+                <q-btn flat dense size="sm" :class="props.colsMap[column.name].__iconClass" @click="sortColumn(column)" :icon="props.colsMap[column.name].__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-btn>
+                <q-btn flat dense size="sm" :class="props.colsMap[column.name].__filterClass" icon="filter_list" @mouseover="filterSelected = column.label">
+                  <table-filter-menu
+                    :column="column"
+                    :models="model"
+                    @filtersUpdated="updateFilters"
+                    v-if="filterSelected === column.label"
+                    >
+                  </table-filter-menu>
+                </q-btn>
               </slot>
             </th>
           </template>
@@ -437,6 +365,7 @@ import RestoreModelConfirm from './restoreModelConfirm'
 import CustomSelect from '../form/customSelect'
 import TableCell from '../table/tableCell'
 import TableGridCell from '../table/tableGridCell'
+import TableFilterMenu from '../table/tableFilterMenu'
 import { customSelectMixins } from '../../mixins/customSelectMixins'
 import { FileMethods } from '../../mixins/fileMixin'
 import { ModelsFetcher } from '../../mixins/modelMixin'
@@ -446,7 +375,7 @@ export default {
   name: 'ModelTable',
   props: ['mode', 'sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'forceTable', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
   mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
-  components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CustomSelect, TableGridCell, TableCell },
+  components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CustomSelect, TableGridCell, TableCell, TableFilterMenu },
   data () {
     return {
       visible: false,
@@ -473,6 +402,7 @@ export default {
       options: {},
       visibleColumns: [],
       separator: 'horizontal',
+      filterSelected: null,
       filters: {
         'searchBar': { text: '' }
       },
@@ -542,6 +472,7 @@ export default {
     },
     filter: {
       get () {
+        // console.log('getting')
         let filter = ''
         if (this.filters['searchBar'].text) filter += this.filters['searchBar'].text
         for (let column in this.filters) {
@@ -552,12 +483,16 @@ export default {
           else if (this.filters[column].options === 'clones') filter += '&&' + ref.label + '=2='
           else if (this.filters[column].options === 'uniques') filter += '&&' + ref.label + '=1='
           else if (this.filters[column].text) {
+            // console.log('text')
             if (this.filters[column].options === 'has') filter += '&&' + ref.label + '==' + this.filters[column].text
             else if (this.filters[column].options === 'is') filter += '&&' + ref.label + '=="' + this.filters[column].text
             else if (['not', 'in'].includes(this.filters[column].options)) {
-              if (this.filters[column].text.indexOf(',') > -1) {
-                let exclusions = this.filters[column].text.toLowerCase().split(',')
+              // console.log('not in')
+              if (this.filters[column].text.indexOf(',') > -1 || Array.isArray(this.filters[column].text)) {
+                // console.log('has ,')
+                let exclusions = Array.isArray(this.filters[column].text) ? this.filters[column].text : this.filters[column].text.toLowerCase().split(',')
                 if (this.filters[column].options === 'in') {
+                  // console.log('has in')
                   filter += '&&' + ref.label + '=in=' + exclusions.join('|')
                 } else {
                   for (let exclusion of exclusions) filter += '&&' + ref.label + '!=' + exclusion
@@ -633,6 +568,16 @@ export default {
     }
   },
   methods: {
+    updateFilters (e) {
+      // console.log(e)
+      // let value = e.payload.searchBar.text
+      // if (value.indexOf('&&') > -1 && Object.keys(this.filters).length > 1) {
+      //   this.buildFilters(value)
+      // }
+      this.filters[e.column].text = e.text
+      this.filters[e.column].options = e.options
+      // this.filters = e.payload
+    },
     rowShiftClicked (row) {
       if (this.selectedItems.length) {
         let lastIndex = null

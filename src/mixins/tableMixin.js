@@ -18,12 +18,14 @@ export const searchMethods = {
             let countedValues = {}
             let col = cols.filter(function (col) { return col.label.toLowerCase() === columnName[0] })[0]
             rows.forEach((row) => {
-              let value = app.getItem(row, col.name) + ''
+              // let value = app.getItem(row, col.name) + ''
+              let value = app.getParseItem(app.getItem(row, col.name)) + ''
               if (!countedValues[value]) countedValues[value] = 1
               else countedValues[value]++
             })
             rows = rows.filter((row) => {
-              let value = app.getItem(row, col.name) + ''
+              let value = app.getParseItem(app.getItem(row, col.name)) + ''
+              // let value = app.getItem(row, col.name) + ''
               return value && countedValues[value] > 1
             })
             // console.log(countedValues)
@@ -34,25 +36,27 @@ export const searchMethods = {
             let countedValues = {}
             let col = cols.filter(function (col) { return col.label.toLowerCase() === columnName[0] })[0]
             rows.forEach((row) => {
-              let value = app.getItem(row, col.name) + ''
+              let value = app.getParseItem(app.getItem(row, col.name)) + ''
+              // let value = app.getItem(row, col.name) + ''
               if (!countedValues[value]) countedValues[value] = 1
               else countedValues[value]++
             })
             rows = rows.filter((row) => {
-              let value = app.getItem(row, col.name) + ''
+              let value = app.getParseItem(app.getItem(row, col.name)) + ''
+              // let value = app.getItem(row, col.name) + ''
               return value && countedValues[value] === 1
             })
             // console.log(countedValues)
           } else {
             rows = rows.filter(
               row => cols.some(function (col) {
-                let value = app.getItem(row, col.name) + ''
-                // console.log(value)
-                if (Array.isArray(value)) {
-                  value = JSON.stringify(value)
-                  value = JSON.stringify(value)
-                  // console.log('Array')
-                }
+                // let value = app.getItem(row, col.name) + ''
+                let value = app.getParseItem(app.getItem(row, col.name)) + ''
+                // if (Array.isArray(value)) {
+                //   value = JSON.stringify(value)
+                // } else if (typeof value === 'object') {
+                //   value = JSON.stringify(value)
+                // }
                 if (i.indexOf('==') > -1) {
                   let columnName = i.split('==')
                   if (col.label.toLowerCase() === columnName[0]) {
@@ -69,7 +73,10 @@ export const searchMethods = {
                   let columnName = i.split('=in=')
                   if (col.label.toLowerCase() === columnName[0]) {
                     let finds = columnName[1].split('|')
+                    // console.log('Finds')
                     for (let find of finds) {
+                      // if (!find) continue
+                      // console.log(value)
                       if (value.toLowerCase().indexOf(find) > -1) return true
                     }
                     return false
@@ -116,7 +123,9 @@ export const searchMethods = {
       return rows
     },
     getItem (row, name) {
+      // console.log(name)
       if (name.indexOf('.') > -1) {
+        // console.log('has dot')
         let names = name.split('.')
         let item = row[names[0]]
         if (typeof item === 'boolean') return item
@@ -127,11 +136,18 @@ export const searchMethods = {
           if (typeof item === 'boolean') return item
           if (!item) return ''
         }
-        if (typeof item === 'object') return item.label
-        else if (typeof item === 'boolean') return item
+        if (typeof item === 'object') {
+          // console.log('object')
+          return item.label
+        } else if (typeof item === 'boolean') return item
         return item
       }
+      // console.log('End')
       return row[name] ? row[name] : ''
+    },
+    getParseItem (item) {
+      if (typeof item === 'object') return JSON.stringify(item)
+      return item
     },
     getObject (row, name) {
       if (name.indexOf('.') > -1) {
