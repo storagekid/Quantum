@@ -17,6 +17,18 @@ export function clinicSelected (state, getters, rootState) {
     return state.clinic.clinics.selected[0]
   }
 }
+export function fullClinicSelected (state, getters, rootState) {
+  if (state.clinic.clinics.selected.length === 1) {
+    let id = state.clinic.clinics.selected[0].id
+    return rootState.Model.models.clinics.items.filter((i) => { return i.id === id })[0]
+  }
+}
+export function fullStoreSelected (state, getters, rootState) {
+  if (state.store.stores.selected.length === 1) {
+    let id = state.store.stores.selected[0].id
+    return rootState.Model.models.stores.items.filter((i) => { return i.id === id })[0]
+  }
+}
 export function storeSelected (state, getters, rootState) {
   if (state.store.stores.selected.length === 1) {
     return state.store.stores.selected[0]
