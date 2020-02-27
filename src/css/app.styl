@@ -210,6 +210,15 @@
         background-color: white;
     }
 }
+.custom-table.filter {
+    border: 1px solid $primary;
+    .q-radio__label {
+        // font-size: .6em;
+    }
+    .q-field__control {
+        // height: 30px;
+    }
+}
 .custom-table-wrapper {
     &.my-sticky-header-column-table {
         &.full {
@@ -277,12 +286,13 @@
         }
     }
     &.filter {
-        .q-radio__label {
-            font-size: .6em;
-        }
-        .q-field__control {
-            height: 30px;
-        }
+      border: 1px solid $primary;
+      .q-radio__label {
+          font-size: .6em;
+      }
+      .q-field__control {
+          height: 30px;
+      }
     }
     &.mobile {
       &.full {
