@@ -1,3 +1,5 @@
+import Vue from 'vue'
+
 export function cleanState (state) {
   state.models = {}
 }
@@ -30,6 +32,7 @@ export function setModel (state, { name, options, cached = false }) {
   }
 
   model.viewsFetched = []
+  model.views = {}
   model.pagination = null
 
   if (options.scoped) {
@@ -61,8 +64,10 @@ export function setModelItems (state, { name, items }) {
   state.models[name].items = items.data ? items.data : items
   state.models[name].refreshed = Date.now()
 }
-export function addViewFetched (state, { name, id }) {
+export function addViewFetched (state, { name, id, params }) {
   state.models[name].viewsFetched.push(id)
+  if (!state.models[name].views[params['view']]) Vue.set(state.models[name].views, params['view'], [])
+  state.models[name].views[params['view']].push(id)
 }
 export function setModelPagination (state, { name, data }) {
   // console.log('Here')
@@ -82,7 +87,9 @@ export function retrieveModel (state, { model }) {
 }
 export function addModelItems (state, { name, items }) {
   // console.log('Adding: ' + items)
-  if (state.models[name]) state.models[name].items.unshift(items)
+  if (!state.models[name]) return false
+  if (Array.isArray(items)) for (let item of items) state.models[name].items.unshift(item)
+  else state.models[name].items.unshift(items)
 }
 export function addRelationItems ({ models }, { name, relation, items, parentIndex, arrayPosition = false }) {
   // console.log('addRelationItems')
@@ -158,6 +165,12 @@ export function updateModelItems ({ models }, { name, item }) {
   for (const [index, model] of models[name].items.entries()) {
     if (model.id === item.id) {
       for (let prop in item) {
+        // console.log(prop)
+        if (typeof models[name].items[index][prop] === 'undefined') {
+          // console.log(prop)
+          Vue.set(models[name].items[index], prop, '')
+          // console.log('Here')
+        }
         models[name].items[index][prop] = item[prop]
       }
     }
