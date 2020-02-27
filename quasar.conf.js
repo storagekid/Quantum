@@ -65,6 +65,7 @@ module.exports = function (ctx) {
         'QSpinnerGears',
         'QTable',
         'QMarkupTable',
+        'QMenu',
         'QTh',
         'QTr',
         'QTd',
@@ -156,8 +157,8 @@ module.exports = function (ctx) {
 
     // animations: 'all' --- includes all animations
     animations: [
-      'bounceInLeft',
-      'bounceOutRight'
+      'bounceIn',
+      'bounceOut'
     ],
 
     ssr: {
