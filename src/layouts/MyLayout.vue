@@ -31,6 +31,8 @@
           >
             <q-icon name="cloud_download" />
           </q-btn>
+          <shopping-cart-menu v-if="$store.getters['ShoppingCart/hasItems']">
+          </shopping-cart-menu>
           <q-btn round outline color="secondary" to="/profile-home" v-if="$q.platform.is.desktop">
             <q-avatar size="38px">
               <q-img :ratio="1" :src="profileAvatar"></q-img>
@@ -80,10 +82,11 @@ import ScopeTopBar from '../components/scope/scopeTopBar'
 import ProfileCard from '../components/profile/profileCard'
 import MainMenu from '../components/menu/mainMenu'
 import LanguageMenu from '../components/menu/languageMenu'
+import ShoppingCartMenu from '../components/shoppingCart/shoppingCartMenu'
 import { FileMethods } from '../mixins/fileMixin'
 
 export default {
-  components: { ScopeTopBar, ProfileCard, MainMenu, LanguageMenu },
+  components: { ScopeTopBar, ProfileCard, MainMenu, LanguageMenu, ShoppingCartMenu },
   mixins: [FileMethods],
   name: 'MyLayout',
   data () {

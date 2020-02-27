@@ -8,6 +8,7 @@ import Notify from './notify'
 import User from './user'
 import Scope from './scope'
 import Model from './model'
+import ShoppingCart from './shopping-cart'
 
 Vue.use(Vuex)
 
@@ -25,7 +26,8 @@ export default function (/* { ssrContext } */) {
       Notify,
       User,
       Scope,
-      Model
+      Model,
+      ShoppingCart
     }
   })
 

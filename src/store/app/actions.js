@@ -1,6 +1,7 @@
 import { LocalStorage } from 'quasar'
 
 export function bootApp (context) {
+  context.commit('ShoppingCart/cleanShoppingCart', { categories: null }, { root: true })
   context.commit('Model/cleanState', null, { root: true })
   if (LocalStorage.has('settings')) context.commit('App/setSettingsFromStorage', LocalStorage.getItem('settings'), { root: true })
   if (localStorage.token && localStorage.user && localStorage.scope && localStorage.menus && localStorage.routes) {
@@ -24,4 +25,5 @@ export function bootApp (context) {
 export function resetState (context) {
   context.commit('Scope/clearScope', null, { root: true })
   context.commit('Model/cleanState', null, { root: true })
+  context.commit('ShoppingCart/cleanShoppingCart', { categories: null }, { root: true })
 }
