@@ -30,19 +30,23 @@
     :exact="true"
     :key="item.id"
     @click="spreadWord(item.name)"
+    class="q-pr-none"
     v-else>
     <q-item-section avatar>
-    <q-avatar :icon="item.icon" font-size=".5em" rounded></q-avatar>
+      <q-avatar :icon="item.icon" font-size=".5em" rounded></q-avatar>
     </q-item-section>
     <q-item-section>
-      <q-item-label style="font-weight: bold">
+      <q-item-label :lines="showSetHome ? 1 : 0" style="font-weight: bold">
         {{$t('menus.main.' +item.name +'.title')}}
+        <q-tooltip content-style="font-size: 16px" v-if="showSetHome">
+          <div style="max-width: 600px">{{ $t('menus.main.' +item.name +'.title') }}</div>
+        </q-tooltip>
       </q-item-label>
-      <q-item-label caption>
+      <q-item-label lines caption v-if="$t('menus.main.' +item.name +'.subtitle')">
         {{$t('menus.main.' +item.name +'.subtitle')}}
       </q-item-label>
     </q-item-section>
-    <q-item-section side v-if="(home !== item.name) && currentRoute === item.name">
+    <q-item-section side v-if="showSetHome">
       <q-avatar icon="home" font-size=".4em" rounded @click.stop="setHomePage(item.name)"></q-avatar>
     </q-item-section>
   </q-item>
@@ -59,15 +63,11 @@ export default {
       value: false
     }
   },
-  // watch: {
-  //   expanded () {
-  //     this.value = this.expanded
-  //   }
-  // },
   computed: {
+    showSetHome () {
+      return this.home !== this.item.name && this.currentRoute === this.item.name
+    },
     expanded () {
-      // console.log(this.$router.currentRoute.name)
-      // console.log(this.childrenNames)
       return this.childrenNames.includes(this.currentRoute)
     },
     childrenNames () {
@@ -98,16 +98,12 @@ export default {
       this.$emit('routeChanged', name)
     },
     setHomePage (name) {
-      // console.log('Button hitted')
       this.$store.commit('App/setSetting', { name: 'home', value: name })
     },
     checkChildren (e, id) {
       if (this.checked.includes(id)) return
-      // console.log('CheckChildren')
-      // console.log(e)
       this.children = [...e, ...this.children]
       this.checked.push(id)
-      // console.log(this.children)
     }
   },
   mounted () {
