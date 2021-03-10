@@ -89,7 +89,7 @@
               :all="mailingDesignSelected.length === mailingDesignOptions.length"
               v-if="mailingDesignOptions.length"
               :dense="true"
-              multiple
+              :multiple="true"
               counter
               :hide-bottom-space="true"
               :field="{name: 'mailing_designs', type: { model: 'mailing_designs', default: { text: 'Selecciona los diseños'} }}"
@@ -102,7 +102,7 @@
           </div>
         </q-card-section>
         <q-card-section>
-          <div class="q-pa-md">
+          <div class="q-pa-none">
             <q-toggle
               v-model="confirm.options.rename"
               label="Rename File"

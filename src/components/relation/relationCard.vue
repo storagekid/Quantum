@@ -678,6 +678,8 @@ export default {
       let child = this.model[this.openRelation][this.editing]
       // console.log(child)
       this.relation = this.buildUpdaterModel(child)
+    } else {
+      this.relation = this.buildRelationData()
     }
     // this.buildRelationData(this.relationData)
   },

@@ -2,6 +2,7 @@
   <q-select
     :dense="dense"
     :multiple="multiple"
+    :emit-value="emitValue || false"
     :hide-bottom-space="hideBottomSpace"
     :clearable="clearable"
     bottom-slots
@@ -45,17 +46,21 @@
 <script>
 export default {
   name: 'CustomSelect',
-  props: ['field', 'initValue', 'model', 'relation', 'error', 'errorMessage', 'relationType', 'clearable', 'dense', 'hideBottomSpace', 'customDisplay', 'multiple', 'sourceOptions', 'all', 'counter', 'max', 'disable', 'excludeModel'],
+  props: ['field', 'initValue', 'model', 'relation', 'error', 'errorMessage', 'relationType', 'clearable', 'dense', 'hideBottomSpace', 'customDisplay', 'multiple', 'emitValue', 'sourceOptions', 'all', 'counter', 'max', 'disable', 'excludeModel'],
   data () {
     return {
       options: this.sourceOptions ? this.sourceOptions : null,
       filteredOptions: null,
-      value: this.multiple ? this.all ? this.sourceOptions : [] : null
+      value: this.multiple ? this.all ? this.sourceOptions : [] : null,
+      lastSelected: null,
+      setted: false
     }
   },
   watch: {
     value () {
-      if (this.value !== this.initValue) this.$emit('updated', this.value)
+      if (this.value !== this.initValue || this.setted) this.$emit('updated', this.value)
+      this.lastSelected = this.value
+      if (!this.setted) this.setted = true
     },
     initValue () {
       this.value = this.multiple ? this.initValue ? Array.isArray(this.initValue) ? this.initValue : [this.initValue] : [] : this.initValue
@@ -69,7 +74,12 @@ export default {
   },
   computed: {
     showCustomDisplayText () {
-      if (!this.customDisplay) return false
+      if (this.customDisplay) {
+        if (this.customDisplay !== true) return true
+        else if (Array.isArray(this.value)) {
+          if (this.value.length > 1) return true
+        }
+      }
       if (!this.value) return false
       if (Array.isArray(this.value)) {
         if (!this.value.length > 1) return false

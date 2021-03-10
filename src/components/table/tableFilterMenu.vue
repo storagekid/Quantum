@@ -93,7 +93,7 @@ export default {
       let values = []
       let options = []
       for (let model of this.models) {
-        let value = this.getItem(model, this.column.name)
+        let value = this.getItem(model, this.column.name, this.column)
         if (Array.isArray(value)) {
           for (let item of value) {
             if (typeof item === 'object') {

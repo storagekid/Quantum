@@ -19,13 +19,13 @@ export const searchMethods = {
             let col = cols.filter(function (col) { return col.label.toLowerCase() === columnName[0] })[0]
             rows.forEach((row) => {
               // let value = app.getItem(row, col.name) + ''
-              let value = app.getParseItem(app.getItem(row, col.name)) + ''
+              let value = app.getParseItem(app.getItem(row, col.name, col)) + ''
               if (!countedValues[value]) countedValues[value] = 1
               else countedValues[value]++
             })
             rows = rows.filter((row) => {
-              let value = app.getParseItem(app.getItem(row, col.name)) + ''
-              // let value = app.getItem(row, col.name) + ''
+              let value = app.getParseItem(app.getItem(row, col.name, col)) + ''
+              // let value = app.getItem(row, col.name, col) + ''
               return value && countedValues[value] > 1
             })
             // console.log(countedValues)
@@ -36,22 +36,22 @@ export const searchMethods = {
             let countedValues = {}
             let col = cols.filter(function (col) { return col.label.toLowerCase() === columnName[0] })[0]
             rows.forEach((row) => {
-              let value = app.getParseItem(app.getItem(row, col.name)) + ''
-              // let value = app.getItem(row, col.name) + ''
+              let value = app.getParseItem(app.getItem(row, col.name, col)) + ''
+              // let value = app.getItem(row, col.name, col) + ''
               if (!countedValues[value]) countedValues[value] = 1
               else countedValues[value]++
             })
             rows = rows.filter((row) => {
-              let value = app.getParseItem(app.getItem(row, col.name)) + ''
-              // let value = app.getItem(row, col.name) + ''
+              let value = app.getParseItem(app.getItem(row, col.name, col)) + ''
+              // let value = app.getItem(row, col.name, col) + ''
               return value && countedValues[value] === 1
             })
             // console.log(countedValues)
           } else {
             rows = rows.filter(
               row => cols.some(function (col) {
-                // let value = app.getItem(row, col.name) + ''
-                let value = app.getParseItem(app.getItem(row, col.name)) + ''
+                // let value = app.getItem(row, col.name, col) + ''
+                let value = app.getParseItem(app.getItem(row, col.name, col)) + ''
                 // if (Array.isArray(value)) {
                 //   value = JSON.stringify(value)
                 // } else if (typeof value === 'object') {
@@ -111,7 +111,7 @@ export const searchMethods = {
       const lowerTerms = terms ? terms.toLowerCase() : ''
       rows = rows.filter(
         row => cols.some(function (col) {
-          let value = app.getItem(row, col.name) + ''
+          let value = app.getItem(row, col.name, col) + ''
           return value.toLowerCase().indexOf(lowerTerms) !== -1
         }, app)
       )
@@ -122,7 +122,7 @@ export const searchMethods = {
       this.filterIds = ids
       return rows
     },
-    getItem (row, name) {
+    getItem (row, name, column) {
       // console.log(name)
       if (name.indexOf('.') > -1) {
         // console.log('has dot')
@@ -142,8 +142,10 @@ export const searchMethods = {
         } else if (typeof item === 'boolean') return item
         return item
       }
+      const value = row[name] ? row[name] : ''
+      if (column['keyNames']) return column['keyNames'][value]
       // console.log('End')
-      return row[name] ? row[name] : ''
+      return value
     },
     getParseItem (item) {
       if (typeof item === 'object') return JSON.stringify(item)

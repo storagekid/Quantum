@@ -22,7 +22,7 @@
         :columns="columns"
         :pagination.sync="pagination"
         :no-data-label="'No se encontraron Items'"
-        selection="multiple"
+        :selection="typeof single === 'undefined' ? 'multiple' : 'single'"
         :selected.sync="selectedItems"
         row-key="id"
         @request="onRequest"
@@ -114,8 +114,8 @@
             <th :class="[props.colsMap[column.name].__thClass, filter.indexOf(column.label) > -1 ? 'filtered' : '']" :key="column.name" v-if="visibleColumns.includes(column.name)">
               <slot :name="'head-cell-' + column.name" v-bind:item="props">
                 {{ column.label }}
-                <q-btn flat dense size="sm" :class="props.colsMap[column.name].__iconClass" @click="sortColumn(column)" :icon="props.colsMap[column.name].__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-btn>
-                <q-btn flat dense size="sm" :class="props.colsMap[column.name].__filterClass" icon="filter_list" @mouseover="filterSelected = column.label">
+                <q-btn flat dense size="xs" :class="props.colsMap[column.name].__iconClass" @click="sortColumn(column)" :icon="props.colsMap[column.name].__iconClass.indexOf('desc') ? 'arrow_upward' : 'arrow_downward'"></q-btn>
+                <q-btn flat dense size="xs" :class="props.colsMap[column.name].__filterClass" icon="filter_list" @mouseover="filterSelected = column.label">
                   <table-filter-menu
                     :column="column"
                     :models="model"
@@ -124,6 +124,7 @@
                     >
                   </table-filter-menu>
                 </q-btn>
+                <q-btn flat dense size="xs" color="negative" :class="props.colsMap[column.name].__filterClass" icon="delete_sweep" @click="clearFilter(column.name)" v-if="filter.indexOf(column.label) > -1"></q-btn>
               </slot>
             </th>
           </template>
@@ -142,7 +143,7 @@
                 <slot :name="'body-cell-' + column.name" v-bind:item="props.row"></slot>
               </q-td>
               <q-td :key="column.name" :class="[column.__tdClasses, { 'first': index === 0, 'last': index === props.cols.length - 1 }]" v-else>
-                <slot :name="'body-cell-' + column.name" v-bind:item="props.row[column.field]">
+                <slot :name="'body-cell-' + column.name" v-bind="{item: props.row[column.field], column: column, row: props.row}">
                   <table-cell
                     :row="props.row"
                     :name="column.name"
@@ -286,14 +287,14 @@
             :field="{name: 'campaigns', type: { default: { text: 'Selecciona una plantilla'} }}"
             :sourceOptions="options.exports.excel"
             :clearable='true'
-            :initValue="options.exports.excel[0]"
+            :initValue="null"
             @updated="updateCustomSelect('confirm.blueprint', $event)"
             >
           </custom-select>
         </q-card-section>
         <q-card-actions align="right">
           <q-btn label="Cancel" color="primary" v-close-popup />
-          <q-btn label="Confirmar" color="positive" v-close-popup @click="exports"/>
+          <q-btn label="Confirmar" color="positive" v-close-popup :disable="confirm.blueprint === ''" @click="exports"/>
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -373,7 +374,7 @@ import { searchMethods } from '../../mixins/tableMixin'
 
 export default {
   name: 'ModelTable',
-  props: ['mode', 'sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'dense', 'grid', 'forceTable', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
+  props: ['mode', 'sourceModel', 'modelName', 'relatedTo', 'tableModels', 'getModelView', 'permissions', 'single', 'dense', 'grid', 'forceTable', 'gridHeader', 'rows', 'showFilters', 'editAferCreate', 'startFilter', 'tableView', 'hideHeaderButtons', 'wrapperClass', 'tableClass', 'tableHeaderClass', 'sticky', 'virtualScroll'],
   mixins: [ModelsFetcher, searchMethods, FileMethods, customSelectMixins],
   components: { NewModel, UpdateModel, RemoveModelConfirm, RestoreModelConfirm, CustomSelect, TableGridCell, TableCell, TableFilterMenu },
   data () {
@@ -683,6 +684,10 @@ export default {
         this.filters[column].options = 'has'
       }
     },
+    clearFilter (columnName) {
+      this.filters[columnName].text = ''
+      this.filters[columnName].options = 'has'
+    },
     log (item) {
     // console.log(item)
     },
@@ -753,7 +758,7 @@ export default {
         this.visible = true
         this.$store.dispatch('Model/getModelView', { model: this.modelName, id: this.selectedItems[0].id })
           .then((data) => {
-            // console.log(data.model)
+            console.log(data.model)
             this.updateModel = true
             this.visible = false
           }).catch(({ response }) => {

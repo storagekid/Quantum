@@ -115,6 +115,18 @@ const routes = [
         meta: { requiresAuth: true }
       },
       {
+        path: '/emailings',
+        name: 'emailings',
+        component: () => import('pages/Emailings.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: '/emailing-designer',
+        name: 'emailing-designer',
+        component: () => import('pages/EmailingDesigner.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
         path: '/mailings',
         name: 'mailings',
         component: () => import('pages/Mailings.vue'),

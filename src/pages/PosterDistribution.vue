@@ -690,7 +690,7 @@
               :all="newCriterion.clinicsSelected.length === newCriterion.clinicOptions.length"
               v-if="newCriterion.clinicOptions.length"
               :dense="true"
-              multiple
+              :multiple="true"
               counter
               :hide-bottom-space="true"
               :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona las clínicas'} }}"
@@ -801,7 +801,7 @@
               :all="exportTpa.clinicsSelected.length === exportTpa.clinicOptions.length"
               v-if="exportTpa.clinicOptions.length"
               :dense="true"
-              multiple
+              :multiple="true"
               counter
               :hide-bottom-space="true"
               :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona las clínicas'} }}"
@@ -894,7 +894,7 @@
               :all="ppFixer.clinicsSelected.length === ppFixer.clinicOptions.length"
               v-if="ppFixer.clinicOptions.length"
               :dense="true"
-              multiple
+              :multiple="true"
               counter
               :hide-bottom-space="true"
               :field="{name: 'clinics', type: { model: 'clinics', default: { text: 'Selecciona las clínicas'} }}"
@@ -1071,6 +1071,9 @@ export default {
     }
   },
   computed: {
+    viewsFetched () {
+      return this.$store.state.Model.models.clinics.viewsFetched
+    },
     posterOptions () {
       return this.$store.state.Model.models.posters.items
     },
@@ -1289,31 +1292,42 @@ export default {
       }
     },
     clinicSelected () {
-      this.model = null
-      this.campaignSelected = ''
-      this.designCampaignSelected = {
-        label: 'No Campaign',
-        value: null
-      }
-      this.dateSelected = null
-      this.designs = []
+      // console.log('Clinic Selected Changed')
+      // console.log(this.clinicSelected)
       if (this.clinicSelected) {
-        this.visible = true
-        this.$store.dispatch('Model/getModelView', { model: 'clinics', id: this.clinicSelected.value, params: { view: 'distributions' } })
-          .then((data) => {
-            this.model = data.model
-            if (this.model.poster_distributions.length) this.buildModelDesigns(this.model.poster_distributions)
-            this.originalPosterPriorities = JSON.parse(JSON.stringify(this.posterPrioritiesByCamapaign))
-            this.visible = false
-          }).catch((response) => {
-            this.visible = false
-            this.$store.dispatch('Response/responseErrorManager', response)
-          })
+        this.model = null
+        this.campaignSelected = ''
+        this.designCampaignSelected = {
+          label: 'No Campaign',
+          value: null
+        }
+        this.dateSelected = null
+        this.designs = []
+        if (!this.viewsFetched.includes(this.clinicSelected.id)) {
+          this.visible = true
+          this.$store.dispatch('Model/getModelView', { model: 'clinics', id: this.clinicSelected.value, params: { view: 'distributions' } })
+            .then((data) => {
+              // console.log('Model Fetched')
+              this.model = data.model
+              if (this.model.poster_distributions.length) this.buildModelDesigns(this.model.poster_distributions)
+              this.originalPosterPriorities = JSON.parse(JSON.stringify(this.posterPrioritiesByCamapaign))
+              this.visible = false
+            }).catch((response) => {
+              this.visible = false
+              this.$store.dispatch('Response/responseErrorManager', response)
+            })
+        } else {
+          this.model = this.clinicSelected
+          if (this.model.poster_distributions.length) this.buildModelDesigns(this.model.poster_distributions)
+          this.originalPosterPriorities = JSON.parse(JSON.stringify(this.posterPrioritiesByCamapaign))
+          this.visible = false
+        }
       } else {
-        this.cleanSelectedState()
+        if (!this.clinicSelected) this.cleanSelectedState()
       }
     },
     dateSelected () {
+      // console.log('dateSelected')
       this.designSelected = null
       this.designCampaignSelected = {
         label: 'No Campaign',
@@ -1467,6 +1481,7 @@ export default {
       this.model.clinic_poster_priorities.splice(index, 1)
     },
     cleanSelectedState () {
+      console.log('cleanSelectedState')
       this.designs = []
       this.designSelected = null
       this.designPressed = null
@@ -1925,7 +1940,7 @@ export default {
       this.startUploader()
     },
     buildModelDesigns (designs) {
-      // this.log('Building Designs')
+      this.log('Building Designs')
       this.designs = []
       for (let design of designs) {
         let baseDesign = this.createDesign()

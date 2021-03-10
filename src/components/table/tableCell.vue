@@ -20,8 +20,8 @@
           <span v-if="columnTypeOptions.mode === 'count'">{{cellItem.length}}</span>
         </template>
         <ul v-else-if="cellItem.length" class="q-ma-none">
-          <li v-for="(item, index) in cellItem" :key="'ai' + index">
-            <span class="text-bold text-italic text-caption">{{ item.label}}</span>
+          <li v-for="(item, index) in cellItem" :key="'ai' + index" style="line-height: 0">
+            <span class="text-bold text-italic text-caption" style="line-height: 1.2">{{ item.label}}</span>
           </li>
         </ul>
         <span v-else class="text-negative text-bold q-pl-lg"> - </span>
@@ -96,7 +96,10 @@ export default {
         else if (typeof item === 'boolean') return item
         return item
       }
-      return this.row[this.name] ? this.row[this.name] : ''
+      // return 'patat'
+      const value = this.row[this.name] ? this.row[this.name] : ''
+      if (this.column.keyNames) return this.column.keyNames[value]
+      return value
     }
   },
   methods: {

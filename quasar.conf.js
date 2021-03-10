@@ -59,6 +59,8 @@ module.exports = function (ctx) {
         'QSelect',
         'QCheckbox',
         'QDate',
+        'QColor',
+        'QEditor',
         'QUploader',
         'QUploaderAddTrigger',
         'QInnerLoading',
@@ -90,7 +92,10 @@ module.exports = function (ctx) {
         'QResizeObserver',
         'QSpace',
         'QPopupProxy',
-        'QVirtualScroll'
+        'QVirtualScroll',
+        'QTree',
+        'QSlideTransition',
+        'QBar'
       ],
 
       directives: [

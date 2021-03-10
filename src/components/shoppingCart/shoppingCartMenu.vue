@@ -1,12 +1,12 @@
 <template>
   <div>
-    <q-btn glossy color="warning-dark" icon="shopping_cart" :loading="loading">
+    <q-btn dense glossy color="secondary" text-color="primary" icon="shopping_cart" :loading="loading">
         <transition
           appear
           enter-active-class="animated bounceIn"
           leave-active-class="animated bounceOut"
           >
-          <q-badge color="white" text-color="warning-dark" floating :key="$store.getters['ShoppingCart/Items'].total">
+          <q-badge floating color="warning" class="shadow-1 text-primary-dark-12 text-bold" :key="$store.getters['ShoppingCart/Items'].total">
             {{$store.getters['ShoppingCart/Items'].total}}
           </q-badge>
         </transition>
@@ -19,7 +19,7 @@
           <template v-for="(category, key, index) in shoppingCart">
             <q-card-section :key="category.id" v-if="category.items.length">
               <div class="text-subtitle1 text-primary text-center text-bold">
-                {{ category.headerText }} {{ index }}
+                {{ category.headerText }}
               </div>
               <q-list separator>
                 <template v-for="item in category.items">
@@ -37,8 +37,8 @@
           <q-card-actions class="bg-primary" align="between">
             <div class="text-h6 q-px-sm text-white">Total: {{$store.getters['ShoppingCart/Items'].total}}</div>
             <div class="q-gutter-md">
-              <q-btn size="sm" color="white" text-color="warning-dark" @click="emptyShoppingCart">Vaciar</q-btn>
-              <q-btn size="sm" color="white" text-color="primary">Ver Carrito</q-btn>
+              <q-btn size="sm" color="warning-dark" text-color="white" @click="emptyShoppingCart">Vaciar</q-btn>
+              <q-btn size="sm" color="secondary" text-color="primary">Detalles</q-btn>
               <q-btn size="sm" color="white" text-color="primary" @click="placeOrder" v-close-popup>Hacer Pedido</q-btn>
             </div>
           </q-card-actions>

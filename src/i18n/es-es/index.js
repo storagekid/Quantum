@@ -117,6 +117,18 @@ export default {
         title: 'Modelos Cartel',
         subtitle: ''
       },
+      'emailing-draw': {
+        title: 'Emailing',
+        subtitle: ''
+      },
+      'emailings': {
+        title: 'Emailings',
+        subtitle: ''
+      },
+      'emailing-designer': {
+        title: 'Diseñador de Email',
+        subtitle: ''
+      },
       'mailing-draw': {
         title: 'Buzoneo',
         subtitle: ''

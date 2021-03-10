@@ -20,9 +20,11 @@ export const customSelectMixins = {
       return ids
     },
     updateCustomSelect (object, payload, onRelation = false) {
+      console.log('updateCustomSelect')
+      console.log(object)
+      console.log(payload)
       if (onRelation) {
         if (this.relationData.type === 'BelongsToMany') {
-          // console.log('BelongsToMany CustomSelect')
           this.relation = payload
           this.$v.relation.$touch()
         } else {
@@ -39,12 +41,20 @@ export const customSelectMixins = {
         if (typeof this.CustomSelectOriginalTypes[object] === 'undefined') {
           this.CustomSelectOriginalTypes[object] = this.findOriginalObjectType(mainObject[words[words.length - 1]])
         }
-        mainObject[words[words.length - 1]] = payload !== null ? payload : this.CustomSelectOriginalTypes[object]
+        if (payload === null || payload === undefined || payload === '' || !payload) {
+          console.log('payload')
+          console.log(payload)
+          mainObject[words[words.length - 1]] = this.CustomSelectOriginalTypes[object]
+        } else mainObject[words[words.length - 1]] = payload !== null ? payload : this.CustomSelectOriginalTypes[object]
       } else {
         if (typeof this.CustomSelectOriginalTypes[object] === 'undefined') {
           this.CustomSelectOriginalTypes[object] = this.findOriginalObjectType(this[object])
         }
-        this[object] = payload !== null ? payload : this.CustomSelectOriginalTypes[object]
+        if (payload === null || payload === undefined || payload === '' || !payload) {
+          console.log('payload')
+          console.log(payload)
+          this[object] = this.CustomSelectOriginalTypes[object]
+        } else this[object] = payload !== null ? payload : this.CustomSelectOriginalTypes[object]
       }
     },
     findOriginalObjectType (object) {

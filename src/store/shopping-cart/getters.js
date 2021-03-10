@@ -7,6 +7,7 @@ export function Items (state) {
   else {
     for (let category in state) {
       if (!items.categories[category]) items.categories[category] = 1
+      else items.categories[category]++
       items.total += state[category].ids.length
     }
     return items

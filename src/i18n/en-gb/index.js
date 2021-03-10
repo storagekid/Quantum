@@ -117,6 +117,18 @@ export default {
         title: 'Poster Models',
         subtitle: ''
       },
+      'emailing-draw': {
+        title: 'Emailing',
+        subtitle: ''
+      },
+      'emailings': {
+        title: 'Emailings',
+        subtitle: ''
+      },
+      'emailing-designer': {
+        title: 'Email Designer',
+        subtitle: ''
+      },
       'mailing-draw': {
         title: 'Mailing',
         subtitle: ''

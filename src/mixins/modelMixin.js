@@ -523,11 +523,13 @@ export const ModelUpdaterBuilder = {
 
 export const ModelRelations = {
   methods: {
-    buildRelationData (relation, source = null) {
+    buildRelationData (relation = null, source = null) {
       // console.log('Building ' + relation.name)
       // console.log('Source')
       // console.log(source)
-      if (source) this.$set(this.relation, 'id', source.id)
+      let model = {}
+      if (!relation) relation = this.relationData
+      if (source) this.$set(model, 'id', source.id)
       let sameConstructor = ['MorphMany', 'HasManyThrough', 'HasMany']
       if (sameConstructor.includes(relation.type)) {
         for (let step of relation.quasarData.newLayout) {
@@ -536,7 +538,7 @@ export const ModelRelations = {
               let value
               if (row[field].type.name === 'boolean') {
                 source ? value = source[field] : value = false
-                this.$set(this.relation, field, value)
+                this.$set(model, field, value)
               } else if (row[field].type.name === 'array') {
                 let value
                 if (source) {
@@ -544,7 +546,7 @@ export const ModelRelations = {
                 } else {
                   value = null
                 }
-                this.$set(this.relation, field, value)
+                this.$set(model, field, value)
               } else if (['select', 'selectFromModel'].includes(row[field].type.name)) {
                 if (source && source[field]) {
                   let relField
@@ -562,10 +564,10 @@ export const ModelRelations = {
                 } else {
                   value = null
                 }
-                this.$set(this.relation, field, value)
+                this.$set(model, field, value)
               } else {
                 source ? value = source[field] : value = null
-                this.$set(this.relation, field, value)
+                this.$set(model, field, value)
               }
               if (this.relationData.quasarData.listFields.draggable) {
                 this.relation[this.relationData.quasarData.listFields.draggable] = this.model[this.relationData.name].length + 1
@@ -575,11 +577,12 @@ export const ModelRelations = {
         }
       }
       if (relation.type === 'BelongsToMany') {
-        // this.$set(this.relation, relation.name, null)
+        // this.$set(model, relation.name, null)
       }
       if (relation.type === 'BelongsTo') {
-        this.$set(this.relation, relation.name, null)
+        this.$set(model, relation.name, null)
       }
+      return model
     }
   }
 }

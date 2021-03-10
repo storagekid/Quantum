@@ -191,6 +191,7 @@ export function getModelView (context, { model, id, params }) {
       method: 'GET',
       params: params
     }).then((response) => {
+      if (!params) params = { view: 'full' }
       context.commit('addViewFetched', { name: model, id: id, params: params })
       context.commit('updateModelItems', { name: model, item: response.data.model })
       resolve(response.data)

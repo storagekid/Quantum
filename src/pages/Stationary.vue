@@ -3,7 +3,7 @@
     <div class="row justify-center q-gutter-lg">
       <template v-if="stationaryReady">
         <div class="col-10">
-          <div class="text-primary text-h5 text-center q-mb-sm">Materiales Clínica</div>
+          <div class="text-primary text-h5 text-center q-mb-md">Materiales Clínica</div>
           <div class="row q-col-gutter-lg justify-center" v-if="stationaryReady">
             <div
               v-for="storeable in stationaryGrouped.storeable"
@@ -18,12 +18,12 @@
               </orderable-product>
             </div>
           </div>
-          <div v-if="can('Marketing', 'create')" class="text-center q-mt-md">
+          <div v-if="can('Marketing', 'create')" class="text-center q-gutter-md q-mt-md">
             <q-btn
               v-if="stationaryGrouped.storeable.length !== stationaryGrouped.clinicStationaryCompleted"
               color="primary"
               label="Generar Materiales"
-              class="q-ma-none"
+              class=""
               @click="generateStationary(false)"
               >
             </q-btn>
@@ -31,7 +31,7 @@
               v-if="can('Marketing', 'edit')"
               color="warning-dark"
               label="Regenerar Materiales"
-              class="q-ma-none"
+              class=""
               @click="generateStationary(true)"
               >
             </q-btn>
@@ -39,7 +39,7 @@
         </div>
       </template>
       <div class="col-10 q-gutter-md">
-        <div class="text-primary text-h5 text-center q-mb-sm">Materiales Genéricos</div>
+        <div class="text-primary text-h5 text-center q-mb-md">Materiales Genéricos</div>
         <div class="row q-col-gutter-lg justify-center">
           <div
             v-for="clinicProduct in stationaryGrouped.unstoreable"
